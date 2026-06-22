@@ -1,0 +1,375 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// For local dev use SQLite:
+// 1. Change provider back to "sqlite"
+// 2. Set DATABASE_URL="file:./dev.db"
+
+model User {
+  id            String   @id @default(cuid())
+  name          String?
+  email         String?  @unique
+  emailVerified DateTime?
+  image         String?
+  password      String?
+  username      String?  @unique
+  bio           String?
+  role          String   @default("user")
+  points        Int      @default(0)
+  totalPointsEarned Int  @default(0)
+  xp            Int      @default(0)
+  level         Int      @default(1)
+  rank          String   @default("Bronze")
+  streak        Int      @default(0)
+  lastLoginAt   DateTime?
+  referralCode  String?  @unique
+  referredBy    String?
+  adsWatched    Int      @default(0)
+  articlesRead  Int      @default(0)
+  scratchCardsOpened Int @default(0)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  accounts          Account[]
+  sessions          Session[]
+  articles          Article[]
+  comments          Comment[]
+  articleBookmarks  ArticleBookmark[]
+  articleViews      ArticleView[]
+  redemptions       Redemption[]
+  scratchCards      ScratchCard[]
+  referrals         Referral[]       @relation("ReferralReferrer")
+  referredUsers     Referral[]       @relation("ReferralReferred")
+  achievements      UserAchievement[]
+  pointTransactions PointTransaction[]
+  notifications     Notification[]
+  challengeCompletions ChallengeCompletion[]
+  dailyLogins       DailyLogin[]
+
+  @@map("users")
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@map("accounts")
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("sessions")
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+  @@map("verification_tokens")
+}
+
+model Article {
+  id            String   @id @default(cuid())
+  title         String
+  slug          String   @unique
+  excerpt       String?  
+  content       String?  
+  imageUrl      String?
+  category      String
+  tags          String?
+  authorId      String?
+  author        User?    @relation(fields: [authorId], references: [id])
+  status        String   @default("draft")
+  featured      Boolean  @default(false)
+  viewCount     Int      @default(0)
+  readTime      String?
+  source        String?
+  sourceUrl     String?
+  aiGenerated   Boolean  @default(false)
+  metaTitle     String?
+  metaDesc      String?
+  publishedAt   DateTime?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  comments      Comment[]
+  bookmarks     ArticleBookmark[]
+  views         ArticleView[]
+
+  @@map("articles")
+}
+
+model Comment {
+  id        String   @id @default(cuid())
+  content   String   
+  userId    String
+  articleId String
+  parentId  String?
+  likes     Int      @default(0)
+  pinned    Boolean  @default(false)
+  status    String   @default("active")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user    User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  article Article   @relation(fields: [articleId], references: [id], onDelete: Cascade)
+  parent  Comment?  @relation("CommentReplies", fields: [parentId], references: [id])
+  replies Comment[] @relation("CommentReplies")
+
+  @@map("comments")
+}
+
+model ArticleBookmark {
+  id        String   @id @default(cuid())
+  userId    String
+  articleId String
+  createdAt DateTime @default(now())
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  article Article @relation(fields: [articleId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, articleId])
+  @@map("article_bookmarks")
+}
+
+model ArticleView {
+  id        String   @id @default(cuid())
+  userId    String
+  articleId String
+  createdAt DateTime @default(now())
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  article Article @relation(fields: [articleId], references: [id], onDelete: Cascade)
+
+  @@map("article_views")
+}
+
+model Reward {
+  id          String   @id @default(cuid())
+  name        String
+  description String?  
+  imageUrl    String?
+  type        String
+  value       Int
+  cost        Int
+  stock       Int      @default(0)
+  status      String   @default("active")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  redemptions Redemption[]
+
+  @@map("rewards")
+}
+
+model Redemption {
+  id         String   @id @default(cuid())
+  userId     String
+  rewardId   String
+  pointsCost Int
+  status     String   @default("pending")
+  note       String?
+  deliveredAt DateTime?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  reward Reward @relation(fields: [rewardId], references: [id], onDelete: Cascade)
+
+  @@map("redemptions")
+}
+
+model ScratchCard {
+  id        String   @id @default(cuid())
+  userId    String
+  reward    Int
+  status    String   @default("unused")
+  createdAt DateTime @default(now())
+  usedAt    DateTime?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("scratch_cards")
+}
+
+model Referral {
+  id         String   @id @default(cuid())
+  referrerId String
+  referredId String
+  pointsAwarded Int  @default(50)
+  status     String   @default("pending")
+  createdAt  DateTime @default(now())
+  completedAt DateTime?
+
+  referrer User @relation("ReferralReferrer", fields: [referrerId], references: [id], onDelete: Cascade)
+  referred User @relation("ReferralReferred", fields: [referredId], references: [id], onDelete: Cascade)
+
+  @@unique([referrerId, referredId])
+  @@map("referrals")
+}
+
+model Achievement {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  description String?  
+  icon        String?
+  category    String?
+  points      Int      @default(15)
+  xp          Int      @default(50)
+  condition   String?
+  threshold   Int      @default(1)
+  createdAt   DateTime @default(now())
+
+  users UserAchievement[]
+
+  @@map("achievements")
+}
+
+model UserAchievement {
+  id            String   @id @default(cuid())
+  userId        String
+  achievementId String
+  unlockedAt    DateTime @default(now())
+
+  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  achievement Achievement @relation(fields: [achievementId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, achievementId])
+  @@map("user_achievements")
+}
+
+model PointTransaction {
+  id        String   @id @default(cuid())
+  userId    String
+  points    Int
+  type      String
+  source    String
+  reference String?
+  note      String?
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("point_transactions")
+}
+
+model DailyLogin {
+  id        String   @id @default(cuid())
+  userId    String
+  date      DateTime
+  pointsAwarded Int @default(5)
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, date])
+  @@map("daily_logins")
+}
+
+model Challenge {
+  id          String   @id @default(cuid())
+  name        String
+  description String?  
+  type        String
+  requirement Int
+  points      Int      @default(10)
+  xp          Int      @default(25)
+  icon        String?
+  category    String?
+  startsAt    DateTime?
+  endsAt      DateTime?
+  status      String   @default("active")
+  createdAt   DateTime @default(now())
+
+  completions ChallengeCompletion[]
+
+  @@map("challenges")
+}
+
+model ChallengeCompletion {
+  id          String   @id @default(cuid())
+  userId      String
+  challengeId String
+  completedAt DateTime @default(now())
+
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  challenge Challenge @relation(fields: [challengeId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, challengeId])
+  @@map("challenge_completions")
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String
+  title     String
+  message   String?  
+  type      String   @default("info")
+  read      Boolean  @default(false)
+  link      String?
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("notifications")
+}
+
+model AdCampaign {
+  id          String   @id @default(cuid())
+  name        String
+  type        String   @default("video")
+  pointsReward Int     @default(2)
+  duration    Int      @default(30)
+  imageUrl    String?
+  linkUrl     String?
+  status      String   @default("active")
+  impressions Int      @default(0)
+  completions Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("ad_campaigns")
+}
+
+model AdWatch {
+  id          String   @id @default(cuid())
+  userId      String
+  adId        String
+  completed   Boolean  @default(false)
+  pointsAwarded Int    @default(0)
+  createdAt   DateTime @default(now())
+
+  @@map("ad_watches")
+}
+
+model SiteSettings {
+  id    String @id @default("main")
+  data  String 
+  @@map("site_settings")
+}
