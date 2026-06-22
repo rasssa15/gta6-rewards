@@ -1,30 +1,30 @@
 "use client"
 import { useState, useEffect } from "react"
 import Link from "next/link"
-import { useSession, signOut } from "next-auth/react"
 import { motion, AnimatePresence } from "framer-motion"
-import { Gamepad2, Menu, X, User, LogOut, Award, Trophy, Gift, Sparkles, Newspaper, Users, ChevronDown } from "lucide-react"
+import { Gamepad2, Menu, X, User, LogOut, Lock, Shield, Home } from "lucide-react"
 import { cn } from "@/lib/utils/cn"
+import { hasWallet, isLocked, clearWallet, setLocked } from "@/lib/wallet/storage"
 
 export function Header() {
-  const { data: session } = useSession()
   const [isOpen, setIsOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
-  const [showDropdown, setShowDropdown] = useState(false)
+  const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
+    setMounted(true)
     const handleScroll = () => setScrolled(window.scrollY > 20)
     window.addEventListener("scroll", handleScroll)
     return () => window.removeEventListener("scroll", handleScroll)
   }, [])
 
+  const walletExists = mounted && hasWallet()
+  const locked = mounted && isLocked()
+  const dashboardPath = locked ? "/wallet/unlock" : "/dashboard"
+
   const navLinks = [
-    { href: "/", label: "Home", icon: Gamepad2 },
-    { href: "/news", label: "News", icon: Newspaper },
-    { href: "/rewards", label: "Rewards", icon: Gift },
-    { href: "/leaderboard", label: "Leaderboard", icon: Trophy },
-    { href: "/challenges", label: "Challenges", icon: Award },
-    { href: "/achievements", label: "Achievements", icon: Sparkles },
+    { href: "/", label: "Home", icon: Home },
+    ...(walletExists ? [{ href: dashboardPath, label: "Dashboard", icon: User }] : []),
   ]
 
   return (
@@ -61,78 +61,29 @@ export function Header() {
           </nav>
 
           <div className="flex items-center gap-3">
-            {session?.user ? (
-              <div className="relative">
-                <button
-                  onClick={() => setShowDropdown(!showDropdown)}
-                  className="flex items-center gap-2 px-3 py-2 rounded-xl glass hover:bg-white/10 transition-all duration-200"
+            {walletExists ? (
+              <div className="flex items-center gap-2">
+                <Link
+                  href={dashboardPath}
+                  className="btn-secondary text-sm flex items-center gap-2"
                 >
-                  <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-neon-blue to-neon-purple flex items-center justify-center text-xs font-bold text-white">
-                    {(session.user as any).name?.[0] || "U"}
-                  </div>
-                  <span className="text-sm font-medium text-white hidden sm:block">
-                    {session.user.name}
-                  </span>
-                  <ChevronDown className="w-4 h-4 text-gray-400" />
+                  <Shield className="w-4 h-4" />
+                  Dashboard
+                </Link>
+                <button
+                  onClick={() => {
+                    setLocked(true)
+                    window.location.href = "/wallet/unlock"
+                  }}
+                  className="btn-ghost text-sm"
+                >
+                  <Lock className="w-4 h-4" />
                 </button>
-                <AnimatePresence>
-                  {showDropdown && (
-                    <motion.div
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: 10 }}
-                      className="absolute right-0 mt-2 w-56 rounded-2xl glass border border-white/10 overflow-hidden shadow-2xl"
-                    >
-                      <div className="p-2">
-                        <Link
-                          href="/dashboard"
-                          onClick={() => setShowDropdown(false)}
-                          className="flex items-center gap-3 px-3 py-2.5 text-sm text-gray-300 hover:text-white rounded-xl hover:bg-white/5 transition-all"
-                        >
-                          <User className="w-4 h-4" />
-                          Dashboard
-                        </Link>
-                        <Link
-                          href="/rewards"
-                          onClick={() => setShowDropdown(false)}
-                          className="flex items-center gap-3 px-3 py-2.5 text-sm text-gray-300 hover:text-white rounded-xl hover:bg-white/5 transition-all"
-                        >
-                          <Gift className="w-4 h-4" />
-                          My Rewards
-                        </Link>
-                        {(session.user as any).role === "admin" && (
-                          <Link
-                            href="/admin"
-                            onClick={() => setShowDropdown(false)}
-                            className="flex items-center gap-3 px-3 py-2.5 text-sm text-neon-pink rounded-xl hover:bg-white/5 transition-all"
-                          >
-                            <Users className="w-4 h-4" />
-                            Admin Panel
-                          </Link>
-                        )}
-                        <hr className="my-1 border-white/5" />
-                        <button
-                          onClick={() => signOut()}
-                          className="flex items-center gap-3 px-3 py-2.5 text-sm text-red-400 hover:text-red-300 rounded-xl hover:bg-white/5 transition-all w-full"
-                        >
-                          <LogOut className="w-4 h-4" />
-                          Sign Out
-                        </button>
-                      </div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
               </div>
             ) : (
               <div className="flex items-center gap-2">
-                <Link href="/auth/login" className="btn-ghost text-sm">
-                  Sign In
-                </Link>
-                <Link
-                  href="/auth/register"
-                  className="btn-primary text-sm !px-4 !py-2"
-                >
-                  Join Free
+                <Link href="/wallet/create" className="btn-primary text-sm !px-4 !py-2">
+                  Create Wallet
                 </Link>
               </div>
             )}
