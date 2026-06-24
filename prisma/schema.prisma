@@ -1,0 +1,229 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(uuid())
+  walletId  String   @unique
+  name      String   @default("Player")
+  points    Int      @default(0)
+  level     Int      @default(1)
+  xp        Int      @default(0)
+  adsWatched Int     @default(0)
+  createdAt DateTime @default(now())
+  lastLogin DateTime @default(now())
+
+  articlesRead   Int            @default(0)
+  scratchCardsPlayed Int        @default(0)
+  referrerId     String?
+  referredUsers  User[]         @relation("Referrals")
+  referral       User?          @relation("Referrals", fields: [referrerId], references: [id])
+
+  pointTransactions PointTransaction[]
+  achievements     UserAchievement[]
+  challengeCompletions ChallengeCompletion[]
+  scratchResults   ScratchResult[]
+  redemptions      Redemption[]
+  articleViews     ArticleView[]
+  comments         Comment[]
+  articleBookmarks ArticleBookmark[]
+
+  @@map("users")
+}
+
+model Category {
+  id       String    @id @default(uuid())
+  name     String    @unique
+  slug     String    @unique
+  articles Article[]
+
+  @@map("categories")
+}
+
+model Article {
+  id            String   @id @default(uuid())
+  title         String
+  slug          String   @unique
+  excerpt       String   @default("")
+  content       String   @default("")
+  categoryId    String?
+  category      Category? @relation(fields: [categoryId], references: [id])
+  featuredImage String   @default("")
+  author        String   @default("GTA 6 Rewards")
+  status        String   @default("draft")
+  viewCount     Int      @default(0)
+  readingTime   Int      @default(3)
+  tags          String   @default("")
+  source        String   @default("")
+  sourceUrl     String   @default("")
+  seoTitle      String   @default("")
+  seoDesc       String   @default("")
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  views      ArticleView[]
+  bookmarks  ArticleBookmark[]
+  comments   Comment[]
+
+  @@map("articles")
+}
+
+model ArticleView {
+  id        String   @id @default(uuid())
+  articleId String
+  article   Article  @relation(fields: [articleId], references: [id])
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id])
+  createdAt DateTime @default(now())
+
+  @@map("article_views")
+}
+
+model ArticleBookmark {
+  id        String   @id @default(uuid())
+  articleId String
+  article   Article  @relation(fields: [articleId], references: [id])
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  createdAt DateTime @default(now())
+
+  @@unique([userId, articleId])
+  @@map("article_bookmarks")
+}
+
+model Comment {
+  id        String   @id @default(uuid())
+  content   String
+  articleId String
+  article   Article  @relation(fields: [articleId], references: [id])
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  likes     Int      @default(0)
+  parentId  String?
+  createdAt DateTime @default(now())
+
+  @@map("comments")
+}
+
+model PointTransaction {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  amount    Int
+  reason    String
+  reference String   @default("")
+  createdAt DateTime @default(now())
+
+  @@map("point_transactions")
+}
+
+model Reward {
+  id          String   @id @default(uuid())
+  name        String
+  description String   @default("")
+  image       String   @default("")
+  pointsCost  Int
+  stock       Int      @default(10)
+  category    String   @default("gift-card")
+  active      Boolean  @default(true)
+  createdAt   DateTime @default(now())
+
+  redemptions Redemption[]
+
+  @@map("rewards")
+}
+
+model Redemption {
+  id         String   @id @default(uuid())
+  userId     String
+  user       User     @relation(fields: [userId], references: [id])
+  rewardId   String
+  reward     Reward   @relation(fields: [rewardId], references: [id])
+  status     String   @default("pending")
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@map("redemptions")
+}
+
+model Achievement {
+  id          String   @id @default(uuid())
+  key         String   @unique
+  name        String
+  description String
+  icon        String   @default("trophy")
+  xpReward    Int      @default(50)
+  pointReward Int      @default(0)
+
+  users UserAchievement[]
+
+  @@map("achievements")
+}
+
+model UserAchievement {
+  id            String   @id @default(uuid())
+  userId        String
+  user          User     @relation(fields: [userId], references: [id])
+  achievementId String
+  achievement   Achievement @relation(fields: [achievementId], references: [id])
+  unlockedAt    DateTime @default(now())
+
+  @@unique([userId, achievementId])
+  @@map("user_achievements")
+}
+
+model Challenge {
+  id          String   @id @default(uuid())
+  key         String   @unique
+  title       String
+  description String
+  xpReward    Int      @default(30)
+  pointReward Int      @default(10)
+  type        String   @default("read_articles")
+  target      Int      @default(5)
+  active      Boolean  @default(true)
+  createdAt   DateTime @default(now())
+
+  completions ChallengeCompletion[]
+
+  @@map("challenges")
+}
+
+model ChallengeCompletion {
+  id          String   @id @default(uuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+  challengeId String
+  challenge   Challenge @relation(fields: [challengeId], references: [id])
+  progress    Int      @default(0)
+  completed   Boolean  @default(false)
+  completedAt DateTime?
+  date        String   @default("")
+
+  @@unique([userId, challengeId, date])
+  @@map("challenge_completions")
+}
+
+model ScratchResult {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  points    Int      @default(0)
+  createdAt DateTime @default(now())
+
+  @@map("scratch_results")
+}
+
+model Setting {
+  id    String @id @default(uuid())
+  key   String @unique
+  value String @default("")
+  type  String @default("string")
+
+  @@map("settings")
+}

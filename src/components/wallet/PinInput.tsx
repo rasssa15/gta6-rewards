@@ -23,22 +23,16 @@ export function PinInput({ length = 6, value, onChange, onComplete, error, disab
     if (val.length === length) onComplete?.(val)
   }
 
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === "Backspace" && value.length > 0) {
-      onChange(value.slice(0, -1))
-    }
-  }
-
   return (
-    <div className="w-full">
-      <div className="flex items-center justify-center gap-3 sm:gap-4" onClick={() => inputRef.current?.focus()}>
+    <div className="w-full flex flex-col items-center gap-4">
+      <div className="flex items-center justify-center gap-3 sm:gap-4">
         {Array.from({ length }).map((_, i) => (
           <div
             key={i}
             className={`w-10 h-12 sm:w-12 sm:h-14 rounded-xl border-2 flex items-center justify-center text-xl sm:text-2xl font-bold transition-all duration-200 ${
               i < value.length
                 ? "border-neon-blue bg-neon-blue/10 text-white scale-105"
-                : "border-white/10 bg-white/5 text-transparent"
+                : "border-white/10 bg-white/5"
             } ${error ? "border-red-500 animate-shake" : ""}`}
           >
             {i < value.length ? "●" : ""}
@@ -53,12 +47,12 @@ export function PinInput({ length = 6, value, onChange, onComplete, error, disab
         maxLength={length}
         value={value}
         onChange={handleChange}
-        onKeyDown={handleKeyDown}
         disabled={disabled}
-        className="absolute opacity-0 pointer-events-none"
+        placeholder="Enter PIN"
+        className="w-64 px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white text-lg text-center focus:outline-none focus:border-neon-blue focus:ring-1 focus:ring-neon-blue/50 transition-all"
         autoComplete="off"
       />
-      {error && <p className="text-red-400 text-sm text-center mt-3">{error}</p>}
+      {error && <p className="text-red-400 text-sm text-center">{error}</p>}
     </div>
   )
 }

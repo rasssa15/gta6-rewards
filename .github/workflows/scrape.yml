@@ -1,0 +1,26 @@
+name: Auto-Scrape Gaming News
+
+on:
+  schedule:
+    - cron: "0 */6 * * *"
+  workflow_dispatch:
+
+jobs:
+  scrape:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      - run: npm install
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+
+      - name: Scrape articles
+        run: node scripts/scrape.mjs
+        env:
+          API_URL: ${{ secrets.API_URL || 'https://out-two-delta-71.vercel.app' }}
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}

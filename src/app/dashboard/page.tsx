@@ -1,27 +1,39 @@
 "use client"
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
+import {
+  User, Shield, Lock, Calendar, Gamepad2, Gift, Trophy, Sparkles,
+  Star, TrendingUp, Clock, Eye, LogOut, Copy, Check, Zap, Medal
+} from "lucide-react"
 import { motion } from "framer-motion"
-import { User, Shield, Lock, Calendar, Clock, LogOut, Copy, Check, Gamepad2 } from "lucide-react"
 import toast from "react-hot-toast"
 import { WalletGuard } from "@/components/wallet/WalletGuard"
-import { loadWallet, setLocked, clearWallet, WalletData } from "@/lib/wallet/storage"
+import { getSession, clearWallet, setLocked } from "@/lib/wallet/storage"
+import { formatDate, formatNumber } from "@/lib/utils"
 
 export default function DashboardPage() {
   const router = useRouter()
-  const [wallet, setWallet] = useState<WalletData | null>(null)
-  const [copied, setCopied] = useState(false)
+  const [wallet, setWallet] = useState<any>(null)
+  const [userData, setUserData] = useState<any>(null)
+  const [history, setHistory] = useState<any[]>([])
+  const [activeTab, setActiveTab] = useState("overview")
+  const [scratchResult, setScratchResult] = useState<number | null>(null)
+  const [scratching, setScratching] = useState(false)
+  const [revealed, setRevealed] = useState(false)
 
   useEffect(() => {
-    const load = async () => {
-      const w = localStorage.getItem("gta6_wallet")
-      if (!w) return
-      try {
-        const { decrypt } = await import("@/lib/wallet/crypto")
-        const { loadWallet } = await import("@/lib/wallet/storage")
-      } catch {}
+    const session = getSession()
+    setWallet(session)
+    if (session?.walletId) {
+      fetch(`/api/users/${session.walletId}`)
+        .then(r => r.json())
+        .then(d => setUserData(d))
+        .catch(() => {})
+      fetch(`/api/points?userId=${session.walletId}&limit=20`)
+        .then(r => r.json())
+        .then(d => setHistory(d.transactions || []))
+        .catch(() => {})
     }
-    load()
   }, [])
 
   const handleLock = () => {
@@ -34,127 +46,231 @@ export default function DashboardPage() {
     router.push("/")
   }
 
+  const handleScratch = async () => {
+    if (!wallet?.walletId) return
+    setScratching(true)
+    setRevealed(false)
+    setScratchResult(null)
+    try {
+      const res = await fetch("/api/scratch-card", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId: wallet.walletId }),
+      })
+      const data = await res.json()
+      setScratchResult(data.points)
+      setRevealed(true)
+      if (data.points > 0) toast.success(`You won ${data.points} points!`)
+      else toast("No luck this time!")
+    } catch {
+      toast.error("Failed to play")
+    }
+    setScratching(false)
+  }
+
+  const level = userData?.level || 1
+  const points = userData?.points || 0
+  const xp = userData?.xp || 0
+  const xpForNext = level * 100
+  const xpProgress = (xp % 100) / 100
+
   const stats = [
-    { icon: Shield, label: "Status", value: "Active", color: "text-neon-green", bg: "bg-neon-green/10" },
-    { icon: Calendar, label: "Created", value: wallet ? new Date(wallet.createdAt).toLocaleDateString() : "-", color: "text-neon-blue", bg: "bg-neon-blue/10" },
-    { icon: Clock, label: "Version", value: "Wallet v1", color: "text-neon-purple", bg: "bg-neon-purple/10" },
+    { icon: Star, label: "Points", value: formatNumber(points), color: "text-neon-yellow" },
+    { icon: Medal, label: "Level", value: level, color: "text-neon-green" },
+    { icon: Trophy, label: "Rank", value: "#-" , color: "text-neon-blue" },
+    { icon: Calendar, label: "Joined", value: userData?.createdAt ? formatDate(userData.createdAt) : "-", color: "text-gray-400" },
   ]
 
   return (
     <WalletGuard>
-      <div className="min-h-screen pt-20 pb-12">
+      <div className="min-h-screen pt-24 pb-12">
         <div className="page-container">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="glass-card p-6 sm:p-8 mb-8"
+            className="glass-card p-6 sm:p-8 mb-6"
           >
             <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6">
               <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-neon-blue to-neon-purple flex items-center justify-center text-3xl font-bold text-white shrink-0">
-                {wallet?.name?.[0] || "U"}
+                {(wallet?.name || "U").charAt(0).toUpperCase()}
               </div>
               <div className="flex-1 min-w-0">
                 <h1 className="text-2xl font-heading font-bold text-white mb-1">
                   {wallet?.name || "Player"}
                 </h1>
-                <p className="text-gray-400 text-sm mb-3 flex items-center gap-2">
+                <p className="text-gray-400 text-sm flex items-center gap-2">
                   <Gamepad2 className="w-4 h-4 text-neon-blue" />
-                  Wallet secured with AES-256 encryption
+                  {userData?.walletId ? `ID: ${userData.walletId.slice(0, 8)}...` : "Wallet secured"}
                 </p>
+                <div className="mt-2">
+                  <div className="flex items-center justify-between text-xs text-gray-500 mb-1">
+                    <span>Level {level}</span>
+                    <span>{xp % 100}/{xpForNext} XP</span>
+                  </div>
+                  <div className="progress-bar w-full max-w-xs">
+                    <div className="progress-fill" style={{ width: `${xpProgress * 100}%` }} />
+                  </div>
+                </div>
               </div>
               <div className="flex gap-2">
                 <button onClick={handleLock} className="btn-secondary text-sm flex items-center gap-2">
-                  <Lock className="w-4 h-4" />
-                  Lock
+                  <Lock className="w-4 h-4" /> Lock
                 </button>
                 <button onClick={handleReset} className="btn-secondary text-sm flex items-center gap-2 text-red-400">
-                  <LogOut className="w-4 h-4" />
-                  Reset
+                  <LogOut className="w-4 h-4" /> Reset
                 </button>
               </div>
             </div>
           </motion.div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
             {stats.map((stat, i) => (
               <motion.div
                 key={stat.label}
-                initial={{ opacity: 0, y: 20 }}
+                initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: i * 0.05 }}
                 className="glass-card p-4 text-center"
               >
-                <div className={`w-10 h-10 rounded-xl ${stat.bg} flex items-center justify-center mx-auto mb-2`}>
-                  <stat.icon className={`w-5 h-5 ${stat.color}`} />
-                </div>
-                <div className={`text-lg font-heading font-bold ${stat.color}`}>{stat.value}</div>
-                <div className="text-xs text-gray-400">{stat.label}</div>
+                <div className={`text-2xl font-heading font-bold ${stat.color}`}>{stat.value}</div>
+                <div className="text-xs text-gray-400 mt-1">{stat.label}</div>
               </motion.div>
             ))}
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              className="glass-card p-6"
-            >
-              <h3 className="text-lg font-heading font-bold text-white mb-4 flex items-center gap-2">
-                <Shield className="w-5 h-5 text-neon-green" />
-                Security
-              </h3>
-              <div className="space-y-4">
-                <div className="flex items-center justify-between py-3 border-b border-white/5">
-                  <span className="text-sm text-gray-300">Encryption</span>
-                  <span className="text-sm text-neon-green">AES-256-GCM</span>
-                </div>
-                <div className="flex items-center justify-between py-3 border-b border-white/5">
-                  <span className="text-sm text-gray-300">Key Derivation</span>
-                  <span className="text-sm text-neon-blue">PBKDF2 (100k rounds)</span>
-                </div>
-                <div className="flex items-center justify-between py-3 border-b border-white/5">
-                  <span className="text-sm text-gray-300">Storage</span>
-                  <span className="text-sm text-gray-400">Browser Local (encrypted)</span>
-                </div>
-                <div className="flex items-center justify-between py-3">
-                  <span className="text-sm text-gray-300">Recovery</span>
-                  <span className="text-sm text-gray-400">12-word phrase</span>
-                </div>
-              </div>
-            </motion.div>
-
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              className="glass-card p-6"
-            >
-              <h3 className="text-lg font-heading font-bold text-white mb-4 flex items-center gap-2">
-                <Gamepad2 className="w-5 h-5 text-neon-purple" />
-                Quick Actions
-              </h3>
-              <div className="space-y-3">
-                {[
-                  { label: "Lock Wallet", desc: "Secure your session", icon: Lock, action: handleLock },
-                  { label: "Recovery Phrase", desc: "View your 12 words (not saved here)", icon: Copy, action: () => toast.success("Recovery phrase is stored only on paper you wrote down") },
-                  { label: "Reset Wallet", desc: "Start over with a new wallet", icon: LogOut, action: handleReset },
-                ].map((action) => (
-                  <button
-                    key={action.label}
-                    onClick={action.action}
-                    className="w-full flex items-center gap-4 p-3 rounded-xl glass hover:bg-white/10 transition-all group"
-                  >
-                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-neon-blue to-neon-purple flex items-center justify-center">
-                      <action.icon className="w-5 h-5 text-white" />
-                    </div>
-                    <div className="text-left">
-                      <div className="text-sm font-semibold text-white">{action.label}</div>
-                      <div className="text-xs text-gray-400">{action.desc}</div>
-                    </div>
-                  </button>
-                ))}
-              </div>
-            </motion.div>
+          <div className="flex gap-2 mb-6 overflow-x-auto">
+            {[
+              { key: "overview", label: "Overview", icon: User },
+              { key: "scratch", label: "Scratch Card", icon: Zap },
+              { key: "history", label: "History", icon: Clock },
+            ].map((tab) => {
+              const Icon = tab.icon
+              return (
+                <button
+                  key={tab.key}
+                  onClick={() => setActiveTab(tab.key)}
+                  className={`px-4 py-2 rounded-xl text-sm font-semibold flex items-center gap-2 transition-all whitespace-nowrap ${
+                    activeTab === tab.key
+                      ? "bg-neon-blue/20 text-neon-blue border border-neon-blue/30"
+                      : "glass text-gray-400 hover:text-white"
+                  }`}
+                >
+                  <Icon className="w-4 h-4" />
+                  {tab.label}
+                </button>
+              )
+            })}
           </div>
+
+          {activeTab === "overview" && (
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <div className="glass-card p-6">
+                <h3 className="text-lg font-heading font-bold text-white mb-4 flex items-center gap-2">
+                  <Shield className="w-5 h-5 text-neon-green" /> Security
+                </h3>
+                <div className="space-y-3">
+                  {[
+                    ["Encryption", "AES-256-GCM"],
+                    ["Key Derivation", "PBKDF2 (100k rounds)"],
+                    ["Storage", "Browser Local (encrypted)"],
+                    ["Recovery", "12-word phrase"],
+                  ].map(([label, value]) => (
+                    <div key={label} className="flex items-center justify-between py-2 border-b border-white/5 last:border-0">
+                      <span className="text-sm text-gray-300">{label}</span>
+                      <span className="text-sm text-gray-400">{value}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="glass-card p-6">
+                <h3 className="text-lg font-heading font-bold text-white mb-4 flex items-center gap-2">
+                  <Sparkles className="w-5 h-5 text-neon-purple" /> Quick Actions
+                </h3>
+                <div className="space-y-3">
+                  {[
+                    { icon: Gift, label: "Browse Rewards", desc: "Spend your points", href: "/rewards" },
+                    { icon: Trophy, label: "Leaderboard", desc: "See top players", href: "/leaderboard" },
+                    { icon: Sparkles, label: "Challenges", desc: "Daily tasks", href: "/challenges" },
+                    { icon: TrendingUp, label: "Earn Points", desc: "Read articles", href: "/news" },
+                  ].map((action) => (
+                    <button
+                      key={action.label}
+                      onClick={() => router.push(action.href)}
+                      className="w-full flex items-center gap-4 p-3 rounded-xl glass hover:bg-white/10 transition-all group"
+                    >
+                      <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-neon-blue to-neon-purple flex items-center justify-center">
+                        <action.icon className="w-5 h-5 text-white" />
+                      </div>
+                      <div className="text-left">
+                        <div className="text-sm font-semibold text-white">{action.label}</div>
+                        <div className="text-xs text-gray-400">{action.desc}</div>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {activeTab === "scratch" && (
+            <div className="glass-card p-8 text-center max-w-md mx-auto">
+              <h3 className="text-xl font-heading font-bold text-white mb-2 flex items-center justify-center gap-2">
+                <Zap className="w-5 h-5 text-neon-yellow" /> Scratch Card
+              </h3>
+              <p className="text-gray-400 text-sm mb-6">
+                Reveal your prize! Win up to 50 points.
+              </p>
+              <div
+                className={`w-48 h-48 mx-auto rounded-2xl flex items-center justify-center cursor-pointer transition-all duration-500 ${
+                  revealed
+                    ? "bg-gradient-to-br from-neon-green/20 to-neon-blue/20 border-2 border-neon-green/30"
+                    : "bg-gradient-to-br from-neon-pink/20 to-neon-purple/20 border-2 border-white/10 hover:border-neon-pink/50"
+                }`}
+                onClick={handleScratch}
+              >
+                {scratching ? (
+                  <div className="animate-spin w-8 h-8 border-2 border-neon-blue border-t-transparent rounded-full" />
+                ) : revealed ? (
+                  <div className="text-center">
+                    <div className="text-5xl font-heading font-bold text-neon-green">+{scratchResult}</div>
+                    <div className="text-xs text-gray-400 mt-2">points</div>
+                  </div>
+                ) : (
+                  <div className="text-center">
+                    <Zap className="w-12 h-12 text-gray-500 mx-auto mb-2" />
+                    <div className="text-sm text-gray-500">Tap to scratch</div>
+                  </div>
+                )}
+              </div>
+              <p className="text-xs text-gray-500 mt-4">
+                {userData?.scratchCardsPlayed || 0} cards played
+              </p>
+            </div>
+          )}
+
+          {activeTab === "history" && (
+            <div className="glass-card p-6 max-w-2xl mx-auto">
+              <h3 className="text-lg font-heading font-bold text-white mb-4">Point History</h3>
+              {history.length === 0 ? (
+                <p className="text-gray-500 text-sm text-center py-8">No activity yet. Start earning points!</p>
+              ) : (
+                <div className="space-y-2">
+                  {history.map((tx: any) => (
+                    <div key={tx.id} className="flex items-center justify-between py-3 border-b border-white/5 last:border-0">
+                      <div>
+                        <div className="text-sm text-white">{tx.reason}</div>
+                        <div className="text-xs text-gray-500">{formatDate(tx.createdAt)}</div>
+                      </div>
+                      <div className={`text-sm font-mono font-bold ${tx.amount > 0 ? "text-neon-green" : "text-red-400"}`}>
+                        {tx.amount > 0 ? "+" : ""}{tx.amount}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
         </div>
       </div>
     </WalletGuard>

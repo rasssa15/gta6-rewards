@@ -1,22 +1,22 @@
 "use client"
 import { useState, useCallback } from "react"
 import { useRouter } from "next/navigation"
-import { motion, AnimatePresence } from "framer-motion"
 import { Shield, ArrowLeft, ArrowRight, Eye, EyeOff, Copy, Check } from "lucide-react"
 import toast from "react-hot-toast"
 import { generatePhrase } from "@/lib/wallet/phrase"
 import { saveWallet } from "@/lib/wallet/storage"
-import { PhraseGrid } from "@/components/wallet/PhraseGrid"
 import { PinInput } from "@/components/wallet/PinInput"
 
-type Step = "intro" | "phrase" | "confirm" | "pin" | "done"
+type Step = "intro" | "phrase" | "name" | "pin" | "done"
 
 export default function CreateWalletPage() {
   const router = useRouter()
   const [step, setStep] = useState<Step>("intro")
   const [phrase, setPhrase] = useState<string[]>([])
+  const [phraseConfirmed, setPhraseConfirmed] = useState(false)
   const [pin, setPin] = useState("")
   const [confirmPin, setConfirmPin] = useState("")
+  const [confirmPinValue, setConfirmPinValue] = useState("")
   const [pinError, setPinError] = useState("")
   const [name, setName] = useState("")
   const [copied, setCopied] = useState(false)
@@ -27,20 +27,30 @@ export default function CreateWalletPage() {
     setStep("phrase")
   }, [])
 
-  const handlePhraseConfirmed = () => setStep("pin")
-
   const handlePinComplete = async (val: string) => {
-    if (step === "pin" && !confirmPin) {
+    if (!confirmPin) {
+      setPin(val)
       setConfirmPin(val)
       setPinError("")
-    } else if (step === "pin" && confirmPin) {
+      setConfirmPinValue("")
+    } else {
       if (val !== confirmPin) {
         setPinError("PINs do not match")
         setConfirmPin("")
+        setPin("")
+        setConfirmPinValue("")
         return
       }
       const displayName = name.trim() || "Player"
-      await saveWallet({ name: displayName, createdAt: new Date().toISOString(), avatarIndex: 0 }, val)
+      const walletId = crypto.randomUUID()
+      await saveWallet({ walletId, name: displayName, createdAt: new Date().toISOString(), avatarIndex: 0 }, val)
+      try {
+        await fetch("/api/users", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ walletId, name: displayName }),
+        })
+      } catch {}
       toast.success("Wallet created!")
       router.push("/dashboard")
     }
@@ -63,12 +73,7 @@ export default function CreateWalletPage() {
         </button>
       )}
 
-      <motion.div
-        key={step}
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="w-full max-w-lg relative"
-      >
+      <div className="w-full max-w-lg relative">
         {step === "intro" && (
           <div className="glass-card p-8 text-center">
             <div className="w-20 h-20 mx-auto mb-6 rounded-2xl bg-gradient-to-br from-neon-blue to-neon-purple flex items-center justify-center">
@@ -114,11 +119,52 @@ export default function CreateWalletPage() {
               </div>
             </div>
             <div className={showPhrase ? "" : "blur-lg select-none"}>
-              <PhraseGrid words={phrase} onConfirm={handlePhraseConfirmed} />
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-3">
+                {phrase.map((word, i) => (
+                  <div key={i} className="glass p-3 rounded-xl flex items-center gap-2">
+                    <span className="text-xs text-gray-500 w-5 text-right shrink-0">{i + 1}</span>
+                    <span className="text-sm font-medium text-white">{word}</span>
+                  </div>
+                ))}
+              </div>
             </div>
             {!showPhrase && (
               <p className="text-xs text-gray-500 text-center mt-3">Tap the eye icon to reveal your phrase</p>
             )}
+            {!phraseConfirmed ? (
+              <button onClick={() => setPhraseConfirmed(true)} className="btn-primary w-full mt-6">
+                I've Saved My Recovery Phrase
+              </button>
+            ) : (
+              <div className="space-y-3 mt-6">
+                <div className="p-4 rounded-xl bg-neon-yellow/10 border border-neon-yellow/20">
+                  <p className="text-sm text-neon-yellow text-center">
+                    Make sure you have saved these 12 words somewhere safe. You will need them to recover your wallet.
+                  </p>
+                </div>
+                <button onClick={() => setStep("name")} className="btn-primary w-full">
+                  Continue <ArrowRight className="w-4 h-4" />
+                </button>
+              </div>
+            )}
+          </div>
+        )}
+
+        {step === "name" && (
+          <div className="glass-card p-8 text-center">
+            <h2 className="text-2xl font-heading font-bold text-white mb-2">Your Name</h2>
+            <p className="text-gray-400 text-sm mb-6">Choose a display name (optional)</p>
+            <input
+              type="text"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="Enter your display name"
+              className="input-field text-center"
+              maxLength={20}
+            />
+            <button onClick={() => setStep("pin")} className="btn-primary w-full mt-6">
+              Continue <ArrowRight className="w-4 h-4" />
+            </button>
           </div>
         )}
 
@@ -133,54 +179,35 @@ export default function CreateWalletPage() {
                 : "Enter the same PIN again to confirm"}
             </p>
 
-            <div className="space-y-4 mb-6">
-              {!confirmPin && (
-                <div>
-                  <label className="text-sm text-gray-400 mb-1 block text-left">Your Name (optional)</label>
-                  <input
-                    type="text"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    placeholder="Enter your display name"
-                    className="input-field text-center"
-                    maxLength={20}
-                  />
-                </div>
-              )}
+            <div className="space-y-6">
               <PinInput
-                value={step === "pin" && confirmPin ? confirmPin.slice(0, pin.length) : pin}
-                onChange={(val) => {
-                  if (!confirmPin) setPin(val)
-                }}
-                onComplete={(val) => {
-                  if (!confirmPin) {
-                    setPin(val)
-                    setConfirmPin("")
-                  }
-                }}
+                value={pin}
+                onChange={setPin}
+                onComplete={handlePinComplete}
                 error={pinError}
               />
-            </div>
 
-            {confirmPin && (
-              <div className="space-y-4">
-                <PinInput
-                  value=""
-                  onChange={(val) => {}}
-                  onComplete={(val) => handlePinComplete(val)}
-                  error={pinError}
-                />
-                <button
-                  onClick={() => { setConfirmPin(""); setPin(""); setPinError("") }}
-                  className="text-sm text-gray-400 hover:text-white transition-colors"
-                >
-                  Start over
-                </button>
-              </div>
-            )}
+              {confirmPin && (
+                <div className="space-y-4 pt-4 border-t border-white/10">
+                  <h3 className="text-sm text-gray-400">Re-enter your PIN to confirm</h3>
+                  <PinInput
+                    value={confirmPinValue}
+                    onChange={setConfirmPinValue}
+                    onComplete={handlePinComplete}
+                    error={pinError}
+                  />
+                  <button
+                    onClick={() => { setConfirmPin(""); setPin(""); setConfirmPinValue(""); setPinError("") }}
+                    className="text-sm text-gray-400 hover:text-white transition-colors"
+                  >
+                    Start over
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
         )}
-      </motion.div>
+      </div>
     </div>
   )
 }

@@ -1,7 +1,6 @@
 "use client"
 import { useState } from "react"
 import { useRouter } from "next/navigation"
-import { motion } from "framer-motion"
 import { RotateCcw, ArrowLeft, ArrowRight } from "lucide-react"
 import toast from "react-hot-toast"
 import { stringToPhrase, validatePhrase } from "@/lib/wallet/phrase"
@@ -18,6 +17,7 @@ export default function RecoverWalletPage() {
   const [error, setError] = useState("")
   const [pin, setPin] = useState("")
   const [confirmPin, setConfirmPin] = useState("")
+  const [confirmPinValue, setConfirmPinValue] = useState("")
   const [pinError, setPinError] = useState("")
 
   const handlePhraseChange = (words: string[]) => {
@@ -39,15 +39,20 @@ export default function RecoverWalletPage() {
 
   const handlePinComplete = async (val: string) => {
     if (!confirmPin) {
+      setPin(val)
       setConfirmPin(val)
       setPinError("")
+      setConfirmPinValue("")
     } else {
       if (val !== confirmPin) {
         setPinError("PINs do not match")
         setConfirmPin("")
+        setPin("")
+        setConfirmPinValue("")
         return
       }
-      await saveWallet({ name: "Recovered", createdAt: new Date().toISOString(), avatarIndex: 0 }, val)
+      const walletId = crypto.randomUUID()
+      await saveWallet({ walletId, name: "Recovered", createdAt: new Date().toISOString(), avatarIndex: 0 }, val)
       toast.success("Wallet recovered successfully!")
       router.push("/dashboard")
     }
@@ -60,12 +65,7 @@ export default function RecoverWalletPage() {
         <ArrowLeft className="w-5 h-5 text-gray-400" />
       </button>
 
-      <motion.div
-        key={step}
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="w-full max-w-lg"
-      >
+      <div className="w-full max-w-lg">
         {step === "phrase" && (
           <div className="glass-card p-6 sm:p-8">
             <div className="text-center mb-6">
@@ -93,26 +93,32 @@ export default function RecoverWalletPage() {
             <p className="text-gray-400 text-sm mb-8">
               {!confirmPin ? "Choose a 6-digit PIN" : "Enter the same PIN again to confirm"}
             </p>
-            <PinInput
-              value={confirmPin ? "" : pin}
-              onChange={(val) => { if (!confirmPin) setPin(val) }}
-              onComplete={(val) => {
-                if (!confirmPin) { setPin(val); setConfirmPin("") }
-              }}
-              error={pinError}
-            />
-            {confirmPin && (
-              <div className="mt-4 space-y-4">
-                <PinInput value="" onChange={() => {}} onComplete={handlePinComplete} error={pinError} />
-                <button onClick={() => { setConfirmPin(""); setPin(""); setPinError("") }}
-                  className="text-sm text-gray-400 hover:text-white">
-                  Start over
-                </button>
-              </div>
-            )}
+            <div className="space-y-6">
+              <PinInput
+                value={pin}
+                onChange={setPin}
+                onComplete={handlePinComplete}
+                error={pinError}
+              />
+              {confirmPin && (
+                <div className="space-y-4 pt-4 border-t border-white/10">
+                  <h3 className="text-sm text-gray-400">Re-enter your PIN to confirm</h3>
+                  <PinInput
+                    value={confirmPinValue}
+                    onChange={setConfirmPinValue}
+                    onComplete={handlePinComplete}
+                    error={pinError}
+                  />
+                  <button onClick={() => { setConfirmPin(""); setPin(""); setConfirmPinValue(""); setPinError("") }}
+                    className="text-sm text-gray-400 hover:text-white transition-colors">
+                    Start over
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
         )}
-      </motion.div>
+      </div>
     </div>
   )
 }

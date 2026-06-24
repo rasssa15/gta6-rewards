@@ -1,7 +1,6 @@
 "use client"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
-import { motion } from "framer-motion"
 import { Lock, LogOut } from "lucide-react"
 import toast from "react-hot-toast"
 import { validatePin, setLocked, hasWallet } from "@/lib/wallet/storage"
@@ -9,7 +8,18 @@ import { PinInput } from "@/components/wallet/PinInput"
 
 export default function UnlockPage() {
   const router = useRouter()
+  const [pin, setPin] = useState("")
   const [error, setError] = useState("")
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+    if (!hasWallet()) {
+      router.replace("/")
+    }
+  }, [router])
+
+  if (!mounted) return null
 
   const handlePinComplete = async (val: string) => {
     const valid = await validatePin(val)
@@ -18,23 +28,15 @@ export default function UnlockPage() {
       router.push("/dashboard")
     } else {
       setError("Wrong PIN")
+      setPin("")
     }
-  }
-
-  if (typeof window !== "undefined" && !hasWallet()) {
-    router.replace("/")
-    return null
   }
 
   return (
     <div className="min-h-screen flex items-center justify-center py-20 px-4">
       <div className="absolute inset-0 bg-gradient-to-b from-neon-purple/5 via-transparent to-neon-blue/5" />
 
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="w-full max-w-sm"
-      >
+      <div className="w-full max-w-sm">
         <div className="glass-card p-8 text-center">
           <div className="w-20 h-20 mx-auto mb-6 rounded-2xl bg-gradient-to-br from-neon-purple to-neon-pink flex items-center justify-center">
             <Lock className="w-10 h-10 text-white" />
@@ -44,8 +46,8 @@ export default function UnlockPage() {
           <p className="text-gray-400 text-sm mb-8">Enter your PIN to unlock</p>
 
           <PinInput
-            value=""
-            onChange={() => {}}
+            value={pin}
+            onChange={setPin}
             onComplete={handlePinComplete}
             error={error}
           />
@@ -54,7 +56,6 @@ export default function UnlockPage() {
             <button
               onClick={() => {
                 setLocked(true)
-                clearWallet()
                 router.push("/wallet/recover")
               }}
               className="text-sm text-gray-400 hover:text-white transition-colors flex items-center justify-center gap-2 mx-auto"
@@ -64,12 +65,7 @@ export default function UnlockPage() {
             </button>
           </div>
         </div>
-      </motion.div>
+      </div>
     </div>
   )
-}
-
-function clearWallet() {
-  const { clearWallet } = require("@/lib/wallet/storage")
-  clearWallet()
 }
