@@ -31,7 +31,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en" className="dark">
       <head>
         <meta name="referrer" content="no-referrer-when-downgrade" />
-        <meta name="19a0284490d299bcbb0c209b745499267a35ead1" content="19a0284490d299bcbb0c209b745499267a35ead1" />
+        <meta name="hilltopads" content="19a028445a524033b1ba3592efc5cf31" />
       </head>
       <body className={`${inter.variable} ${orbitron.variable} font-body antialiased`}>
         <WalletProvider>
