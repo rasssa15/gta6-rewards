@@ -17,7 +17,11 @@ export default function HomePage() {
       setFeaturedArticles(d.articles || [])
     }).catch(() => {})
     fetch("/api/admin/analytics").then(r => r.json()).then(d => {
-      if (d.totalUsers) setStats(d)
+      if (d && typeof d.totalUsers === "number") setStats({
+        users: d.totalUsers,
+        articles: d.totalArticles,
+        points: d.totalPoints,
+      })
     }).catch(() => {})
   }, [])
 
