@@ -22,5 +22,5 @@ jobs:
       - name: Scrape articles
         run: node scripts/scrape.mjs
         env:
-          API_URL: ${{ secrets.API_URL || 'https://out-two-delta-71.vercel.app' }}
+          API_URL: ${{ secrets.API_URL || 'https://gta6-rewards.vercel.app' }}
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
