@@ -54,6 +54,7 @@ model Article {
   categoryId    String?
   category      Category? @relation(fields: [categoryId], references: [id])
   featuredImage String   @default("")
+  prices        String   @default("[]")
   author        String   @default("GTA 6 Rewards")
   status        String   @default("draft")
   viewCount     Int      @default(0)

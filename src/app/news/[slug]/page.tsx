@@ -19,6 +19,8 @@ export default function ArticlePage() {
   const [bookmarked, setBookmarked] = useState(false)
   const [comments, setComments] = useState<any[]>([])
   const [commentText, setCommentText] = useState("")
+  const [geo, setGeo] = useState<{ currency: string; symbol: string } | null>(null)
+  const [selectedCurrency, setSelectedCurrency] = useState<string | null>(null)
   const [relatedArticles, setRelatedArticles] = useState<any[]>([])
 
   useEffect(() => {
@@ -41,6 +43,11 @@ export default function ArticlePage() {
 
     fetch(`/api/comments?articleId=${slug}`)
       .then(r => r.json()).then(setComments).catch(() => {})
+
+    fetch("/api/geo").then(r => r.json()).then(d => {
+      setGeo(d)
+      setSelectedCurrency(d.currency)
+    }).catch(() => {})
   }, [params.slug, walletId])
 
   const handleBookmark = async () => {
@@ -140,6 +147,47 @@ export default function ArticlePage() {
             <span className="flex items-center gap-1"><Eye className="w-4 h-4" /> {article.viewCount} views</span>
             <span>{article.author}</span>
           </div>
+
+          {article.prices && (
+            <div className="glass-card p-4 mb-6 flex flex-wrap items-center justify-between gap-3">
+              <div className="flex flex-wrap items-center gap-3">
+                <span className="text-sm text-gray-400">Price:</span>
+                {(() => {
+                  try {
+                    const prices = JSON.parse(article.prices)
+                    const cur = selectedCurrency || geo?.currency || "USD"
+                    const match = prices.find((p: any) => p.currency === cur) || prices.find((p: any) => p.currency === "USD")
+                    if (!match) return null
+                    return (
+                      <span className="text-xl font-heading font-bold text-neon-green">
+                        {new Intl.NumberFormat("en-US", { style: "currency", currency: match.currency as string, minimumFractionDigits: 2 }).format(match.amount)}
+                        <span className="text-xs text-gray-400 ml-2 font-normal">{match.label}</span>
+                      </span>
+                    )
+                  } catch { return null }
+                })()}
+              </div>
+              {(() => {
+                try {
+                  const prices = JSON.parse(article.prices)
+                  if (prices.length < 2) return null
+                  return (
+                    <select
+                      value={selectedCurrency || geo?.currency || "USD"}
+                      onChange={(e) => setSelectedCurrency(e.target.value)}
+                      className="text-xs bg-white/10 border border-white/20 rounded-lg px-2 py-1 text-gray-300 cursor-pointer focus:outline-none focus:border-neon-blue"
+                    >
+                      {prices.map((p: any) => (
+                        <option key={p.currency} value={p.currency} className="bg-gray-900">
+                          {p.currency} {new Intl.NumberFormat("en-US", { style: "currency", currency: p.currency, minimumFractionDigits: 0 }).format(p.amount)}
+                        </option>
+                      ))}
+                    </select>
+                  )
+                } catch { return null }
+              })()}
+            </div>
+          )}
 
           {article.featuredImage && (
             <div className="rounded-2xl overflow-hidden mb-8">
