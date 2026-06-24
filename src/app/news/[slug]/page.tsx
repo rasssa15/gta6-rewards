@@ -156,9 +156,10 @@ export default function ArticlePage() {
             </button>
           </div>
 
-          <div className="prose prose-invert max-w-none text-gray-300 leading-relaxed whitespace-pre-wrap">
-            {article.content}
-          </div>
+          <div
+            className="prose prose-invert max-w-none text-gray-300 leading-relaxed"
+            dangerouslySetInnerHTML={{ __html: article.content }}
+          />
         </motion.article>
 
         <div className="mt-12 glass-card p-6">
