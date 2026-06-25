@@ -3,8 +3,9 @@ import { useState, useEffect } from "react"
 import Link from "next/link"
 import {
   Gamepad2, Shield, Sparkles, Trophy, Gift, ArrowRight, Newspaper,
-  TrendingUp, Users, Star, ChevronRight
+  TrendingUp, Users, Star, ChevronRight, Coins
 } from "lucide-react"
+import OnlinePlayerBadge from "@/components/ui/OnlinePlayerBadge"
 import { formatNumber } from "@/lib/utils"
 import { motion } from "framer-motion"
 
@@ -45,9 +46,8 @@ export default function HomePage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
           >
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass mb-8">
-              <span className="w-2 h-2 rounded-full bg-neon-green animate-pulse" />
-              <span className="text-xs text-neon-green font-semibold">GTA 6 Coming 2025</span>
+            <div className="mb-8">
+              <OnlinePlayerBadge />
             </div>
             <h1 className="text-5xl sm:text-7xl font-heading font-bold mb-6">
               <span className="gradient-text">GTA 6</span>

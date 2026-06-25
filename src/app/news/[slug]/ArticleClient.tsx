@@ -1,5 +1,5 @@
 "use client"
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import { Share2, Bookmark, MessageSquare } from "lucide-react"
 import { useWallet } from "@/components/providers/WalletProvider"
 import toast from "react-hot-toast"
@@ -9,7 +9,6 @@ interface Article {
   id: string
   title: string
   content: string
-  prices: string
 }
 
 interface Comment {
@@ -30,15 +29,6 @@ export default function ArticleClient({
   const [bookmarked, setBookmarked] = useState(false)
   const [comments, setComments] = useState<Comment[]>(initialComments)
   const [commentText, setCommentText] = useState("")
-  const [geo, setGeo] = useState<{ currency: string; symbol: string } | null>(null)
-  const [selectedCurrency, setSelectedCurrency] = useState<string | null>(null)
-
-  useEffect(() => {
-    fetch("/api/geo").then(r => r.json()).then(d => {
-      setGeo(d)
-      setSelectedCurrency(d.currency)
-    }).catch(() => {})
-  }, [])
 
   const handleBookmark = async () => {
     if (!walletId || !article) return toast.error("Connect wallet to bookmark")
@@ -78,47 +68,6 @@ export default function ArticleClient({
 
   return (
     <>
-      {article.prices && (
-        <div className="glass-card p-4 mb-6 flex flex-wrap items-center justify-between gap-3">
-          <div className="flex flex-wrap items-center gap-3">
-            <span className="text-sm text-gray-400">Price:</span>
-            {(() => {
-              try {
-                const prices = JSON.parse(article.prices)
-                const cur = selectedCurrency || geo?.currency || "USD"
-                const match = prices.find((p: any) => p.currency === cur) || prices.find((p: any) => p.currency === "USD")
-                if (!match) return null
-                return (
-                  <span className="text-xl font-heading font-bold text-neon-green">
-                    {new Intl.NumberFormat("en-US", { style: "currency", currency: match.currency as string, minimumFractionDigits: 2 }).format(match.amount)}
-                    <span className="text-xs text-gray-400 ml-2 font-normal">{match.label}</span>
-                  </span>
-                )
-              } catch { return null }
-            })()}
-          </div>
-          {(() => {
-            try {
-              const prices = JSON.parse(article.prices)
-              if (prices.length < 2) return null
-              return (
-                <select
-                  value={selectedCurrency || geo?.currency || "USD"}
-                  onChange={(e) => setSelectedCurrency(e.target.value)}
-                  className="text-xs bg-white/10 border border-white/20 rounded-lg px-2 py-1 text-gray-300 cursor-pointer focus:outline-none focus:border-neon-blue"
-                >
-                  {prices.map((p: any) => (
-                    <option key={p.currency} value={p.currency} className="bg-gray-900">
-                      {p.currency} {new Intl.NumberFormat("en-US", { style: "currency", currency: p.currency, minimumFractionDigits: 0 }).format(p.amount)}
-                    </option>
-                  ))}
-                </select>
-              )
-            } catch { return null }
-          })()}
-        </div>
-      )}
-
       <div className="flex items-center gap-2 mb-8">
         <button onClick={handleBookmark} className={`p-2 rounded-lg glass hover:bg-white/10 transition-all ${bookmarked ? "text-neon-blue" : "text-gray-400"}`}>
           <Bookmark className="w-4 h-4" />
