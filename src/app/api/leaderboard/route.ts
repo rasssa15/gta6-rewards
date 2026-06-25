@@ -8,11 +8,12 @@ export async function GET(req: NextRequest) {
 
   try {
     const users = getLeaderboard(period, limit)
+    const key = period === "daily" ? "dailyPoints" : period === "weekly" ? "weeklyPoints" : period === "monthly" ? "monthlyPoints" : "points"
     const ranked = users.map((u, i) => ({
       rank: i + 1,
       walletId: u.walletId,
       name: u.name,
-      points: u.points,
+      points: u[key],
       level: u.level,
       badges: 0,
     }))

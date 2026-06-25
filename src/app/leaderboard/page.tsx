@@ -118,7 +118,7 @@ export default function LeaderboardPage() {
                   </div>
                 </div>
                 <div className="text-right">
-                  <div className="text-neon-green font-bold font-mono">{formatNumber(player.points)}</div>
+                  <div className="text-neon-green font-bold font-mono">{player.points.toLocaleString()}</div>
                   <div className="text-[10px] text-gray-500">points</div>
                 </div>
               </motion.div>

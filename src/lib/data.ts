@@ -30,6 +30,9 @@ export interface UserData {
   walletId: string
   name: string
   points: number
+  dailyPoints: number
+  weeklyPoints: number
+  monthlyPoints: number
   level: number
   xp: number
   adsWatched: number
@@ -191,7 +194,8 @@ export function getLeaderboard(period: string, limit: number = 50): UserData[] {
     const chunk = chunks.get(i)
     if (chunk) all.push(...chunk)
   }
-  all.sort((a, b) => b.points - a.points)
+  const key = period === "daily" ? "dailyPoints" : period === "weekly" ? "weeklyPoints" : period === "monthly" ? "monthlyPoints" : "points"
+  all.sort((a, b) => b[key] - a[key])
   return all.slice(0, limit)
 }
 

@@ -389,7 +389,10 @@ async function main() {
     const spacer = pick(["", ".", "_"])
     const name = `${first}${spacer}${last}${num}`
     const walletId = Array.from({ length: 32 }, () => "0123456789abcdef"[randomInt(0, 15)]).join("")
-    const points = randomInt(50, 5000)
+    const dailyPoints = randomInt(1, 210)
+    const weeklyPoints = randomInt(1, 2400)
+    const monthlyPoints = randomInt(1, 4600)
+    const points = randomInt(1, 12000)
     const xp = randomInt(100, 50000)
     const level = Math.floor(xp / 100) + 1
     const createdAt = randomDate(new Date("2024-06-01"), new Date("2026-06-24"))
@@ -400,6 +403,9 @@ async function main() {
       walletId,
       name,
       points,
+      dailyPoints,
+      weeklyPoints,
+      monthlyPoints,
       level,
       xp,
       adsWatched: randomInt(0, 200),
