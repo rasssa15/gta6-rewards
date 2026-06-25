@@ -1,5 +1,42 @@
 import { NextRequest, NextResponse } from "next/server"
-import { getArticleBySlug, getArticleById } from "@/lib/data"
+import { getArticleBySlug, getArticleById, ArticleData } from "@/lib/data"
+
+async function getDbArticle(slugOrId: string): Promise<ArticleData | undefined> {
+  try {
+    const { prisma } = await import("@/lib/prisma")
+    const dbArticle = await prisma.article.findFirst({
+      where: {
+        OR: [{ slug: slugOrId }, { id: slugOrId }],
+        status: "published",
+      },
+      include: { category: true },
+    })
+    if (!dbArticle) return undefined
+    return {
+      id: dbArticle.id,
+      title: dbArticle.title,
+      slug: dbArticle.slug,
+      excerpt: dbArticle.excerpt,
+      content: dbArticle.content,
+      categoryId: dbArticle.categoryId || "",
+      categorySlug: dbArticle.category?.slug || "",
+      categoryName: dbArticle.category?.name || "",
+      featuredImage: dbArticle.featuredImage,
+      prices: dbArticle.prices,
+      author: dbArticle.author,
+      status: dbArticle.status,
+      viewCount: dbArticle.viewCount,
+      readingTime: dbArticle.readingTime,
+      tags: dbArticle.tags,
+      metaTitle: dbArticle.seoTitle,
+      metaDescription: dbArticle.seoDesc,
+      keywords: "",
+      createdAt: dbArticle.createdAt.toISOString(),
+    }
+  } catch {
+    return undefined
+  }
+}
 
 export async function GET(
   req: NextRequest,
@@ -7,9 +44,8 @@ export async function GET(
 ) {
   try {
     let article = getArticleById(params.id)
-    if (!article) {
-      article = getArticleBySlug(params.id)
-    }
+    if (!article) article = getArticleBySlug(params.id)
+    if (!article) article = await getDbArticle(params.id)
     if (!article) {
       return NextResponse.json({ error: "Article not found" }, { status: 404 })
     }

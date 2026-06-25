@@ -1,4 +1,4 @@
-import { getAllArticles, getArticleBySlug, getCommentsForArticle } from "@/lib/data"
+import { getAllArticles, getArticleBySlug, getCommentsForArticle, ArticleData } from "@/lib/data"
 import { formatDate } from "@/lib/utils"
 import Link from "next/link"
 import { ArrowLeft, Clock, Eye, Calendar, Newspaper } from "lucide-react"
@@ -15,12 +15,49 @@ export async function generateStaticParams() {
 export const dynamicParams = true
 export const revalidate = 86400
 
-export default function ArticlePage({
+async function findArticle(slug: string): Promise<ArticleData | null> {
+  const fromJson = getArticleBySlug(slug)
+  if (fromJson) return fromJson
+
+  try {
+    const { prisma } = await import("@/lib/prisma")
+    const dbArticle = await prisma.article.findFirst({
+      where: { slug, status: "published" },
+      include: { category: true },
+    })
+    if (dbArticle) {
+      return {
+        id: dbArticle.id,
+        title: dbArticle.title,
+        slug: dbArticle.slug,
+        excerpt: dbArticle.excerpt,
+        content: dbArticle.content,
+        categoryId: dbArticle.categoryId || "",
+        categorySlug: dbArticle.category?.slug || "",
+        categoryName: dbArticle.category?.name || "",
+        featuredImage: dbArticle.featuredImage,
+        prices: dbArticle.prices,
+        author: dbArticle.author,
+        status: dbArticle.status,
+        viewCount: dbArticle.viewCount,
+        readingTime: dbArticle.readingTime,
+        tags: dbArticle.tags,
+        metaTitle: dbArticle.seoTitle,
+        metaDescription: dbArticle.seoDesc,
+        keywords: "",
+        createdAt: dbArticle.createdAt.toISOString(),
+      }
+    }
+  } catch {}
+  return null
+}
+
+export default async function ArticlePage({
   params,
 }: {
   params: { slug: string }
 }) {
-  const article = getArticleBySlug(params.slug)
+  const article = await findArticle(params.slug)
 
   if (!article) {
     notFound()
