@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
-import { prisma } from "@/lib/prisma"
+import { getCommentsForArticle, getAllArticles } from "@/lib/data"
 
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url)
@@ -7,16 +7,12 @@ export async function GET(req: NextRequest) {
   const limit = Math.min(parseInt(searchParams.get("limit") || "50"), 100)
 
   try {
-    const where: any = {}
-    if (articleId) where.articleId = articleId
-
-    const comments = await prisma.comment.findMany({
-      where,
-      include: { user: { select: { name: true } } },
-      orderBy: { createdAt: "desc" },
-      take: limit,
-    })
-    return NextResponse.json(comments)
+    if (articleId) {
+      const comments = getCommentsForArticle(articleId)
+      const sliced = comments.slice(0, limit)
+      return NextResponse.json(sliced)
+    }
+    return NextResponse.json([])
   } catch (error) {
     return NextResponse.json({ error: "Failed to fetch comments" }, { status: 500 })
   }
@@ -28,7 +24,7 @@ export async function POST(req: NextRequest) {
     if (!content || !articleId || !userId) {
       return NextResponse.json({ error: "content, articleId, userId required" }, { status: 400 })
     }
-
+    const { prisma } = await import("@/lib/prisma")
     const comment = await prisma.comment.create({
       data: { content, articleId, userId, parentId: parentId || null },
       include: { user: { select: { name: true } } },

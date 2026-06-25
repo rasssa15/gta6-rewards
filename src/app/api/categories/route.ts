@@ -1,13 +1,15 @@
-import { NextRequest, NextResponse } from "next/server"
-import { prisma } from "@/lib/prisma"
+import { NextResponse } from "next/server"
+
+const CATEGORIES = [
+  { id: "gta-6", name: "GTA 6", slug: "gta-6" },
+  { id: "rockstar", name: "Rockstar", slug: "rockstar" },
+  { id: "playstation", name: "PlayStation", slug: "playstation" },
+  { id: "xbox", name: "Xbox", slug: "xbox" },
+  { id: "pc-gaming", name: "PC Gaming", slug: "pc-gaming" },
+  { id: "nintendo", name: "Nintendo", slug: "nintendo" },
+  { id: "esports", name: "Esports", slug: "esports" },
+]
 
 export async function GET() {
-  try {
-    const categories = await prisma.category.findMany({
-      orderBy: { name: "asc" },
-    })
-    return NextResponse.json(categories)
-  } catch (error) {
-    return NextResponse.json({ error: "Failed to fetch categories" }, { status: 500 })
-  }
+  return NextResponse.json(CATEGORIES)
 }

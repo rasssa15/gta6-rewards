@@ -1,24 +1,17 @@
 import { NextRequest, NextResponse } from "next/server"
-import { prisma } from "@/lib/prisma"
+import { getArticleBySlug, getArticleById } from "@/lib/data"
 
 export async function GET(
   req: NextRequest,
   { params }: { params: { id: string } }
 ) {
   try {
-    const article = await prisma.article.findUnique({
-      where: { id: params.id },
-      include: { category: true },
-    })
+    let article = getArticleById(params.id)
     if (!article) {
-      const articleBySlug = await prisma.article.findUnique({
-        where: { slug: params.id },
-        include: { category: true },
-      })
-      if (!articleBySlug) {
-        return NextResponse.json({ error: "Article not found" }, { status: 404 })
-      }
-      return NextResponse.json(articleBySlug)
+      article = getArticleBySlug(params.id)
+    }
+    if (!article) {
+      return NextResponse.json({ error: "Article not found" }, { status: 404 })
     }
     return NextResponse.json(article)
   } catch (error) {
@@ -32,6 +25,7 @@ export async function PUT(
 ) {
   try {
     const data = await req.json()
+    const { prisma } = await import("@/lib/prisma")
     const article = await prisma.article.update({
       where: { id: params.id },
       data: {
@@ -62,6 +56,7 @@ export async function DELETE(
   { params }: { params: { id: string } }
 ) {
   try {
+    const { prisma } = await import("@/lib/prisma")
     await prisma.article.delete({ where: { id: params.id } })
     return NextResponse.json({ success: true })
   } catch (error) {
