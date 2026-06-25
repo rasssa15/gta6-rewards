@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
+import { awardScratchCard } from "@/lib/scratch-card"
 
 export async function POST(req: NextRequest) {
   try {
@@ -20,6 +21,7 @@ export async function POST(req: NextRequest) {
       create: { userId, challengeId, date: today, progress: 1 },
     })
 
+    let scratchResult = null
     const isCompleted = completion.progress >= challenge.target
     if (isCompleted && !completion.completed) {
       await prisma.challengeCompletion.update({
@@ -28,11 +30,9 @@ export async function POST(req: NextRequest) {
       })
       await prisma.user.update({
         where: { id: userId },
-        data: { points: { increment: challenge.pointReward }, xp: { increment: challenge.xpReward } },
+        data: { xp: { increment: challenge.xpReward } },
       })
-      await prisma.pointTransaction.create({
-        data: { userId, amount: challenge.pointReward, reason: `Challenge: ${challenge.title}` },
-      })
+      scratchResult = await awardScratchCard(userId, `Challenge: ${challenge.title}`)
     }
 
     return NextResponse.json({
@@ -40,7 +40,7 @@ export async function POST(req: NextRequest) {
       completed: isCompleted || completion.completed,
       target: challenge.target,
       xpReward: challenge.xpReward,
-      pointReward: challenge.pointReward,
+      scratchResult,
     })
   } catch (error) {
     return NextResponse.json({ error: "Failed to update challenge" }, { status: 500 })

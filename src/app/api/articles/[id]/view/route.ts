@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
+import { awardScratchCard } from "@/lib/scratch-card"
 
 export async function POST(
   req: NextRequest,
@@ -17,7 +18,12 @@ export async function POST(
       data: { viewCount: { increment: 1 } },
     })
 
-    return NextResponse.json({ success: true })
+    let scratchResult = null
+    if (userId) {
+      scratchResult = await awardScratchCard(userId, "Read article")
+    }
+
+    return NextResponse.json({ success: true, scratchResult })
   } catch (error) {
     return NextResponse.json({ error: "Failed to record view" }, { status: 500 })
   }

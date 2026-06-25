@@ -37,6 +37,23 @@ export async function POST(req: NextRequest) {
       }),
     ])
 
+    // Referral bonus: check if this is the user's first redemption
+    const redemptionCount = await prisma.redemption.count({ where: { userId } })
+    if (redemptionCount === 1 && user.referrerId) {
+      const referrerBonus = 10 + Math.round(reward.pointsCost * 0.2)
+      await prisma.user.update({
+        where: { id: user.referrerId },
+        data: { points: { increment: referrerBonus } },
+      })
+      await prisma.pointTransaction.create({
+        data: {
+          userId: user.referrerId,
+          amount: referrerBonus,
+          reason: `Referral bonus: ${user.name} redeemed ${reward.name}`,
+        },
+      })
+    }
+
     return NextResponse.json(redemption, { status: 201 })
   } catch (error) {
     return NextResponse.json({ error: "Failed to redeem" }, { status: 500 })

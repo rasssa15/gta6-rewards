@@ -7,48 +7,48 @@ const earnMethods = [
   {
     icon: Newspaper,
     title: "Read Articles",
-    desc: "Earn points for every article you read. Stay informed and rewarded.",
-    points: "+5 per article",
+    desc: "Every article you read awards a Scratch Card. First 20 cards give 25–35 points total, then decreases.",
+    points: "Scratch Card per read",
     link: "/news",
     color: "from-neon-blue/20 to-cyan-500/20",
   },
   {
     icon: Eye,
     title: "Watch Ads",
-    desc: "Support the platform by watching short ads and earn points instantly.",
-    points: "+10 per ad",
+    desc: "Support the platform by watching ads. Each ad awards a Scratch Card toward your daily login.",
+    points: "Scratch Card per ad",
     link: "/rewards",
     color: "from-neon-green/20 to-emerald-500/20",
   },
   {
     icon: Sparkles,
     title: "Complete Challenges",
-    desc: "Daily challenges with increasing rewards. New challenges every day.",
-    points: "+30–100 per challenge",
+    desc: "Daily challenges reward a Scratch Card on completion. New challenges every day.",
+    points: "Scratch Card per challenge",
     link: "/challenges",
     color: "from-neon-purple/20 to-pink-500/20",
   },
   {
     icon: Gift,
-    title: "Scratch Cards",
-    desc: "Try your luck with daily scratch cards. Win up to 500 points!",
-    points: "Up to +500",
+    title: "Play Scratch Cards",
+    desc: "Try your luck! First 20 cards pay 25–35 total, max 80. Cards past 20 give 1–2 points.",
+    points: "1–3 per card",
     link: "/rewards",
     color: "from-neon-pink/20 to-rose-500/20",
   },
   {
     icon: Users,
     title: "Refer Friends",
-    desc: "Invite your friends to join. You earn a bonus when they sign up.",
-    points: "+50 per referral",
+    desc: "Invite friends. When they make their first redemption, you get 10 points + 20% of the reward.",
+    points: "10 + 20% per referral",
     link: "/dashboard",
     color: "from-amber-500/20 to-orange-500/20",
   },
   {
     icon: RefreshCw,
-    title: "Daily Login Streak",
-    desc: "Log in daily to build your streak. Longer streaks = bigger rewards.",
-    points: "+5–50 daily",
+    title: "Daily Login Gift",
+    desc: "Watch 5 ads then claim your daily login gift — a free Scratch Card every day.",
+    points: "Claim after 5 ads",
     link: "/dashboard",
     color: "from-sky-500/20 to-indigo-500/20",
   },
@@ -68,7 +68,7 @@ export default function EarnPage() {
             Earn Points
           </h1>
           <p className="text-gray-400 mb-8">
-            Multiple ways to earn points and climb the leaderboard.
+            No direct points — every task awards a Scratch Card. Stack your cards and watch the points grow.
           </p>
         </motion.div>
 
