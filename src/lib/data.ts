@@ -1,4 +1,7 @@
-import { readFileSync, existsSync } from "fs"
+import { readFileSync } from "fs"
+import { join } from "path"
+
+const DATA_DIR = join(process.cwd(), "public/data")
 
 export interface ArticleData {
   id: string
@@ -54,7 +57,6 @@ declare global {
 }
 
 const CATEGORIES = ["gta-6", "rockstar", "playstation", "xbox", "pc-gaming", "nintendo", "esports"]
-const DATA_DIR = existsSync("public/data") ? "public/data" : "../public/data"
 
 function readJSON(path: string): any {
   const fullPath = `${DATA_DIR}/${path}`
