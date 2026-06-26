@@ -1,5 +1,12 @@
 import { NextRequest, NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
+import { createHash, randomBytes } from "crypto"
+
+function generateCouponCode(rewardName: string): string {
+  const prefix = rewardName.slice(0, 4).toUpperCase().replace(/[^A-Z0-9]/g, "X")
+  const rand = randomBytes(4).toString("hex").toUpperCase()
+  return `${prefix}-${rand}`
+}
 
 export async function POST(req: NextRequest) {
   try {
@@ -20,9 +27,11 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Not enough points" }, { status: 400 })
     }
 
+    const couponCode = reward.category === "coupon" ? generateCouponCode(reward.name) : null
+
     const [redemption] = await Promise.all([
       prisma.redemption.create({
-        data: { userId, rewardId, status: "pending" },
+        data: { userId, rewardId, status: couponCode ? "completed" : "pending" },
       }),
       prisma.reward.update({
         where: { id: rewardId },
@@ -37,7 +46,7 @@ export async function POST(req: NextRequest) {
       }),
     ])
 
-    // Referral bonus: check if this is the user's first redemption
+    // Referral bonus on first redemption
     const redemptionCount = await prisma.redemption.count({ where: { userId } })
     if (redemptionCount === 1 && user.referrerId) {
       const referrerBonus = 10 + Math.round(reward.pointsCost * 0.2)
@@ -54,7 +63,7 @@ export async function POST(req: NextRequest) {
       })
     }
 
-    return NextResponse.json(redemption, { status: 201 })
+    return NextResponse.json({ redemption, couponCode }, { status: 201 })
   } catch (error) {
     return NextResponse.json({ error: "Failed to redeem" }, { status: 500 })
   }

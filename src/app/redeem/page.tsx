@@ -1,7 +1,7 @@
 "use client"
 import { useState, useEffect, Suspense } from "react"
 import { useSearchParams, useRouter } from "next/navigation"
-import { Gift, ArrowLeft, Check, AlertCircle, Loader2 } from "lucide-react"
+import { Gift, ArrowLeft, Check, AlertCircle, Loader2, Copy } from "lucide-react"
 import { motion } from "framer-motion"
 import { useWallet } from "@/components/providers/WalletProvider"
 import toast from "react-hot-toast"
@@ -14,6 +14,7 @@ function RedeemContent() {
   const [loading, setLoading] = useState(true)
   const [redeeming, setRedeeming] = useState(false)
   const [success, setSuccess] = useState(false)
+  const [couponCode, setCouponCode] = useState<string | null>(null)
 
   const rewardId = searchParams.get("reward")
 
@@ -39,18 +40,26 @@ function RedeemContent() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ userId: walletId, rewardId: reward.id }),
       })
+      const data = await res.json()
       if (res.ok) {
         setSuccess(true)
-        toast.success("Redemption requested!")
+        if (data.couponCode) setCouponCode(data.couponCode)
+        toast.success("Redemption successful!")
         refresh()
       } else {
-        const err = await res.json()
-        toast.error(err.error || "Redemption failed")
+        toast.error(data.error || "Redemption failed")
       }
     } catch {
       toast.error("Redemption failed")
     }
     setRedeeming(false)
+  }
+
+  const copyCode = () => {
+    if (couponCode) {
+      navigator.clipboard.writeText(couponCode)
+      toast.success("Code copied!")
+    }
   }
 
   if (loading) {
@@ -84,9 +93,26 @@ function RedeemContent() {
           <div className="w-20 h-20 rounded-2xl bg-neon-green/20 flex items-center justify-center mx-auto mb-6">
             <Check className="w-10 h-10 text-neon-green" />
           </div>
-          <h2 className="text-2xl font-heading font-bold text-white mb-2">Redemption Requested!</h2>
-          <p className="text-gray-400 mb-6">Your {reward.name} will be processed soon.</p>
-          <button onClick={() => router.push("/dashboard")} className="btn-primary">
+          <h2 className="text-2xl font-heading font-bold text-white mb-2">Redemption Successful!</h2>
+          <p className="text-gray-400 mb-2">{reward.name}</p>
+
+          {couponCode ? (
+            <div className="mt-4 p-4 rounded-xl bg-neon-green/10 border border-neon-green/30">
+              <p className="text-xs text-gray-400 mb-2">Your Coupon Code</p>
+              <div className="flex items-center gap-2 justify-center">
+                <code className="text-xl font-mono font-bold text-neon-green tracking-wider select-all">
+                  {couponCode}
+                </code>
+                <button onClick={copyCode} className="p-2 rounded-lg hover:bg-white/5 text-gray-400 hover:text-neon-green transition-colors">
+                  <Copy className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+          ) : (
+            <p className="text-gray-400 mb-6">Your reward will be processed soon.</p>
+          )}
+
+          <button onClick={() => router.push("/dashboard")} className="btn-primary mt-6">
             Go to Dashboard
           </button>
         </motion.div>

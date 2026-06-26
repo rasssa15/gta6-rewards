@@ -5,6 +5,7 @@ import { Footer } from "@/components/layout/Footer"
 import { ParticleBackground } from "@/components/ui/ParticleBackground"
 import { Toaster } from "react-hot-toast"
 import { WalletProvider } from "@/components/providers/WalletProvider"
+import { AdScripts } from "@/components/ads/AdScripts"
 import "./globals.css"
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-body" })
@@ -50,6 +51,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               },
             }}
           />
+          <AdScripts />
         </WalletProvider>
       </body>
     </html>
