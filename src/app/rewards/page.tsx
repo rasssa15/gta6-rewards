@@ -1,6 +1,6 @@
 "use client"
 import { useState, useEffect } from "react"
-import { Gift, ArrowRight, Check, Star, Monitor, Gamepad2, Globe, ShoppingBag, Radio } from "lucide-react"
+import { Gift, ArrowRight, Check, Star, Monitor, Gamepad2, Globe, ShoppingBag, Radio, Trophy, Zap, Coins } from "lucide-react"
 import { motion } from "framer-motion"
 import { formatNumber } from "@/lib/utils"
 import Link from "next/link"
@@ -13,6 +13,10 @@ const PLATFORMS = [
   { key: "xbox", label: "Xbox", icon: Globe },
   { key: "nintendo", label: "Nintendo", icon: Gamepad2 },
   { key: "gta6", label: "GTA 6", icon: Star },
+  { key: "bronze", label: "🥉 Bronze", icon: Coins },
+  { key: "silver", label: "🥈 Silver", icon: Zap },
+  { key: "gold", label: "🥇 Gold", icon: Trophy },
+  { key: "giftcard", label: "Gift Cards", icon: Star },
 ]
 
 export default function RewardsPage() {
@@ -33,6 +37,8 @@ export default function RewardsPage() {
     : rewards.filter(r => {
         const cat = r.category || ""
         if (activePlatform === "gta6") return cat === "coupon-gta6"
+        if (activePlatform === "giftcard") return cat.startsWith("coupon-giftcard")
+        if (["bronze", "silver", "gold"].includes(activePlatform)) return cat === `coupon-${activePlatform}`
         return cat === `coupon-${activePlatform}`
       })
 
@@ -88,9 +94,13 @@ export default function RewardsPage() {
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filtered.map((reward, i) => {
+              {filtered.map((reward, i) => {
               const cat = reward.category || ""
-              const platform = PLATFORMS.find(p => cat === `coupon-${p.key}` || (p.key === "gta6" && cat === "coupon-gta6")) || PLATFORMS[0]
+              let platform = PLATFORMS.find(p => cat === `coupon-${p.key}` || (p.key === "gta6" && cat === "coupon-gta6"))
+              if (!platform && ["bronze", "silver", "gold"].some(t => cat === `coupon-${t}`)) {
+                platform = PLATFORMS.find(p => ["bronze", "silver", "gold"].includes(p.key))
+              }
+              platform ||= PLATFORMS[0]
               const Icon = platform.icon
               return (
                 <motion.div
@@ -100,9 +110,15 @@ export default function RewardsPage() {
                   transition={{ duration: 0.3, delay: i * 0.05 }}
                   className="glass-card p-6 flex flex-col"
                 >
-                  <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-neon-green/20 to-neon-blue/20 flex items-center justify-center mb-4">
-                    <Icon className="w-6 h-6 text-neon-green" />
-                  </div>
+                  {reward.image ? (
+                    <div className="relative w-full h-36 rounded-xl overflow-hidden mb-4">
+                      <img src={reward.image} alt={reward.name} className="w-full h-full object-cover" onError={(e) => { (e.target as HTMLImageElement).style.display = "none" }} />
+                    </div>
+                  ) : (
+                    <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-neon-green/20 to-neon-blue/20 flex items-center justify-center mb-4">
+                      <Icon className="w-6 h-6 text-neon-green" />
+                    </div>
+                  )}
                   <h3 className="text-white font-semibold mb-2">{reward.name}</h3>
                   <p className="text-gray-400 text-sm flex-1">{reward.description}</p>
                   <div className="flex items-center justify-between mt-4 pt-4 border-t border-white/5">
@@ -114,12 +130,18 @@ export default function RewardsPage() {
                       {reward.stock > 0 ? `${reward.stock} left` : "Out of stock"}
                     </span>
                   </div>
-                  <Link
-                    href={`/redeem?reward=${reward.id}`}
-                    className="btn-primary w-full mt-4 text-sm !py-2.5 text-center"
-                  >
-                    Redeem
-                  </Link>
+                  {reward.stock > 0 ? (
+                    <Link
+                      href={`/redeem?reward=${reward.id}`}
+                      className="btn-primary w-full mt-4 text-sm !py-2.5 text-center"
+                    >
+                      Redeem
+                    </Link>
+                  ) : (
+                    <div className="w-full mt-4 py-2.5 text-sm text-center rounded-xl bg-white/5 text-red-400 font-semibold cursor-not-allowed">
+                      Sold Out
+                    </div>
+                  )}
                 </motion.div>
               )
             })}

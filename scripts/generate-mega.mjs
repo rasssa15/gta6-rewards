@@ -434,11 +434,11 @@ async function main() {
   // === GENERATE COMMENTS ===
   console.log("\n=== Generating comments ===")
 
-  // Collect all article IDs from all categories
-  const allArticleIds = []
+  // Collect all article IDs + createdAt from all categories
+  const allArticleMeta = []
   for (const articles of Object.values(articlesByCategory)) {
     for (const a of articles) {
-      allArticleIds.push(a.id)
+      allArticleMeta.push({ id: a.id, createdAt: new Date(a.createdAt) })
     }
   }
 
@@ -552,13 +552,15 @@ async function main() {
   let parentPool = []
 
   for (let i = 0; i < COMMENT_TOTAL; i++) {
-    const article = allArticleIds[randomInt(0, allArticleIds.length - 1)]
+    const articleMeta = allArticleMeta[randomInt(0, allArticleMeta.length - 1)]
+    const article = articleMeta.id
     const user = allUserIds[randomInt(0, allUserIds.length - 1)]
     const userName = allUsers.find(u => u.id === user)?.name || "Player"
     const isReply = Math.random() < 0.22 && parentPool.length > 0
     const parentId = isReply ? pick(parentPool) : null
     const cid = uuid()
-    const createdAt = randomDate(new Date("2025-01-01"), new Date("2026-06-24"))
+    const commentEarliest = new Date(Math.max(articleMeta.createdAt.getTime(), new Date("2025-01-01").getTime()))
+    const createdAt = randomDate(commentEarliest, new Date("2026-06-24"))
     const timeDecay = Math.max(0.3, 1 - (Date.now() - createdAt.getTime()) / (1000 * 60 * 60 * 24 * 30) / 18)
     const likes = Math.floor(randomInt(5, 500) * timeDecay)
 

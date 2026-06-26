@@ -1,56 +1,86 @@
 "use client"
 import Link from "next/link"
-import { Gift, Newspaper, Sparkles, Eye, RefreshCw, Users, ChevronRight } from "lucide-react"
+import { Gift, Newspaper, Sparkles, Eye, RefreshCw, Users, ChevronRight, Coins, Zap, Trophy, Flame } from "lucide-react"
 import { motion } from "framer-motion"
 
 const earnMethods = [
   {
     icon: Newspaper,
-    title: "Read Articles",
-    desc: "Every article you read awards a Scratch Card. First 20 cards give 25–35 points total, then decreases.",
-    points: "Scratch Card per read",
+    title: "📰 Read Articles",
+    desc: "Stay updated with the latest GTA VI leaks and news. Every article you read drops a random Scratch Card — 🥉 Bronze (1-3 pts), 🥈 Silver (5-10 pts), or 🥇 Gold (15-25 pts)! Mostly Bronze, sometimes Silver, rarely Gold.",
+    points: "🎴 Random Card per read",
     link: "/news",
     color: "from-neon-blue/20 to-cyan-500/20",
+    emoji: "📰",
   },
   {
     icon: Eye,
-    title: "Watch Ads",
-    desc: "Support the platform by watching ads. Each ad awards a Scratch Card toward your daily login.",
-    points: "Scratch Card per ad",
-    link: "/rewards",
+    title: "📺 Watch Ads",
+    desc: "Watch 1 full ad → get 1 random Scratch Card! 🥉 Bronze is most common (10x), 🥈 Silver pops up sometimes (1-2x), and 🥇 Gold is rare but huge (0.5x). The more ads you watch, the more cards you stack. Keep going!",
+    points: "🥉🥈🥇 Random Card per ad",
+    link: "/ads",
     color: "from-neon-green/20 to-emerald-500/20",
+    emoji: "📺",
   },
   {
     icon: Sparkles,
-    title: "Complete Challenges",
-    desc: "Daily challenges reward a Scratch Card on completion. New challenges every day.",
-    points: "Scratch Card per challenge",
+    title: "⚡ Complete Challenges",
+    desc: "Fresh challenges every day. Finish them, grab a random Scratch Card. Bronze fills your bag, Silver gives a boost, Gold is the jackpot. Keep completing!",
+    points: "🥉🥈🥇 Per challenge",
     link: "/challenges",
     color: "from-neon-purple/20 to-pink-500/20",
+    emoji: "⚡",
   },
   {
     icon: Gift,
-    title: "Play Scratch Cards",
-    desc: "Try your luck! First 20 cards pay 25–35 total, max 80. Cards past 20 give 1–2 points.",
-    points: "1–3 per card",
-    link: "/rewards",
+    title: "🎰 Play Scratch Cards",
+    desc: "Test your luck! Every card is 🥉 Bronze (1-3 pts), 🥈 Silver (5-10 pts), or 🥇 Gold (15-25 pts). Bronze comes often, Silver now and then, Gold is rare. Tap and see what you get!",
+    points: "🥉1-3 · 🥈5-10 · 🥇15-25",
+    link: "/dashboard",
     color: "from-neon-pink/20 to-rose-500/20",
+    emoji: "🎰",
   },
   {
     icon: Users,
-    title: "Refer Friends",
-    desc: "Invite friends. When they make their first redemption, you get 10 points + 20% of the reward.",
-    points: "10 + 20% per referral",
+    title: "👥 Refer Friends",
+    desc: "Got friends who love GTA? Invite them. When they make their first redemption, you score 10 points + 20% of their reward cost. Build your crew, earn bigger.",
+    points: "10 🪙 + 20% per referral",
     link: "/dashboard",
     color: "from-amber-500/20 to-orange-500/20",
+    emoji: "👥",
   },
   {
     icon: RefreshCw,
-    title: "Daily Login Gift",
-    desc: "Watch 5 ads then claim your daily login gift — a free Scratch Card every day.",
-    points: "Claim after 5 ads",
+    title: "🎁 Daily Login Gift",
+    desc: "Watch 5 ads → claim your daily Scratch Card. Completely free. Every single day. Log in, claim it, profit. Don't break the streak!",
+    points: "Claim after 5 ads 🎴",
     link: "/dashboard",
     color: "from-sky-500/20 to-indigo-500/20",
+    emoji: "🎁",
+  },
+]
+
+const rewards = [
+  {
+    icon: Coins,
+    title: "🥉 Bronze Coupon",
+    desc: "Starter coupon for small game deals. Cheap, fast, and gets you in the game.",
+    cost: "70 🪙",
+    color: "from-amber-700/20 to-amber-500/20",
+  },
+  {
+    icon: Zap,
+    title: "🥈 Silver Coupon",
+    desc: "Mid-tier coupon for the big titles. Save bigger, play harder.",
+    cost: "160 🪙",
+    color: "from-gray-300/20 to-gray-100/20",
+  },
+  {
+    icon: Trophy,
+    title: "🥇 Gold Coupon",
+    desc: "Premium coupon — the ultimate reward. For players who grind to the top.",
+    cost: "200 🪙",
+    color: "from-yellow-500/20 to-amber-400/20",
   },
 ]
 
@@ -63,12 +93,17 @@ export default function EarnPage() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4 }}
         >
-          <h1 className="text-3xl sm:text-4xl font-heading font-bold text-white flex items-center gap-3 mb-2">
-            <Gift className="w-7 h-7 text-neon-green" />
-            Earn Points
-          </h1>
-          <p className="text-gray-400 mb-8">
-            No direct points — every task awards a Scratch Card. Stack your cards and watch the points grow.
+          <div className="flex items-center gap-3 mb-4">
+            <Flame className="w-8 h-8 text-neon-orange animate-pulse" />
+            <h1 className="text-3xl sm:text-5xl font-heading font-bold text-white">
+              Earn <span className="bg-gradient-to-r from-neon-green to-neon-blue bg-clip-text text-transparent">Big</span>
+            </h1>
+          </div>
+          <p className="text-gray-400 text-lg mb-2">
+            <strong className="text-white">Every action</strong> gives you a random Scratch Card: <span className="text-amber-500 font-semibold">🥉 Bronze</span> · <span className="text-gray-300 font-semibold">🥈 Silver</span> · <span className="text-yellow-400 font-semibold">🥇 Gold</span>
+          </p>
+          <p className="text-gray-500 mb-8">
+            Mostly Bronze, sometimes Silver, rarely Gold. Watch ads on repeat for more cards!
           </p>
         </motion.div>
 
@@ -84,17 +119,17 @@ export default function EarnPage() {
               >
                 <Link
                   href={method.link}
-                  className="glass-card p-5 flex items-start gap-4 group hover:border-neon-green/30 transition-all block"
+                  className="glass-card p-5 flex items-start gap-4 group hover:border-neon-green/40 hover:shadow-lg hover:shadow-neon-green/5 transition-all block"
                 >
                   <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${method.color} flex items-center justify-center shrink-0`}>
-                    <Icon className="w-5 h-5 text-white" />
+                    <span className="text-xl">{method.emoji}</span>
                   </div>
                   <div className="flex-1 min-w-0">
-                    <h3 className="text-white font-semibold group-hover:text-neon-green transition-colors">
+                    <h3 className="text-white font-bold group-hover:text-neon-green transition-colors">
                       {method.title}
                     </h3>
-                    <p className="text-gray-400 text-sm mt-1">{method.desc}</p>
-                    <span className="inline-block mt-2 text-xs font-mono text-neon-green bg-neon-green/10 px-2 py-0.5 rounded">
+                    <p className="text-gray-400 text-sm mt-1 leading-relaxed">{method.desc}</p>
+                    <span className="inline-block mt-2 text-xs font-mono font-semibold text-neon-green bg-neon-green/10 px-2.5 py-1 rounded-full">
                       {method.points}
                     </span>
                   </div>
@@ -105,19 +140,59 @@ export default function EarnPage() {
           })}
         </div>
 
+        {/* Coupon Tiers */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4, delay: 0.4 }}
-          className="mt-8 glass-card p-6 text-center"
+          transition={{ duration: 0.4, delay: 0.3 }}
+          className="mt-12"
         >
-          <h2 className="text-lg font-heading font-bold text-white mb-2">Leaderboard</h2>
-          <p className="text-gray-400 text-sm mb-4">
-            Compete with other players. Top earners get exclusive rewards.
+          <h2 className="text-2xl font-heading font-bold text-white mb-2 flex items-center gap-2">
+            <Gift className="w-6 h-6 text-neon-green" /> Coupon Tiers
+          </h2>
+          <p className="text-gray-400 mb-6">Redeem your points for exclusive Steam coupon codes. Three tiers, bigger savings.</p>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            {rewards.map((r, i) => {
+              const Icon = r.icon
+              return (
+                <motion.div
+                  key={r.title}
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ duration: 0.4, delay: 0.35 + i * 0.05 }}
+                  className="glass-card p-6 text-center group hover:border-neon-green/30 transition-all"
+                >
+                  <div className={`w-16 h-16 rounded-2xl bg-gradient-to-br ${r.color} flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform`}>
+                    <Icon className="w-8 h-8 text-white" />
+                  </div>
+                  <h3 className="text-white font-bold text-lg">{r.title}</h3>
+                  <p className="text-gray-400 text-sm mt-2 mb-3">{r.desc}</p>
+                  <span className="text-neon-yellow font-mono font-bold text-xl">{r.cost}</span>
+                  <Link href="/rewards" className="btn-primary w-full mt-4 text-sm !py-2.5 block text-center">
+                    View Rewards →
+                  </Link>
+                </motion.div>
+              )
+            })}
+          </div>
+        </motion.div>
+
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, delay: 0.5 }}
+          className="mt-10 glass-card p-8 text-center relative overflow-hidden"
+        >
+          <div className="absolute inset-0 bg-gradient-to-br from-neon-green/5 to-neon-blue/5 pointer-events-none" />
+          <Flame className="w-10 h-10 text-neon-orange mx-auto mb-3 animate-pulse" />
+          <h2 className="text-xl font-heading font-bold text-white mb-2">🏆 Leaderboard</h2>
+          <p className="text-gray-400 text-sm mb-5 max-w-md mx-auto">
+            The grind is real. Climb the ranks, crush the competition, and earn bragging rights. Top players get exclusive perks.
           </p>
-          <Link href="/leaderboard" className="btn-primary text-sm !px-6 !py-2.5 inline-flex items-center gap-2">
-            <Users className="w-4 h-4" />
+          <Link href="/leaderboard" className="btn-primary text-sm !px-8 !py-3 inline-flex items-center gap-2 font-bold">
+            <Trophy className="w-4 h-4" />
             View Leaderboard
+            <ChevronRight className="w-4 h-4" />
           </Link>
         </motion.div>
       </div>

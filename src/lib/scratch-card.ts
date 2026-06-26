@@ -1,15 +1,30 @@
 import { prisma } from "@/lib/prisma"
 
-const ADS_THRESHOLD = 100
-const CARD_CAP_NORMAL = 80
-const CARD_CAP_OVERADS = 10
-const ABSOLUTE_MAX = 150
+export type CardTier = "bronze" | "silver" | "gold"
 
-export type ScratchResult = { points: number; capped: boolean }
+const TIERS: Record<CardTier, { weight: number; min: number; max: number; label: string; emoji: string }> = {
+  bronze: { weight: 10, min: 1, max: 2, label: "Bronze", emoji: "🥉" },
+  silver: { weight: 1.5, min: 2, max: 5, label: "Silver", emoji: "🥈" },
+  gold:   { weight: 0.5, min: 5, max: 10, label: "Gold", emoji: "🥇" },
+}
 
-export async function awardScratchCard(userId: string, reason: string): Promise<ScratchResult> {
+const TOTAL_WEIGHT = Object.values(TIERS).reduce((s, t) => s + t.weight, 0)
+
+export type ScratchResult = { points: number; tier: CardTier; label: string; emoji: string }
+
+function pickTier(): CardTier {
+  const roll = Math.random() * TOTAL_WEIGHT
+  let cumulative = 0
+  for (const [tier, info] of Object.entries(TIERS)) {
+    cumulative += info.weight
+    if (roll < cumulative) return tier as CardTier
+  }
+  return "bronze"
+}
+
+export async function awardScratchCard(userId: string, reason: string, forceTier?: CardTier): Promise<ScratchResult> {
   const user = await prisma.user.findUnique({ where: { id: userId } })
-  if (!user) return { points: 0, capped: true }
+  if (!user) return { points: 0, tier: "bronze", label: "Bronze", emoji: "🥉" }
 
   const aggregate = await prisma.scratchResult.aggregate({
     where: { userId },
@@ -17,24 +32,17 @@ export async function awardScratchCard(userId: string, reason: string): Promise<
   })
   const totalEarned = aggregate._sum.points || 0
 
-  if (totalEarned >= ABSOLUTE_MAX) return { points: 0, capped: true }
+  // First 100 pts: all 3 tiers, full points. Avg ~2/card → 50+ cards for 100 pts.
+  // Past 100: decay kicks in, gets harder toward 300.
+  const tier = forceTier || pickTier()
+  const info = TIERS[tier]
 
-  const cap = user.adsWatched > ADS_THRESHOLD ? CARD_CAP_OVERADS : CARD_CAP_NORMAL
-  const remaining = Math.max(0, cap - totalEarned)
-  if (remaining <= 0) return { points: 0, capped: true }
+  const decay = totalEarned < 100
+    ? 1
+    : Math.max(0.008, Math.pow(1 - (totalEarned - 100) / 220, 2))
 
-  let points: number
-  const played = user.scratchCardsPlayed
-
-  if (played < 20) {
-    const base = Math.max(0.3, 3 - (played + 1) * 0.14)
-    const variance = Math.random() * 1.5 - 0.75
-    points = Math.max(1, Math.round(base + variance))
-  } else {
-    points = Math.random() < 0.5 ? 1 : 2
-  }
-
-  points = Math.min(points, remaining)
+  const raw = info.min + Math.random() * (info.max - info.min)
+  const points = Math.max(1, Math.round(raw * decay))
 
   await prisma.scratchResult.create({ data: { userId, points } })
   await prisma.user.update({
@@ -45,8 +53,8 @@ export async function awardScratchCard(userId: string, reason: string): Promise<
     },
   })
   await prisma.pointTransaction.create({
-    data: { userId, amount: points, reason },
+    data: { userId, amount: points, reason: `${reason} — ${info.emoji} ${info.label} Card` },
   })
 
-  return { points, capped: false }
+  return { points, tier, label: info.label, emoji: info.emoji }
 }

@@ -38,7 +38,7 @@ function RedeemContent() {
       const res = await fetch("/api/redeem", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ userId: walletId, rewardId: reward.id }),
+        body: JSON.stringify({ walletId, rewardId: reward.id }),
       })
       const data = await res.json()
       if (res.ok) {
@@ -143,6 +143,11 @@ function RedeemContent() {
               <AlertCircle className="w-5 h-5 text-yellow-500 shrink-0" />
               <p className="text-sm text-yellow-500">Connect your wallet to redeem rewards.</p>
             </div>
+          ) : reward.stock < 1 ? (
+            <div className="p-4 rounded-xl bg-red-500/10 border border-red-500/20 flex items-center gap-3 mb-6">
+              <AlertCircle className="w-5 h-5 text-red-500 shrink-0" />
+              <p className="text-sm text-red-500 font-semibold">Sold Out — This reward is no longer available.</p>
+            </div>
           ) : points < reward.pointsCost ? (
             <div className="p-4 rounded-xl bg-red-500/10 border border-red-500/20 flex items-center gap-3 mb-6">
               <AlertCircle className="w-5 h-5 text-red-500 shrink-0" />
@@ -165,7 +170,7 @@ function RedeemContent() {
 
           <button
             onClick={handleRedeem}
-            disabled={!walletId || points < reward.pointsCost || redeeming}
+            disabled={!walletId || reward.stock < 1 || points < reward.pointsCost || redeeming}
             className="btn-primary w-full py-4 flex items-center justify-center gap-2 disabled:opacity-50"
           >
             {redeeming ? (

@@ -23,8 +23,20 @@ const PLATFORMS = {
   ]},
 }
 
+const TIERS = [
+  { name: "🥉 Bronze Steam Coupon", description: "Entry-level Steam coupon code. Small discount, big start. Grab yours before they're gone!", cost: 70, stock: 50, image: "https://picsum.photos/seed/bronze/400/300", cat: "coupon-bronze" },
+  { name: "🥈 Silver Steam Coupon", description: "Mid-tier Steam coupon code. For the real gamers. Unlock bigger savings today!", cost: 160, stock: 50, image: "https://picsum.photos/seed/silver/400/300", cat: "coupon-silver" },
+  { name: "🥇 Gold Steam Coupon", description: "Premium Steam coupon code. The ultimate reward for the ultimate player. Maximum savings!", cost: 200, stock: 50, image: "https://picsum.photos/seed/gold/400/300", cat: "coupon-gold" },
+]
+
+const GIFTCARDS = [
+  { name: "Steam Gift Card - ₹100", description: "100 Rupees Steam wallet code. Currently sold out — check back soon!", cost: 70, stock: 0, cat: "coupon-giftcard" },
+  { name: "Steam Gift Card - ₹200", description: "200 Rupees Steam wallet code. Currently sold out — check back soon!", cost: 160, stock: 0, cat: "coupon-giftcard" },
+  { name: "Steam Gift Card - ₹250", description: "250 Rupees Steam wallet code. Currently sold out — check back soon!", cost: 200, stock: 0, cat: "coupon-giftcard" },
+]
+
 const SPECIAL = [
-  { name: "GTA 6 Pre-Order Code", description: "Exclusive GTA 6 pre-order coupon code for any platform.", cost: 250, cat: "coupon-gta6" },
+  { name: "★ GTA 6 Pre-Order Code", description: "Exclusive GTA 6 pre-order coupon code for any platform. Be the first in Vice City!", cost: 250, stock: 100, image: "https://picsum.photos/seed/gta6-vice/400/300", cat: "coupon-gta6" },
 ]
 
 async function main() {
@@ -40,7 +52,7 @@ async function main() {
         data: {
           name: `${info.label} - ${game}`,
           description: `Coupon code for ${game} on ${info.label}. Redeem your points for this digital game code.`,
-          image: "",
+          image: `https://picsum.photos/seed/${plat}-${game.replace(/[^a-z0-9]/gi, "")}/400/300`,
           pointsCost: info.cost,
           stock: 50,
           category: `coupon-${plat}`,
@@ -51,15 +63,47 @@ async function main() {
     }
   }
 
+  console.log(`\nCoupon Tiers:`)
+  for (const item of TIERS) {
+    const reward = await prisma.reward.create({
+      data: {
+        name: item.name,
+        description: item.description,
+        image: item.image,
+        pointsCost: item.cost,
+        stock: item.stock,
+        category: item.cat,
+        active: true,
+      },
+    })
+    console.log(`  ★ ${reward.name} — ${reward.pointsCost} pts (stock: ${reward.stock})`)
+  }
+
+  console.log(`\nGift Cards (Sold Out):`)
+  for (const item of GIFTCARDS) {
+    const reward = await prisma.reward.create({
+      data: {
+        name: item.name,
+        description: item.description,
+        image: `https://picsum.photos/seed/giftcard-${item.cost}/400/300`,
+        pointsCost: item.cost,
+        stock: item.stock,
+        category: item.cat,
+        active: true,
+      },
+    })
+    console.log(`  ✗ ${reward.name} — ${reward.pointsCost} pts (sold out)`)
+  }
+
   console.log(`\n${SPECIAL[0].name}:`)
   for (const item of SPECIAL) {
     const reward = await prisma.reward.create({
       data: {
         name: item.name,
         description: item.description,
-        image: "",
+        image: item.image,
         pointsCost: item.cost,
-        stock: 100,
+        stock: item.stock,
         category: item.cat,
         active: true,
       },

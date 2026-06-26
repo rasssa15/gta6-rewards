@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
 import { getCommentsForArticle, getAllArticles } from "@/lib/data"
+import { prisma } from "@/lib/prisma"
 
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url)
@@ -7,12 +8,30 @@ export async function GET(req: NextRequest) {
   const limit = Math.min(parseInt(searchParams.get("limit") || "50"), 100)
 
   try {
-    if (articleId) {
-      const comments = getCommentsForArticle(articleId)
-      const sliced = comments.slice(0, limit)
-      return NextResponse.json(sliced)
-    }
-    return NextResponse.json([])
+    const jsonComments = articleId ? getCommentsForArticle(articleId) : []
+    const dbComments = articleId ? await prisma.comment.findMany({
+      where: { articleId },
+      include: { user: { select: { name: true, walletId: true } } },
+      orderBy: { createdAt: "desc" },
+      take: limit,
+    }) : []
+
+    const merged = mergeAndDedup(
+      jsonComments,
+      dbComments.map(c => ({
+        id: c.id,
+        content: c.content,
+        articleId: c.articleId,
+        userId: c.userId,
+        userName: c.user?.name || "Player",
+        walletId: c.user?.walletId || "",
+        likes: c.likes,
+        parentId: c.parentId,
+        createdAt: c.createdAt.toISOString(),
+      }))
+    )
+
+    return NextResponse.json(merged.slice(0, limit))
   } catch (error) {
     return NextResponse.json({ error: "Failed to fetch comments" }, { status: 500 })
   }
@@ -20,17 +39,46 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   try {
-    const { content, articleId, userId, parentId } = await req.json()
-    if (!content || !articleId || !userId) {
-      return NextResponse.json({ error: "content, articleId, userId required" }, { status: 400 })
+    const { content, articleId, walletId, parentId } = await req.json()
+    if (!content || !articleId || !walletId) {
+      return NextResponse.json({ error: "content, articleId, walletId required" }, { status: 400 })
     }
-    const { prisma } = await import("@/lib/prisma")
-    const comment = await prisma.comment.create({
-      data: { content, articleId, userId, parentId: parentId || null },
-      include: { user: { select: { name: true } } },
+
+    const user = await prisma.user.upsert({
+      where: { walletId },
+      update: { lastLogin: new Date() },
+      create: { walletId, name: "Player", lastLogin: new Date() },
     })
-    return NextResponse.json(comment, { status: 201 })
+
+    const comment = await prisma.comment.create({
+      data: { content, articleId, userId: user.id, parentId: parentId || null },
+      include: { user: { select: { name: true, walletId: true } } },
+    })
+
+    return NextResponse.json({
+      id: comment.id,
+      content: comment.content,
+      articleId: comment.articleId,
+      userId: comment.userId,
+      userName: comment.user?.name || "Player",
+      walletId: comment.user?.walletId || "",
+      likes: comment.likes,
+      parentId: comment.parentId,
+      createdAt: comment.createdAt.toISOString(),
+    }, { status: 201 })
   } catch (error) {
     return NextResponse.json({ error: "Failed to create comment" }, { status: 500 })
   }
+}
+
+function mergeAndDedup(json: any[], db: any[]) {
+  const seen = new Set<string>()
+  const result: any[] = []
+  for (const c of [...db, ...json]) {
+    if (!seen.has(c.id)) {
+      seen.add(c.id)
+      result.push(c)
+    }
+  }
+  return result
 }

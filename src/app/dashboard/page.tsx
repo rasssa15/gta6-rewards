@@ -3,7 +3,7 @@ import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import {
   User, Shield, Lock, Calendar, Gamepad2, Gift, Trophy, Sparkles,
-  Star, TrendingUp, Clock, Eye, LogOut, Copy, Check, Zap, Medal
+  Star, TrendingUp, Clock, Eye, LogOut, Copy, Check, Zap, Medal, Link as LinkIcon, Users
 } from "lucide-react"
 import { motion } from "framer-motion"
 import toast from "react-hot-toast"
@@ -17,7 +17,7 @@ export default function DashboardPage() {
   const [userData, setUserData] = useState<any>(null)
   const [history, setHistory] = useState<any[]>([])
   const [activeTab, setActiveTab] = useState("overview")
-  const [scratchResult, setScratchResult] = useState<number | null>(null)
+  const [scratchResult, setScratchResult] = useState<{ points: number; tier: string; emoji: string } | null>(null)
   const [scratching, setScratching] = useState(false)
   const [revealed, setRevealed] = useState(false)
 
@@ -55,12 +55,12 @@ export default function DashboardPage() {
       const res = await fetch("/api/scratch-card", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ userId: wallet.walletId }),
+        body: JSON.stringify({ walletId: wallet.walletId }),
       })
       const data = await res.json()
-      setScratchResult(data.points)
+      setScratchResult({ points: data.points, tier: data.tier, emoji: data.emoji })
       setRevealed(true)
-      if (data.points > 0) toast.success(`You won ${data.points} points!`)
+      if (data.points > 0) toast.success(`${data.emoji} ${data.label} Card! +${data.points} points!`)
       else toast("No luck this time!")
     } catch {
       toast.error("Failed to play")
@@ -142,6 +142,7 @@ export default function DashboardPage() {
             {[
               { key: "overview", label: "Overview", icon: User },
               { key: "scratch", label: "Scratch Card", icon: Zap },
+              { key: "referral", label: "Referral", icon: Users },
               { key: "history", label: "History", icon: Clock },
             ].map((tab) => {
               const Icon = tab.icon
@@ -218,13 +219,20 @@ export default function DashboardPage() {
               <h3 className="text-xl font-heading font-bold text-white mb-2 flex items-center justify-center gap-2">
                 <Zap className="w-5 h-5 text-neon-yellow" /> Scratch Card
               </h3>
-              <p className="text-gray-400 text-sm mb-6">
-                Reveal your prize! Win up to 50 points.
+              <p className="text-gray-400 text-sm mb-2">
+                🥉 Bronze 1-3 pts · 🥈 Silver 5-10 pts · 🥇 Gold 15-25 pts
+              </p>
+              <p className="text-gray-500 text-xs mb-6">
+                Mostly Bronze, sometimes Silver, rarely Gold — luck decides!
               </p>
               <div
                 className={`w-48 h-48 mx-auto rounded-2xl flex items-center justify-center cursor-pointer transition-all duration-500 ${
                   revealed
-                    ? "bg-gradient-to-br from-neon-green/20 to-neon-blue/20 border-2 border-neon-green/30"
+                    ? scratchResult?.tier === "gold"
+                      ? "bg-gradient-to-br from-yellow-500/20 to-amber-400/20 border-2 border-yellow-500/40"
+                      : scratchResult?.tier === "silver"
+                        ? "bg-gradient-to-br from-gray-300/20 to-gray-100/20 border-2 border-gray-300/40"
+                        : "bg-gradient-to-br from-amber-700/20 to-amber-500/20 border-2 border-amber-500/40"
                     : "bg-gradient-to-br from-neon-pink/20 to-neon-purple/20 border-2 border-white/10 hover:border-neon-pink/50"
                 }`}
                 onClick={handleScratch}
@@ -233,8 +241,9 @@ export default function DashboardPage() {
                   <div className="animate-spin w-8 h-8 border-2 border-neon-blue border-t-transparent rounded-full" />
                 ) : revealed ? (
                   <div className="text-center">
-                    <div className="text-5xl font-heading font-bold text-neon-green">+{scratchResult}</div>
-                    <div className="text-xs text-gray-400 mt-2">points</div>
+                    <div className="text-4xl mb-1">{scratchResult?.emoji}</div>
+                    <div className="text-4xl font-heading font-bold text-neon-green">+{scratchResult?.points}</div>
+                    <div className="text-xs text-gray-400 mt-1">{scratchResult?.tier === "gold" ? "🥇 Gold" : scratchResult?.tier === "silver" ? "🥈 Silver" : "🥉 Bronze"}</div>
                   </div>
                 ) : (
                   <div className="text-center">
@@ -247,6 +256,10 @@ export default function DashboardPage() {
                 {userData?.scratchCardsPlayed || 0} cards played
               </p>
             </div>
+          )}
+
+          {activeTab === "referral" && (
+            <ReferralSection walletId={wallet?.walletId} />
           )}
 
           {activeTab === "history" && (
@@ -274,5 +287,81 @@ export default function DashboardPage() {
         </div>
       </div>
     </WalletGuard>
+  )
+}
+
+function ReferralSection({ walletId }: { walletId?: string }) {
+  const [refInfo, setRefInfo] = useState<any>(null)
+  const [copied, setCopied] = useState(false)
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    if (!walletId) return
+    setLoading(true)
+    fetch(`/api/referral?walletId=${walletId}`)
+      .then(r => r.json())
+      .then(data => setRefInfo(data))
+      .catch(() => toast.error("Failed to load referral"))
+      .finally(() => setLoading(false))
+  }, [walletId])
+
+  const copyLink = () => {
+    if (!refInfo?.link) return
+    navigator.clipboard.writeText(refInfo.link)
+    setCopied(true)
+    toast.success("Referral link copied!")
+    setTimeout(() => setCopied(false), 2000)
+  }
+
+  if (loading) {
+    return (
+      <div className="glass-card p-6 max-w-2xl mx-auto text-center">
+        <div className="animate-pulse text-gray-500">Loading referral info...</div>
+      </div>
+    )
+  }
+
+  return (
+    <div className="glass-card p-6 max-w-2xl mx-auto">
+      <h3 className="text-lg font-heading font-bold text-white mb-4 flex items-center gap-2">
+        <Users className="w-5 h-5 text-neon-green" /> Refer Friends
+      </h3>
+      <p className="text-gray-400 text-sm mb-6">
+        Share your referral link or code. When a friend signs up and redeems, you get <span className="text-neon-green font-bold">10 points + 20%</span> of their reward cost!
+      </p>
+
+      <div className="space-y-4">
+        <div>
+          <label className="text-xs text-gray-500 uppercase tracking-wider mb-1 block">Your Referral Link</label>
+          <div className="flex items-center gap-2">
+            <input readOnly value={refInfo?.link || ""} className="input-field flex-1 text-xs font-mono" onClick={(e) => (e.target as HTMLInputElement).select()} />
+            <button onClick={copyLink} className="btn-glass !p-3 rounded-xl shrink-0">
+              {copied ? <Check className="w-4 h-4 text-neon-green" /> : <Copy className="w-4 h-4 text-gray-400" />}
+            </button>
+          </div>
+        </div>
+
+        <div>
+          <label className="text-xs text-gray-500 uppercase tracking-wider mb-1 block">Or share your code</label>
+          <div className="flex items-center gap-3 p-4 rounded-xl bg-white/5 border border-white/10">
+            <span className="flex-1 text-center text-2xl font-bold font-mono tracking-widest text-neon-green">{refInfo?.code || "------"}</span>
+            <button onClick={copyLink} className="btn-glass !p-2 rounded-xl">
+              <Copy className="w-4 h-4 text-gray-400" />
+            </button>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-2 gap-3 pt-2">
+          <div className="p-3 rounded-xl bg-white/5 text-center">
+            <div className="text-xl font-bold text-white mb-1">{refInfo?.referralCount || 0}</div>
+            <div className="text-xs text-gray-500">Friends Referred</div>
+          </div>
+          <div className="p-3 rounded-xl bg-white/5 text-center">
+            <div className="text-xl font-bold text-neon-green mb-1">{refInfo?.bonusEarned || 0}</div>
+            <div className="text-xs text-gray-500">Bonus Points Earned</div>
+          </div>
+        </div>
+      </div>
+    </div>
   )
 }

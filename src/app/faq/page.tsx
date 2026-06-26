@@ -6,43 +6,75 @@ import { motion } from "framer-motion"
 const faqs = [
   {
     q: "What is GTA 6 Rewards?",
-    a: "GTA 6 Rewards is a gaming rewards platform where you earn points by reading articles, completing daily challenges, and watching ads. Points can be redeemed for gift cards and digital rewards.",
+    a: "GTA 6 Rewards is a fictional entertainment platform where you earn points by reading GTA 6 news, watching ads, and referring friends. Points can be redeemed for digital reward coupons — but this is all for fun, no real rewards or gift cards are provided.",
   },
   {
     q: "How do I create a wallet?",
-    a: "Click 'Create Wallet' on the homepage. A 12-word recovery phrase will be generated — write it down and keep it safe. Then set a 6-digit PIN for quick access.",
+    a: "Click 'Create Wallet' on the homepage. A 12-word recovery phrase will be generated — write it down and keep it safe. Then set a 6-digit PIN for quick access. Your wallet is stored only on your device, encrypted with your PIN.",
   },
   {
     q: "How do I earn points?",
-    a: "You can earn points by reading articles (+2 per article), completing daily challenges, watching rewarded ads, referring friends, and unlocking achievements.",
-  },
-  {
-    q: "What is a recovery phrase?",
-    a: "Your 12-word recovery phrase is the master key to your wallet. It's stored only on your device, encrypted with your PIN. Never share it with anyone.",
-  },
-  {
-    q: "How do I recover my wallet?",
-    a: "If you lose access, click 'Recover Wallet' and enter your 12-word recovery phrase. Then set a new PIN to regain access to your account.",
+    a: "You earn points by completing scratch cards. Get scratch cards by: reading articles, watching ads on the Watch Ads page (/ads), and completing ad milestone challenges. Every action awards a random scratch card with 1–10 points depending on the tier.",
   },
   {
     q: "How do scratch cards work?",
-    a: "Complete rewarded ads to unlock scratch cards. Each card reveals a random reward from 1 to 50 points. The more ads you watch, the more cards you can play.",
+    a: "There are 3 tiers: 🥉 Bronze (1–2 pts, very common 10x weight), 🥈 Silver (2–5 pts, uncommon 1.5x), 🥇 Gold (5–10 pts, rare 0.5x). Early on you get full points, but the more you earn the harder it gets — points decay toward a ~250–300 lifetime ceiling. No hard cap, just diminishing returns.",
+  },
+  {
+    q: "How do I watch ads to earn cards?",
+    a: "Go to the /ads page. Each video ad plays for a few seconds, then you earn a random scratch card. You can chain-watch as many as you like. Your total ads watched also unlocks milestone challenges for bigger rewards.",
+  },
+  {
+    q: "What are ad milestone challenges?",
+    a: "Watch certain numbers of ads to unlock bonus rewards: 5/10/15/25/30/50 ads → Gold scratch card, 20/40/75/100 ads → Mystery Chest with 5 random cards. Check the /challenges page to track your progress.",
+  },
+  {
+    q: "How do I refer friends?",
+    a: "Go to your Dashboard → Referral tab. You'll find your unique referral link and code (e.g., ABC123). Share it with friends. When they sign up using your code and make their first redemption, you get 10 points + 20% of their reward cost as a bonus!",
+  },
+  {
+    q: "How do I claim a friend's referral?",
+    a: "Click your friend's referral link (e.g., https://gta6-rewards.vercel.app/referral?ref=ABC123) or enter their code on the referral page. Make sure you've created a wallet first. You can only claim one referral, so choose wisely!",
   },
   {
     q: "How do I redeem rewards?",
-    a: "Go to the Rewards Center, choose a reward with enough points, and click Redeem. Your request will be processed and you'll receive instructions via your dashboard.",
+    a: "Go to the /redeem page, choose a reward with enough points, and click Redeem. Your points are deducted and you get a coupon code displayed on screen. Remember — this is a fictional platform, coupons are for fun only.",
+  },
+  {
+    q: "What rewards are available?",
+    a: "We have game coupons (various popular titles at 170 pts each, GTA 6 at 250 pts), tier coupon packs (Bronze 70 pts, Silver 160 pts, Gold 200 pts), and gift cards (sold out). New rewards are added regularly.",
   },
   {
     q: "How does the leaderboard work?",
-    a: "Players are ranked by total points earned. You can view daily, weekly, monthly, and all-time rankings. Higher rank = more bragging rights!",
+    a: "The all-time leaderboard shows the top players capped at 12,546 points. It rotates daily (by day-of-year offset) so positions shuffle for fun. There's also a daily tab with random 50–300 bonus points added per player. Compete for bragging rights!",
   },
   {
-    q: "What are daily challenges?",
-    a: "Daily challenges refresh every 24 hours. Complete them to earn bonus points and XP. Common challenges include reading articles, earning points, and visiting daily.",
+    q: "What is a recovery phrase?",
+    a: "Your 12-word recovery phrase is the master key to your wallet. It's stored only on your device, encrypted with AES-256-GCM using a key derived from your PIN via PBKDF2 (100,000 rounds). Never share it with anyone. If you lose it, your wallet is gone forever.",
+  },
+  {
+    q: "How do I recover my wallet?",
+    a: "If you lose access, click 'Recover Wallet' on the homepage. Enter your 12-word recovery phrase (in the correct order), then set a new PIN. Your points and progress are saved on the server linked to your wallet ID.",
   },
   {
     q: "Is my data secure?",
-    a: "Yes. Your wallet is encrypted with AES-256-GCM using a key derived from your PIN via PBKDF2 (100,000 rounds). Your recovery phrase never leaves your device.",
+    a: "Yes. Your wallet is encrypted on-device with AES-256-GCM. Your recovery phrase never leaves your device. We use HTTPS and never sell your data. The server stores only your wallet ID (a hash), points, and game progress — no personal info.",
+  },
+  {
+    q: "What articles are on the site?",
+    a: "We feature GTA 6 news, rumors, leaks, and analysis. Articles are auto-generated using AI and updated every 2 hours. Each article you read gives you a scratch card. You can also bookmark your favorite articles.",
+  },
+  {
+    q: "Why do I see a video ad before articles?",
+    a: "To keep the platform free, articles show a short video ad before reading. You can skip after 4 seconds or close it anytime. The ad helps us keep the lights on — and you still get a scratch card for reading!",
+  },
+  {
+    q: "Can I use the same wallet on multiple devices?",
+    a: "Yes! Use your 12-word recovery phrase to restore your wallet on any device. Your points, progress, and everything else is tied to your wallet ID on the server.",
+  },
+  {
+    q: "Is this a real rewards platform?",
+    a: "No — this is a fictional fan project for entertainment. All points, coupons, and rewards are simulated. No real gift cards, money, or prizes are distributed. It's just for fun! See the /terms page for full details.",
   },
 ]
 

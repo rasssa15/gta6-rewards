@@ -13,44 +13,44 @@ function generateCouponCode(rewardName: string): string {
 
 export async function POST(req: NextRequest) {
   try {
-    const { userId, rewardId } = await req.json()
-    if (!userId || !rewardId) {
-      return NextResponse.json({ error: "userId and rewardId required" }, { status: 400 })
+    const { userId, walletId, rewardId } = await req.json()
+    if ((!userId && !walletId) || !rewardId) {
+      return NextResponse.json({ error: "userId or walletId, and rewardId required" }, { status: 400 })
     }
 
     const [user, reward] = await Promise.all([
-      prisma.user.findUnique({ where: { id: userId } }),
+      walletId ? prisma.user.findUnique({ where: { walletId } }) : prisma.user.findUnique({ where: { id: userId } }),
       prisma.reward.findUnique({ where: { id: rewardId } }),
     ])
 
-    if (!user) return NextResponse.json({ error: "User not found" }, { status: 404 })
+    if (!user) return NextResponse.json({ error: "User not found. Connect your wallet first." }, { status: 404 })
     if (!reward) return NextResponse.json({ error: "Reward not found" }, { status: 404 })
     if (reward.stock < 1) return NextResponse.json({ error: "Out of stock" }, { status: 400 })
     if (user.points < reward.pointsCost) {
       return NextResponse.json({ error: "Not enough points" }, { status: 400 })
     }
 
-    const couponCode = reward.category === "coupon" ? generateCouponCode(reward.name) : null
+    const couponCode = reward.category?.startsWith("coupon") ? generateCouponCode(reward.name) : null
 
     const [redemption] = await Promise.all([
       prisma.redemption.create({
-        data: { userId, rewardId, status: couponCode ? "completed" : "pending" },
+        data: { userId: user.id, rewardId, status: couponCode ? "completed" : "pending" },
       }),
       prisma.reward.update({
         where: { id: rewardId },
         data: { stock: { decrement: 1 } },
       }),
       prisma.user.update({
-        where: { id: userId },
+        where: { id: user.id },
         data: { points: { decrement: reward.pointsCost } },
       }),
       prisma.pointTransaction.create({
-        data: { userId, amount: -reward.pointsCost, reason: `Redeemed: ${reward.name}`, reference: rewardId },
+        data: { userId: user.id, amount: -reward.pointsCost, reason: `Redeemed: ${reward.name}`, reference: rewardId },
       }),
     ])
 
     // Referral bonus on first redemption
-    const redemptionCount = await prisma.redemption.count({ where: { userId } })
+    const redemptionCount = await prisma.redemption.count({ where: { userId: user.id } })
     if (redemptionCount === 1 && user.referrerId) {
       const referrerBonus = 10 + Math.round(reward.pointsCost * 0.2)
       await prisma.user.update({
