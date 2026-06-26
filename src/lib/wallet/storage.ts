@@ -4,6 +4,12 @@ const WALLET_KEY = "gta6_wallet"
 const LOCKED_KEY = "gta6_locked"
 const SESSION_KEY = "gta6_session"
 
+function getStorage() {
+  if (typeof window === "undefined") return { getItem: () => null, setItem: () => {}, removeItem: () => {} }
+  // Use localStorage so session persists across tabs/browser restarts
+  return localStorage
+}
+
 export interface WalletData {
   walletId: string
   name: string
@@ -25,7 +31,7 @@ export async function saveWallet(data: WalletData, pin: string): Promise<void> {
   const encrypted = await encrypt(JSON.stringify(data), pin)
   localStorage.setItem(WALLET_KEY, encrypted)
   localStorage.setItem(LOCKED_KEY, "false")
-  sessionStorage.setItem(SESSION_KEY, JSON.stringify({ walletId: data.walletId, name: data.name }))
+  getStorage().setItem(SESSION_KEY, JSON.stringify({ walletId: data.walletId, name: data.name }))
 }
 
 export async function loadWallet(pin: string): Promise<WalletData | null> {
@@ -41,7 +47,7 @@ export async function loadWallet(pin: string): Promise<WalletData | null> {
 
 export function getSession(): SessionData | null {
   if (typeof window === "undefined") return null
-  const data = sessionStorage.getItem(SESSION_KEY)
+  const data = getStorage().getItem(SESSION_KEY)
   if (!data) return null
   try {
     return JSON.parse(data)
@@ -51,7 +57,7 @@ export function getSession(): SessionData | null {
 }
 
 export function setSession(data: SessionData): void {
-  sessionStorage.setItem(SESSION_KEY, JSON.stringify(data))
+  getStorage().setItem(SESSION_KEY, JSON.stringify(data))
 }
 
 export function isLocked(): boolean {
@@ -66,7 +72,7 @@ export function setLocked(locked: boolean): void {
 export function clearWallet(): void {
   localStorage.removeItem(WALLET_KEY)
   localStorage.removeItem(LOCKED_KEY)
-  sessionStorage.removeItem(SESSION_KEY)
+  getStorage().removeItem(SESSION_KEY)
 }
 
 export async function validatePin(pin: string): Promise<boolean> {

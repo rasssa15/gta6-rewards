@@ -3,7 +3,7 @@ import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { Lock, LogOut } from "lucide-react"
 import toast from "react-hot-toast"
-import { validatePin, setLocked, hasWallet } from "@/lib/wallet/storage"
+import { validatePin, setLocked, hasWallet, loadWallet, setSession } from "@/lib/wallet/storage"
 import { PinInput } from "@/components/wallet/PinInput"
 
 export default function UnlockPage() {
@@ -25,6 +25,10 @@ export default function UnlockPage() {
     const valid = await validatePin(val)
     if (valid) {
       setLocked(false)
+      const wallet = await loadWallet(val)
+      if (wallet) {
+        setSession({ walletId: wallet.walletId, name: wallet.name })
+      }
       router.push("/dashboard")
     } else {
       setError("Wrong PIN")
