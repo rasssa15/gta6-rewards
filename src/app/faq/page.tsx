@@ -46,7 +46,7 @@ const faqs = [
   },
   {
     q: "How does the leaderboard work?",
-    a: "The all-time leaderboard shows the top players capped at 12,546 points. It rotates daily (by day-of-year offset) so positions shuffle for fun. There's also a daily tab with random 50–300 bonus points added per player. Compete for bragging rights!",
+    a: "The all-time leaderboard shows the top players by real points. Real users replace fake entries when they have higher scores. Daily, Weekly, and Monthly tabs use seeded random rankings that shuffle daily for variety. Compete for bragging rights!",
   },
   {
     q: "What is a recovery phrase?",
