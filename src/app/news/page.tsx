@@ -34,6 +34,7 @@ export default function NewsPage({
     <div className="min-h-screen pt-24 pb-16">
       <div className="page-container">
         <NewsGrid
+          key={category || "all"}
           initialArticles={initialArticles}
           total={total}
           category={category}

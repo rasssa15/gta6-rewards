@@ -1,0 +1,7 @@
+name = "gta6-image-gen"
+main = "src/index.js"
+compatibility_date = "2025-06-01"
+account_id = "580b5cb60a803c5aab8d003b05850e12"
+
+[ai]
+binding = "AI"
