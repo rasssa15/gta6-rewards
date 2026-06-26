@@ -78,9 +78,9 @@ export default function HomePage() {
             className="grid grid-cols-3 gap-6 max-w-lg mx-auto mt-16"
           >
             {[
-              { value: stats.users || "1K+", label: "Players", icon: Users },
+              { value: "80,000+", label: "Players", icon: Users },
               { value: stats.articles || "50+", label: "Articles", icon: Newspaper },
-              { value: formatNumber(stats.points) || "10K+", label: "Points Earned", icon: TrendingUp },
+              { value: "12.5M+", label: "Points Earned", icon: TrendingUp },
             ].map((s) => (
               <div key={s.label} className="text-center">
                 <div className="w-12 h-12 rounded-xl glass flex items-center justify-center mx-auto mb-2">

@@ -1,6 +1,7 @@
 "use client"
-import { useState, useEffect, useRef } from "react"
+import { useState, useEffect } from "react"
 import { HTA_AD_URLS } from "@/lib/hta-ads"
+import { ExternalLink, Check, Loader2 } from "lucide-react"
 
 interface HTaAdPlayerProps {
   onComplete: () => void
@@ -9,12 +10,11 @@ interface HTaAdPlayerProps {
 }
 
 export function HTaAdPlayer({ onComplete, onSkip, minWatchSeconds = 8 }: HTaAdPlayerProps) {
-  const iframeRef = useRef<HTMLIFrameElement>(null)
   const [adUrl, setAdUrl] = useState("")
-  const [loaded, setLoaded] = useState(false)
   const [timer, setTimer] = useState(minWatchSeconds)
-  const [canSkip, setCanSkip] = useState(false)
+  const [canComplete, setCanComplete] = useState(false)
   const [completed, setCompleted] = useState(false)
+  const [opened, setOpened] = useState(false)
 
   useEffect(() => {
     setAdUrl(HTA_AD_URLS[Math.floor(Math.random() * HTA_AD_URLS.length)])
@@ -26,8 +26,7 @@ export function HTaAdPlayer({ onComplete, onSkip, minWatchSeconds = 8 }: HTaAdPl
       setTimer((t) => {
         if (t <= 1) {
           clearInterval(interval)
-          setCanSkip(true)
-          setLoaded(true)
+          setCanComplete(true)
           return 0
         }
         return t - 1
@@ -36,6 +35,12 @@ export function HTaAdPlayer({ onComplete, onSkip, minWatchSeconds = 8 }: HTaAdPl
     return () => clearInterval(interval)
   }, [adUrl])
 
+  const handleOpen = () => {
+    if (!adUrl || opened) return
+    setOpened(true)
+    window.open(adUrl, "_blank", "width=800,height=600")
+  }
+
   const handleComplete = () => {
     if (completed) return
     setCompleted(true)
@@ -43,46 +48,50 @@ export function HTaAdPlayer({ onComplete, onSkip, minWatchSeconds = 8 }: HTaAdPl
   }
 
   const handleSkip = () => {
-    if (!canSkip) return
+    if (!canComplete) return
     onSkip?.()
     handleComplete()
   }
 
   return (
-    <div className="relative rounded-xl overflow-hidden bg-black mb-4">
-      <iframe
-        ref={iframeRef}
-        src={adUrl}
-        className="w-full aspect-video"
-        style={{ minHeight: 250 }}
-        allow="autoplay; fullscreen; payment; microphone; camera; display-capture"
-      />
-      <div className="absolute top-3 right-3 flex items-center gap-2">
-        {!canSkip && (
-          <span className="px-2 py-1 rounded-lg bg-white/10 text-xs text-white font-mono">
-            {timer}s
-          </span>
-        )}
-        {canSkip && !completed && (
-          <button
-            onClick={handleSkip}
-            className="px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-xs text-white transition-all"
-          >
-            Skip
-          </button>
-        )}
-        {!loaded && (
-          <span className="px-2 py-1 rounded-lg bg-black/50 text-xs text-gray-400">
-            Loading ad...
-          </span>
+    <div className="text-center mb-4">
+      <div className="rounded-xl bg-gradient-to-br from-white/5 to-white/[0.02] border border-white/10 p-8 mb-3">
+        {!opened ? (
+          <>
+            <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-neon-green/20 to-emerald-500/20 flex items-center justify-center mx-auto mb-4">
+              <ExternalLink className="w-8 h-8 text-neon-green" />
+            </div>
+            <p className="text-white font-semibold mb-1">Click to open ad</p>
+            <p className="text-gray-400 text-xs mb-4">A new tab will open. Come back after watching!</p>
+            <button
+              onClick={handleOpen}
+              className="btn-primary !py-3 !px-8 flex items-center gap-2 mx-auto font-bold"
+            >
+              <ExternalLink className="w-4 h-4" /> Open Ad
+            </button>
+          </>
+        ) : (
+          <>
+            <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-yellow-500/20 to-amber-400/20 flex items-center justify-center mx-auto mb-4">
+              <Loader2 className="w-8 h-8 text-yellow-400 animate-spin" />
+            </div>
+            <p className="text-white font-semibold mb-1">Ad opened in new tab</p>
+            <p className="text-gray-400 text-xs mb-1">Watch the ad, then come back to claim!</p>
+            {!canComplete && (
+              <p className="text-yellow-400 text-sm font-mono font-bold">
+                Wait {timer}s
+              </p>
+            )}
+          </>
         )}
       </div>
-      {canSkip && !completed && (
+
+      {canComplete && !completed && (
         <button
           onClick={handleComplete}
-          className="absolute bottom-3 right-3 px-4 py-2 rounded-lg bg-neon-green/20 hover:bg-neon-green/30 text-xs text-neon-green font-semibold transition-all"
+          className="btn-primary w-full !py-3 font-bold flex items-center justify-center gap-2"
         >
-          Done ✓
+          <Check className="w-5 h-5" /> Claim Reward
         </button>
       )}
     </div>
