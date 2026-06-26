@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react"
 import Link from "next/link"
 import { useRouter, usePathname } from "next/navigation"
-import { Gamepad2, Menu, X, User, Shield, Trophy, Sparkles, Gift, HelpCircle, Newspaper, Wallet, LogOut, ChevronDown, Coins } from "lucide-react"
+import { Gamepad2, Menu, X, User, Shield, Trophy, Sparkles, Gift, HelpCircle, Newspaper, Wallet, LogOut, ChevronDown, Coins, Eye } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useWallet } from "@/components/providers/WalletProvider"
 import { clearWallet, setLocked } from "@/lib/wallet/storage"
@@ -10,6 +10,7 @@ import toast from "react-hot-toast"
 
 const navLinks = [
   { label: "News", href: "/news", icon: Newspaper },
+  { label: "Watch Ads", href: "/ads", icon: Eye },
   { label: "Earn", href: "/earn", icon: Coins },
   { label: "Rewards", href: "/rewards", icon: Gift },
   { label: "Leaderboard", href: "/leaderboard", icon: Trophy },

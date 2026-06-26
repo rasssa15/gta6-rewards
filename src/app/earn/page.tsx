@@ -7,7 +7,7 @@ const earnMethods = [
   {
     icon: Newspaper,
     title: "📰 Read Articles",
-    desc: "Stay updated with the latest GTA VI leaks and news. Every article you read drops a random Scratch Card — 🥉 Bronze (1-3 pts), 🥈 Silver (5-10 pts), or 🥇 Gold (15-25 pts)! Mostly Bronze, sometimes Silver, rarely Gold.",
+    desc: "Stay updated with the latest GTA VI leaks and news. Every article you read drops a random Scratch Card — 🥉 Bronze (1-2 pts), 🥈 Silver (2-5 pts), or 🥇 Gold (5-10 pts)! Mostly Bronze, sometimes Silver, rarely Gold.",
     points: "🎴 Random Card per read",
     link: "/news",
     color: "from-neon-blue/20 to-cyan-500/20",
@@ -34,8 +34,8 @@ const earnMethods = [
   {
     icon: Gift,
     title: "🎰 Play Scratch Cards",
-    desc: "Test your luck! Every card is 🥉 Bronze (1-3 pts), 🥈 Silver (5-10 pts), or 🥇 Gold (15-25 pts). Bronze comes often, Silver now and then, Gold is rare. Tap and see what you get!",
-    points: "🥉1-3 · 🥈5-10 · 🥇15-25",
+    desc: "Test your luck! Every card is 🥉 Bronze (1-2 pts), 🥈 Silver (2-5 pts), or 🥇 Gold (5-10 pts). Bronze comes often, Silver now and then, Gold is rare. Tap and see what you get!",
+    points: "🥉1-2 · 🥈2-5 · 🥇5-10",
     link: "/dashboard",
     color: "from-neon-pink/20 to-rose-500/20",
     emoji: "🎰",
@@ -103,7 +103,7 @@ export default function EarnPage() {
             <strong className="text-white">Every action</strong> gives you a random Scratch Card: <span className="text-amber-500 font-semibold">🥉 Bronze</span> · <span className="text-gray-300 font-semibold">🥈 Silver</span> · <span className="text-yellow-400 font-semibold">🥇 Gold</span>
           </p>
           <p className="text-gray-500 mb-8">
-            Mostly Bronze, sometimes Silver, rarely Gold. Watch ads on repeat for more cards!
+            Mostly Bronze, sometimes Silver, rarely Gold. <Link href="/ads" className="text-neon-green hover:underline">Watch ads on repeat</Link> for more cards!
           </p>
         </motion.div>
 
