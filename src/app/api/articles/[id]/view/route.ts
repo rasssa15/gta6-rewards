@@ -10,6 +10,13 @@ export async function POST(
     const { userId } = await req.json()
     const articleId = params.id
 
+    // Ensure article exists in DB for FK constraint
+    await prisma.article.upsert({
+      where: { id: articleId },
+      update: {},
+      create: { id: articleId, title: "Article", slug: articleId },
+    })
+
     await prisma.articleView.create({
       data: { articleId, userId: userId || null },
     })

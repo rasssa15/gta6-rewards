@@ -50,6 +50,13 @@ export async function POST(req: NextRequest) {
       create: { walletId, name: "Player", lastLogin: new Date() },
     })
 
+    // Ensure article exists in DB for FK constraint
+    await prisma.article.upsert({
+      where: { id: articleId },
+      update: {},
+      create: { id: articleId, title: "Article", slug: articleId },
+    })
+
     const comment = await prisma.comment.create({
       data: { content, articleId, userId: user.id, parentId: parentId || null },
       include: { user: { select: { name: true, walletId: true } } },

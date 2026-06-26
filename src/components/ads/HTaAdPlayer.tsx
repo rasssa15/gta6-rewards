@@ -8,7 +8,7 @@ interface HTaAdPlayerProps {
   minWatchSeconds?: number
 }
 
-export function HTaAdPlayer({ onComplete, onSkip, minWatchSeconds = 10 }: HTaAdPlayerProps) {
+export function HTaAdPlayer({ onComplete, onSkip, minWatchSeconds = 8 }: HTaAdPlayerProps) {
   const iframeRef = useRef<HTMLIFrameElement>(null)
   const [adUrl, setAdUrl] = useState("")
   const [loaded, setLoaded] = useState(false)
@@ -55,8 +55,7 @@ export function HTaAdPlayer({ onComplete, onSkip, minWatchSeconds = 10 }: HTaAdP
         src={adUrl}
         className="w-full aspect-video"
         style={{ minHeight: 250 }}
-        allow="autoplay"
-        sandbox="allow-scripts allow-same-origin allow-popups allow-forms"
+        allow="autoplay; fullscreen; payment; microphone; camera; display-capture"
       />
       <div className="absolute top-3 right-3 flex items-center gap-2">
         {!canSkip && (

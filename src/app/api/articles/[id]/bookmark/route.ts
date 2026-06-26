@@ -11,6 +11,13 @@ export async function POST(
       return NextResponse.json({ error: "userId required" }, { status: 400 })
     }
 
+    // Ensure article exists in DB for FK constraint
+    await prisma.article.upsert({
+      where: { id: params.id },
+      update: {},
+      create: { id: params.id, title: "Article", slug: params.id },
+    })
+
     const existing = await prisma.articleBookmark.findUnique({
       where: { userId_articleId: { userId, articleId: params.id } },
     })
