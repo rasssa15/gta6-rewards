@@ -3,7 +3,7 @@ import { useState, useCallback } from "react"
 import { useRouter } from "next/navigation"
 import { Shield, ArrowLeft, ArrowRight, Eye, EyeOff, Copy, Check } from "lucide-react"
 import toast from "react-hot-toast"
-import { generatePhrase } from "@/lib/wallet/phrase"
+import { generatePhrase, hashPhrase } from "@/lib/wallet/phrase"
 import { saveWallet } from "@/lib/wallet/storage"
 import { PinInput } from "@/components/wallet/PinInput"
 
@@ -42,7 +42,7 @@ export default function CreateWalletPage() {
         return
       }
       const displayName = name.trim() || "Player"
-      const walletId = crypto.randomUUID()
+      const walletId = hashPhrase(phrase)
       await saveWallet({ walletId, name: displayName, createdAt: new Date().toISOString(), avatarIndex: 0 }, val)
       try {
         await fetch("/api/users", {

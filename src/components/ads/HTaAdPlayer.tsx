@@ -15,6 +15,7 @@ export function HTaAdPlayer({ onComplete, onSkip, minWatchSeconds = 8 }: HTaAdPl
   const [canComplete, setCanComplete] = useState(false)
   const [completed, setCompleted] = useState(false)
   const [opened, setOpened] = useState(false)
+  const [popupBlocked, setPopupBlocked] = useState(false)
 
   useEffect(() => {
     setAdUrl(HTA_AD_URLS[Math.floor(Math.random() * HTA_AD_URLS.length)])
@@ -38,7 +39,15 @@ export function HTaAdPlayer({ onComplete, onSkip, minWatchSeconds = 8 }: HTaAdPl
   const handleOpen = () => {
     if (!adUrl || opened) return
     setOpened(true)
-    window.open(adUrl, "_blank", "width=800,height=600")
+    setPopupBlocked(false)
+    try {
+      const win = window.open(adUrl, "_blank")
+      if (!win || win.closed || typeof win.closed === "undefined") {
+        setPopupBlocked(true)
+      }
+    } catch {
+      setPopupBlocked(true)
+    }
   }
 
   const handleComplete = () => {
@@ -77,6 +86,22 @@ export function HTaAdPlayer({ onComplete, onSkip, minWatchSeconds = 8 }: HTaAdPl
             </div>
             <p className="text-white font-semibold mb-1">Ad opened in new tab</p>
             <p className="text-gray-400 text-xs mb-1">Watch the ad, then come back to claim!</p>
+
+            {popupBlocked && (
+              <div className="my-4 p-3 rounded-xl bg-yellow-500/10 border border-yellow-500/20 text-xs text-yellow-500 max-w-xs mx-auto animate-in fade-in duration-200">
+                <p className="mb-2">Your browser blocked the popup window.</p>
+                <a
+                  href={adUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={() => setPopupBlocked(false)}
+                  className="inline-flex items-center gap-1 font-bold underline hover:text-yellow-400"
+                >
+                  Click here to open the ad manually
+                </a>
+              </div>
+            )}
+
             {!canComplete && (
               <p className="text-yellow-400 text-sm font-mono font-bold">
                 Wait {timer}s

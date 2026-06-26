@@ -1,7 +1,19 @@
 import { NextRequest, NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
+import { cookies } from "next/headers"
+
+function checkAdminAuth(): boolean {
+  const cookieStore = cookies()
+  const adminAuth = cookieStore.get("admin_auth_cookie")?.value
+  const adminPassword = process.env.ADMIN_PASSWORD || "gta6admin2026"
+  return adminAuth === adminPassword
+}
 
 export async function GET() {
+  if (!checkAdminAuth()) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+  }
+
   try {
     const [totalUsers, totalArticles, totalPoints, totalScratches, totalRedemptions, recentUsers] =
       await Promise.all([

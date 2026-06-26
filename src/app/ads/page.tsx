@@ -14,6 +14,8 @@ export default function AdsPage() {
   const [lastResult, setLastResult] = useState<any>(null)
   const [adsWatched, setAdsWatched] = useState(0)
   const [totalPoints, setTotalPoints] = useState(0)
+  const [adUrl, setAdUrl] = useState("")
+  const [popupBlocked, setPopupBlocked] = useState(false)
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
   useEffect(() => {
@@ -38,8 +40,19 @@ export default function AdsPage() {
     setLastResult(null)
     setWatching(true)
     setTimer(12)
-    const adUrl = HTA_AD_URLS[Math.floor(Math.random() * HTA_AD_URLS.length)]
-    window.open(adUrl, "_blank", "width=400,height=600,menubar=no,toolbar=no,location=no")
+    setPopupBlocked(false)
+    const selectedUrl = HTA_AD_URLS[Math.floor(Math.random() * HTA_AD_URLS.length)]
+    setAdUrl(selectedUrl)
+
+    try {
+      const win = window.open(selectedUrl, "_blank")
+      if (!win || win.closed || typeof win.closed === "undefined") {
+        setPopupBlocked(true)
+      }
+    } catch {
+      setPopupBlocked(true)
+    }
+
     intervalRef.current = setInterval(() => {
       setTimer((t) => {
         if (t <= 1) {
@@ -120,6 +133,22 @@ export default function AdsPage() {
                       </div>
                       <p className="text-white font-semibold mb-1">Ad opened in new window</p>
                       <p className="text-gray-500 text-sm mb-6">Complete the ad offer to earn your reward</p>
+                      
+                      {popupBlocked && (
+                        <div className="mb-6 p-4 rounded-xl bg-yellow-500/10 border border-yellow-500/20 text-xs text-yellow-500 max-w-xs mx-auto animate-in fade-in duration-200">
+                          <p className="mb-2">Your browser blocked the popup window.</p>
+                          <a
+                            href={adUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            onClick={() => setPopupBlocked(false)}
+                            className="inline-flex items-center gap-1 font-bold underline hover:text-yellow-400"
+                          >
+                            Click here to open the ad manually
+                          </a>
+                        </div>
+                      )}
+
                       <div className="flex items-center justify-center gap-2 mb-4">
                         <span className="text-3xl font-heading font-bold text-neon-green">{timer}s</span>
                       </div>

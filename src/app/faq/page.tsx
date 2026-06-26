@@ -53,8 +53,8 @@ const faqs = [
     a: "Your 12-word recovery phrase is the master key to your wallet. It's stored only on your device, encrypted with AES-256-GCM using a key derived from your PIN via PBKDF2 (100,000 rounds). Never share it with anyone. If you lose it, your wallet is gone forever.",
   },
   {
-    q: "How do I recover my wallet?",
-    a: "If you lose access, click 'Recover Wallet' on the homepage. Enter your 12-word recovery phrase (in the correct order), then set a new PIN. Your points and progress are saved on the server linked to your wallet ID.",
+    q: "How do I log back into my wallet?",
+    a: "Click 'Login' in the header. Enter your 12-word recovery phrase (in the correct order), then set your PIN. Your points and progress are saved on the server linked to your wallet ID.",
   },
   {
     q: "Is my data secure?",

@@ -60,12 +60,12 @@ export default function UnlockPage() {
             <button
               onClick={() => {
                 setLocked(true)
-                router.push("/wallet/recover")
+                router.push("/wallet/login")
               }}
               className="text-sm text-gray-400 hover:text-white transition-colors flex items-center justify-center gap-2 mx-auto"
             >
               <LogOut className="w-3 h-3" />
-              Forgot PIN? Recover wallet
+              Forgot PIN? Use recovery phrase
             </button>
           </div>
         </div>

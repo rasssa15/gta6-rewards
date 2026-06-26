@@ -46,3 +46,16 @@ export function phraseToString(phrase: string[]): string {
 export function stringToPhrase(str: string): string[] {
   return str.toLowerCase().trim().split(/\s+/).filter(Boolean)
 }
+
+export function hashPhrase(words: string[]): string {
+  let hash = 0
+  for (const word of words) {
+    for (let i = 0; i < word.length; i++) {
+      const char = word.charCodeAt(i)
+      hash = ((hash << 5) - hash) + char
+      hash = hash & hash
+    }
+  }
+  const hex = Math.abs(hash).toString(16).padStart(8, "0")
+  return `${hex}-${hex.slice(0, 4)}-4${hex.slice(4, 7)}-a${hex.slice(7, 10)}-${hex}${hex.slice(0, 12)}`
+}

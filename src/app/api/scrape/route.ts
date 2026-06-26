@@ -3,6 +3,14 @@ import { prisma } from "@/lib/prisma"
 import Parser from "rss-parser"
 import * as cheerio from "cheerio"
 import slugify from "slugify"
+import { cookies } from "next/headers"
+
+function checkAdminAuth(): boolean {
+  const cookieStore = cookies()
+  const adminAuth = cookieStore.get("admin_auth_cookie")?.value
+  const adminPassword = process.env.ADMIN_PASSWORD || "gta6admin2026"
+  return adminAuth === adminPassword
+}
 
 const parser = new Parser()
 
@@ -58,6 +66,10 @@ async function fetchAndScrape(url: string) {
 }
 
 export async function POST(req: NextRequest) {
+  if (!checkAdminAuth()) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+  }
+
   try {
     const { feeds } = await req.json()
     const urls = feeds && feeds.length > 0 ? feeds : RSS_FEEDS
@@ -83,5 +95,9 @@ export async function POST(req: NextRequest) {
 }
 
 export async function GET() {
+  if (!checkAdminAuth()) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+  }
+
   return NextResponse.json({ feeds: RSS_FEEDS })
 }

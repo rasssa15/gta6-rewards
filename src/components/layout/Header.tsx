@@ -158,14 +158,22 @@ export function Header() {
                 Unlock
               </Link>
             ) : (
-              <div className="hidden sm:flex items-center gap-2">
-                <Link href="/wallet/create" className="btn-primary text-sm !px-4 !py-2">
-                  Create Wallet
-                </Link>
-                <Link href="/wallet/recover" className="btn-secondary text-sm !px-4 !py-2">
-                  Recover
-                </Link>
-              </div>
+              <>
+                <div className="hidden sm:flex items-center gap-2">
+                  <Link href="/wallet/create" className="btn-primary text-sm !px-4 !py-2">
+                    Create Wallet
+                  </Link>
+                  <Link href="/wallet/login" className="btn-secondary text-sm !px-4 !py-2">
+                    Login
+                  </Link>
+                </div>
+                <div className="flex sm:hidden items-center">
+                  <Link href="/wallet/create" className="btn-primary text-xs !px-2.5 !py-1.5 flex items-center gap-1">
+                    <Wallet className="w-3.5 h-3.5" />
+                    Create
+                  </Link>
+                </div>
+              </>
             )}
 
             <button
@@ -182,11 +190,12 @@ export function Header() {
             <nav className="flex flex-col gap-1">
               {navLinks.map((link) => {
                 const Icon = link.icon
-                const isActive = pathname === link.href
+                const isActive = pathname === link.href || pathname.startsWith(link.href + "/")
                 return (
                   <Link
                     key={link.href}
                     href={link.href}
+                    onClick={() => setIsOpen(false)}
                     className={cn(
                       "flex items-center gap-3 px-4 py-3 rounded-xl text-sm transition-all",
                       isActive ? "text-white bg-white/10" : "text-gray-300 hover:text-white hover:bg-white/5"
@@ -200,20 +209,20 @@ export function Header() {
               <hr className="my-2 border-white/5" />
               {!isConnected ? (
                 <>
-                  <Link href="/wallet/create" className="btn-primary text-center py-3">
+                  <Link href="/wallet/create" onClick={() => setIsOpen(false)} className="btn-primary text-center py-3">
                     Create Wallet
                   </Link>
-                  <Link href="/wallet/recover" className="btn-secondary text-center py-3">
-                    Recover Wallet
+                  <Link href="/wallet/login" onClick={() => setIsOpen(false)} className="btn-secondary text-center py-3">
+                    Login
                   </Link>
                 </>
               ) : (
                 <>
-                  <Link href="/dashboard" className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm text-gray-300 hover:text-white hover:bg-white/5">
+                  <Link href="/dashboard" onClick={() => setIsOpen(false)} className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm text-gray-300 hover:text-white hover:bg-white/5">
                     <User className="w-4 h-4" />
                     Dashboard
                   </Link>
-                  <button onClick={handleLock} className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm text-gray-300 hover:text-white hover:bg-white/5 w-full text-left">
+                  <button onClick={() => { handleLock(); setIsOpen(false) }} className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm text-gray-300 hover:text-white hover:bg-white/5 w-full text-left">
                     <Shield className="w-4 h-4" />
                     Lock Wallet
                   </button>

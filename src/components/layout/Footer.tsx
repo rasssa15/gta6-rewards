@@ -1,86 +1,95 @@
 "use client"
 import Link from "next/link"
-import { Gamepad2, Mail, Twitter, MessageCircle, Youtube } from "lucide-react"
+import { Gamepad2, Twitter, MessageCircle, Youtube, ExternalLink, ArrowUpRight } from "lucide-react"
+
+const navSections = [
+  {
+    title: "Platform",
+    links: [
+      { label: "GTA 6 News", href: "/news" },
+      { label: "Rewards Center", href: "/rewards" },
+      { label: "Leaderboard", href: "/leaderboard" },
+      { label: "Challenges", href: "/challenges" },
+      { label: "Watch Ads", href: "/ads" },
+      { label: "Earn Points", href: "/earn" },
+    ],
+  },
+  {
+    title: "Account",
+    links: [
+      { label: "Create Wallet", href: "/wallet/create" },
+      { label: "Login", href: "/wallet/login" },
+      { label: "Dashboard", href: "/dashboard" },
+      { label: "Referral Program", href: "/referral" },
+    ],
+  },
+  {
+    title: "Support",
+    links: [
+      { label: "FAQ", href: "/faq" },
+      { label: "Terms of Service", href: "/terms" },
+      { label: "Privacy Policy", href: "/privacy" },
+    ],
+  },
+]
+
+const socials = [
+  { icon: Twitter,        label: "Twitter",  href: "#", color: "hover:text-[#1da1f2]" },
+  { icon: MessageCircle, label: "Discord",  href: "#", color: "hover:text-[#7289da]" },
+  { icon: Youtube,       label: "YouTube",  href: "#", color: "hover:text-[#ff0000]" },
+]
 
 export function Footer() {
   return (
-    <footer className="relative z-10 border-t border-white/5 bg-[#0a0a0f]">
-      <div className="page-container py-12 sm:py-16">
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-8">
-          <div className="col-span-2 sm:col-span-3 lg:col-span-2">
-            <Link href="/" className="flex items-center gap-2 mb-4">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-neon-pink to-neon-purple flex items-center justify-center">
+    <footer className="relative z-10 border-t border-white/5" style={{ background: "rgba(7,7,16,0.97)" }}>
+      {/* Subtle top neon line */}
+      <div className="h-px w-full" style={{ background: "linear-gradient(90deg, transparent, var(--neon-pink) 30%, var(--neon-purple) 50%, var(--neon-blue) 70%, transparent)" }} />
+
+      <div className="page-container py-14 sm:py-20">
+        <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-8 lg:gap-12">
+          {/* Brand */}
+          <div className="col-span-2 sm:col-span-4 lg:col-span-2">
+            <Link href="/" className="flex items-center gap-2.5 mb-5 group" id="footer-brand">
+              <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-neon-pink to-neon-purple flex items-center justify-center group-hover:shadow-lg group-hover:shadow-neon-pink/30 transition-all duration-300">
                 <Gamepad2 className="w-5 h-5 text-white" />
               </div>
               <span className="text-xl font-heading font-bold gradient-text">GTA6 Rewards</span>
             </Link>
-            <p className="text-gray-400 text-sm max-w-md leading-relaxed">
-              Your ultimate gaming rewards platform. Earn points, unlock achievements, 
-              and redeem exclusive rewards while staying up to date with the latest 
-              GTA 6 and gaming news.
+            <p className="text-gray-500 text-sm leading-relaxed max-w-xs mb-6">
+              The ultimate GTA 6 fan platform. Read news, earn points through ads & challenges,
+              and redeem real gaming gift cards.
             </p>
-            <div className="flex items-center gap-3 mt-6">
-              {[
-                { icon: Twitter, href: "#" },
-                { icon: MessageCircle, href: "#" },
-                { icon: Youtube, href: "#" },
-                { icon: Mail, href: "#" },
-              ].map((social) => (
+
+            {/* Social icons */}
+            <div className="flex items-center gap-2">
+              {socials.map((social) => (
                 <Link
-                  key={social.href}
+                  key={social.label}
                   href={social.href}
-                  className="w-10 h-10 rounded-xl glass flex items-center justify-center hover:bg-white/10 transition-all duration-200"
+                  aria-label={social.label}
+                  className={`w-10 h-10 rounded-xl glass flex items-center justify-center text-gray-500 ${social.color} transition-all duration-200 hover:scale-110 hover:bg-white/10`}
+                  id={`footer-social-${social.label.toLowerCase()}`}
                 >
-                  <social.icon className="w-4 h-4 text-gray-400 hover:text-white" />
+                  <social.icon className="w-4 h-4" />
                 </Link>
               ))}
             </div>
           </div>
 
-          {[
-            {
-              title: "Platform",
-              links: [
-                { label: "News", href: "/news" },
-                { label: "Rewards", href: "/rewards" },
-                { label: "Leaderboard", href: "/leaderboard" },
-                { label: "Challenges", href: "/challenges" },
-                { label: "Achievements", href: "/achievements" },
-              ],
-            },
-            {
-              title: "Support",
-              links: [
-                { label: "FAQ", href: "/faq" },
-                { label: "Contact", href: "/contact" },
-                { label: "Terms", href: "/terms" },
-                { label: "Privacy", href: "/privacy" },
-                { label: "Guidelines", href: "/guidelines" },
-              ],
-            },
-            {
-              title: "Community",
-              links: [
-                { label: "Discord", href: "#" },
-                { label: "Twitter", href: "#" },
-                { label: "YouTube", href: "#" },
-                { label: "Reddit", href: "#" },
-                { label: "Blog", href: "/blog" },
-              ],
-            },
-          ].map((section) => (
-            <div key={section.title}>
-              <h3 className="text-white font-semibold mb-4 text-sm uppercase tracking-wider">
+          {/* Nav sections */}
+          {navSections.map((section) => (
+            <div key={section.title} className="col-span-1">
+              <h3 className="text-white font-heading font-bold mb-4 text-xs uppercase tracking-widest">
                 {section.title}
               </h3>
-              <ul className="space-y-3">
+              <ul className="space-y-2.5">
                 {section.links.map((link) => (
                   <li key={link.label}>
                     <Link
                       href={link.href}
-                      className="text-gray-400 hover:text-white text-sm transition-colors duration-200"
+                      className="text-gray-500 hover:text-white text-sm transition-colors duration-200 flex items-center gap-1 group"
                     >
-                      {link.label}
+                      <span>{link.label}</span>
                     </Link>
                   </li>
                 ))}
@@ -89,13 +98,20 @@ export function Footer() {
           ))}
         </div>
 
-        <div className="mt-12 pt-8 border-t border-white/5 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <p className="text-gray-500 text-sm">
+        {/* Bottom bar */}
+        <div className="mt-14 pt-8 border-t border-white/5 flex flex-col sm:flex-row items-center justify-between gap-3">
+          <p className="text-gray-600 text-xs font-mono">
             © {new Date().getFullYear()} GTA 6 Rewards. All rights reserved.
           </p>
-          <p className="text-gray-500 text-sm">
-            Not affiliated with Rockstar Games or Take-Two Interactive.
+          <p className="text-gray-700 text-xs text-center">
+            Fan platform — not affiliated with Rockstar Games or Take-Two Interactive.
           </p>
+          <div className="flex items-center gap-3">
+            <span className="flex items-center gap-1.5 text-xs text-neon-green font-mono">
+              <span className="w-1.5 h-1.5 rounded-full bg-neon-green animate-pulse" />
+              Live Platform
+            </span>
+          </div>
         </div>
       </div>
     </footer>

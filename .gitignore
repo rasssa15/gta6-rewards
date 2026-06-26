@@ -13,4 +13,4 @@ next-env.d.ts
 .vercel
 generated/
 
-public/images/
+# public/images/

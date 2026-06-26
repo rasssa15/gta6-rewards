@@ -1,11 +1,23 @@
 import { NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 import { getRandomCategory, getNewsHeadline, writeArticle, generateArticleImage, generateSlug, getCategoryList } from "@/lib/auto-generate"
+import { cookies } from "next/headers"
 
 export const maxDuration = 60
 export const dynamic = "force-dynamic"
 
+function checkAdminAuth(): boolean {
+  const cookieStore = cookies()
+  const adminAuth = cookieStore.get("admin_auth_cookie")?.value
+  const adminPassword = process.env.ADMIN_PASSWORD || "gta6admin2026"
+  return adminAuth === adminPassword
+}
+
 export async function GET(req: Request) {
+  if (!checkAdminAuth()) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+  }
+
   const { searchParams } = new URL(req.url)
   const categoryParam = searchParams.get("category")
 
