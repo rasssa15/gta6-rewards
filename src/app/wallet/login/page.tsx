@@ -5,6 +5,7 @@ import { LogIn, ArrowLeft, ArrowRight } from "lucide-react"
 import toast from "react-hot-toast"
 import { validatePhrase, hashPhrase } from "@/lib/wallet/phrase"
 import { saveWallet } from "@/lib/wallet/storage"
+import { useWallet } from "@/components/providers/WalletProvider"
 import { PhraseGrid } from "@/components/wallet/PhraseGrid"
 import { PinInput } from "@/components/wallet/PinInput"
 
@@ -12,6 +13,7 @@ type Step = "phrase" | "pin" | "done"
 
 export default function LoginPage() {
   const router = useRouter()
+  const { refresh } = useWallet()
   const [step, setStep] = useState<Step>("phrase")
   const [enteredWords, setEnteredWords] = useState<string[]>([])
   const [error, setError] = useState("")
@@ -67,6 +69,7 @@ export default function LoginPage() {
         }
       } catch {}
       await saveWallet({ walletId, name: displayName, createdAt: new Date().toISOString(), avatarIndex: 0 }, val)
+      await refresh()
       toast.success(`Welcome back, ${displayName}`)
       router.push("/dashboard")
     }

@@ -5,12 +5,14 @@ import { Shield, ArrowLeft, ArrowRight, Eye, EyeOff, Copy, Check } from "lucide-
 import toast from "react-hot-toast"
 import { generatePhrase, hashPhrase } from "@/lib/wallet/phrase"
 import { saveWallet } from "@/lib/wallet/storage"
+import { useWallet } from "@/components/providers/WalletProvider"
 import { PinInput } from "@/components/wallet/PinInput"
 
 type Step = "intro" | "phrase" | "name" | "pin" | "done"
 
 export default function CreateWalletPage() {
   const router = useRouter()
+  const { refresh } = useWallet()
   const [step, setStep] = useState<Step>("intro")
   const [phrase, setPhrase] = useState<string[]>([])
   const [phraseConfirmed, setPhraseConfirmed] = useState(false)
@@ -51,6 +53,7 @@ export default function CreateWalletPage() {
           body: JSON.stringify({ walletId, name: displayName }),
         })
       } catch {}
+      await refresh()
       toast.success("Wallet created!")
       router.push("/dashboard")
     }

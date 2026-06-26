@@ -4,10 +4,12 @@ import { useRouter } from "next/navigation"
 import { Lock, LogOut } from "lucide-react"
 import toast from "react-hot-toast"
 import { validatePin, setLocked, hasWallet, loadWallet, setSession } from "@/lib/wallet/storage"
+import { useWallet } from "@/components/providers/WalletProvider"
 import { PinInput } from "@/components/wallet/PinInput"
 
 export default function UnlockPage() {
   const router = useRouter()
+  const { refresh } = useWallet()
   const [pin, setPin] = useState("")
   const [error, setError] = useState("")
   const [mounted, setMounted] = useState(false)
@@ -29,6 +31,7 @@ export default function UnlockPage() {
       if (wallet) {
         setSession({ walletId: wallet.walletId, name: wallet.name })
       }
+      await refresh()
       router.push("/dashboard")
     } else {
       setError("Wrong PIN")
