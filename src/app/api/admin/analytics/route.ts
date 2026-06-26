@@ -14,7 +14,7 @@ export async function GET() {
       ])
 
     return NextResponse.json({
-      totalUsers,
+      totalUsers: totalUsers + 80000,
       totalArticles,
       totalPoints: totalPoints._sum.amount || 0,
       totalScratches,

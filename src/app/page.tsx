@@ -78,7 +78,7 @@ export default function HomePage() {
             className="grid grid-cols-3 gap-6 max-w-lg mx-auto mt-16"
           >
             {[
-              { value: "80,000+", label: "Players", icon: Users },
+              { value: stats.users ? `${(stats.users).toLocaleString()}+` : "80,000+", label: "Players", icon: Users },
               { value: stats.articles || "50+", label: "Articles", icon: Newspaper },
               { value: "12.5M+", label: "Points Earned", icon: TrendingUp },
             ].map((s) => (
