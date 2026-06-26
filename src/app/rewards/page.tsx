@@ -1,6 +1,6 @@
 "use client"
 import { useState, useEffect } from "react"
-import { Gift, ArrowRight, Check, Star, Monitor, Gamepad2, Globe, ShoppingBag, Radio, Trophy, Zap, Coins } from "lucide-react"
+import { Gift, ArrowRight, Check, Star, Monitor, Gamepad2, Globe, ShoppingBag, Radio } from "lucide-react"
 import { motion } from "framer-motion"
 import { formatNumber } from "@/lib/utils"
 import Link from "next/link"
@@ -13,9 +13,6 @@ const PLATFORMS = [
   { key: "xbox", label: "Xbox", icon: Globe },
   { key: "nintendo", label: "Nintendo", icon: Gamepad2 },
   { key: "gta6", label: "GTA 6", icon: Star },
-  { key: "bronze", label: "🥉 Bronze", icon: Coins },
-  { key: "silver", label: "🥈 Silver", icon: Zap },
-  { key: "gold", label: "🥇 Gold", icon: Trophy },
   { key: "giftcard", label: "Gift Cards", icon: Star },
 ]
 
@@ -38,7 +35,6 @@ export default function RewardsPage() {
         const cat = r.category || ""
         if (activePlatform === "gta6") return cat === "coupon-gta6"
         if (activePlatform === "giftcard") return cat.startsWith("coupon-giftcard")
-        if (["bronze", "silver", "gold"].includes(activePlatform)) return cat === `coupon-${activePlatform}`
         return cat === `coupon-${activePlatform}`
       })
 
@@ -97,9 +93,6 @@ export default function RewardsPage() {
               {filtered.map((reward, i) => {
               const cat = reward.category || ""
               let platform = PLATFORMS.find(p => cat === `coupon-${p.key}` || (p.key === "gta6" && cat === "coupon-gta6"))
-              if (!platform && ["bronze", "silver", "gold"].some(t => cat === `coupon-${t}`)) {
-                platform = PLATFORMS.find(p => ["bronze", "silver", "gold"].includes(p.key))
-              }
               platform ||= PLATFORMS[0]
               const Icon = platform.icon
               return (

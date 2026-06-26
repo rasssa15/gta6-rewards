@@ -48,6 +48,7 @@ export default function DashboardPage() {
 
   const handleScratch = async () => {
     if (!wallet?.walletId) return
+    if (scratching || revealed) return
     setScratching(true)
     setRevealed(false)
     setScratchResult(null)
@@ -220,7 +221,7 @@ export default function DashboardPage() {
                 <Zap className="w-5 h-5 text-neon-yellow" /> Scratch Card
               </h3>
               <p className="text-gray-400 text-sm mb-2">
-                🥉 Bronze 1-3 pts · 🥈 Silver 5-10 pts · 🥇 Gold 15-25 pts
+                🥉 Bronze 1-2 pts · 🥈 Silver 2-5 pts · 🥇 Gold 5-10 pts
               </p>
               <p className="text-gray-500 text-xs mb-6">
                 Mostly Bronze, sometimes Silver, rarely Gold — luck decides!

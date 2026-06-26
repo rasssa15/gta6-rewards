@@ -5,7 +5,7 @@ const CONFIG: Record<string, { floor: number; range?: number; ceiling?: number }
   daily:   { floor: 210,   range: 1000  },
   weekly:  { floor: 1900,  range: 4000  },
   monthly: { floor: 4500,  range: 8000  },
-  all:     { floor: 12569, ceiling: 27046 },
+  all:     { floor: 12569, ceiling: 25654 },
 }
 
 function seededRandom(seed: string): number {
