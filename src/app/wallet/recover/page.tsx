@@ -3,12 +3,25 @@ import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { RotateCcw, ArrowLeft, ArrowRight } from "lucide-react"
 import toast from "react-hot-toast"
-import { stringToPhrase, validatePhrase } from "@/lib/wallet/phrase"
+import { validatePhrase } from "@/lib/wallet/phrase"
 import { saveWallet } from "@/lib/wallet/storage"
 import { PhraseGrid } from "@/components/wallet/PhraseGrid"
 import { PinInput } from "@/components/wallet/PinInput"
 
 type Step = "phrase" | "pin" | "done"
+
+function hashPhrase(words: string[]): string {
+  let hash = 0
+  for (const word of words) {
+    for (let i = 0; i < word.length; i++) {
+      const char = word.charCodeAt(i)
+      hash = ((hash << 5) - hash) + char
+      hash = hash & hash
+    }
+  }
+  const hex = Math.abs(hash).toString(16).padStart(8, "0")
+  return `${hex}-${hex.slice(0, 4)}-4${hex.slice(4, 7)}-a${hex.slice(7, 10)}-${hex}${hex.slice(0, 12)}`
+}
 
 export default function RecoverWalletPage() {
   const router = useRouter()
@@ -51,9 +64,23 @@ export default function RecoverWalletPage() {
         setConfirmPinValue("")
         return
       }
-      const walletId = crypto.randomUUID()
-      await saveWallet({ walletId, name: "Recovered", createdAt: new Date().toISOString(), avatarIndex: 0 }, val)
-      toast.success("Wallet recovered successfully!")
+      const walletId = hashPhrase(enteredWords)
+      let displayName = "Player"
+      try {
+        const res = await fetch(`/api/users/${walletId}`)
+        if (res.ok) {
+          const user = await res.json()
+          displayName = user.name || "Player"
+        } else {
+          await fetch("/api/users", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ walletId, name: "Player" }),
+          })
+        }
+      } catch {}
+      await saveWallet({ walletId, name: displayName, createdAt: new Date().toISOString(), avatarIndex: 0 }, val)
+      toast.success(`Wallet recovered! Welcome back, ${displayName}`)
       router.push("/dashboard")
     }
   }

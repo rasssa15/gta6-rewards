@@ -1751,7 +1751,7 @@
     "categoryId": "esports",
     "categorySlug": "esports",
     "categoryName": "Esports",
-    "featuredImage": "https://picsum.photos/seed/esports04/1200/675",
+    "featuredImage": "/images/articles/0084-mobile-esports-rise-pubg-mobile-and-free-fire-analysis-84-20.jpg",
     "prices": "[{\"currency\":\"USD\",\"amount\":99.99,\"label\":\"Deluxe Edition\"},{\"currency\":\"INR\",\"amount\":8299.17,\"label\":\"Deluxe Edition\"},{\"currency\":\"JPY\",\"amount\":14998.5,\"label\":\"Deluxe Edition\"},{\"currency\":\"CNY\",\"amount\":719.93,\"label\":\"Deluxe Edition\"},{\"currency\":\"EUR\",\"amount\":91.99,\"label\":\"Deluxe Edition\"},{\"currency\":\"GBP\",\"amount\":78.99,\"label\":\"Deluxe Edition\"}]",
     "author": "GameSpot",
     "status": "published",
