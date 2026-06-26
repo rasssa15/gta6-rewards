@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "framer-motion"
 import { useWallet } from "@/components/providers/WalletProvider"
 import toast from "react-hot-toast"
 import Link from "next/link"
+import { HTA_AD_URLS } from "@/lib/hta-ads"
 
 export default function AdsPage() {
   const { walletId, points, refresh } = useWallet()
@@ -37,6 +38,8 @@ export default function AdsPage() {
     setLastResult(null)
     setWatching(true)
     setTimer(12)
+    const adUrl = HTA_AD_URLS[Math.floor(Math.random() * HTA_AD_URLS.length)]
+    window.open(adUrl, "_blank", "width=400,height=600,menubar=no,toolbar=no,location=no")
     intervalRef.current = setInterval(() => {
       setTimer((t) => {
         if (t <= 1) {
@@ -74,7 +77,7 @@ export default function AdsPage() {
 
   return (
     <div className="min-h-screen pt-24 pb-16">
-      <div className="page-container max-w-lg">
+      <div className="page-container max-w-2xl">
         <div className="text-center mb-8">
           <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-neon-green to-emerald-500 flex items-center justify-center mx-auto mb-4">
             <Eye className="w-8 h-8 text-white" />
@@ -89,7 +92,7 @@ export default function AdsPage() {
           </div>
         ) : (
           <>
-            <div className="grid grid-cols-2 gap-4 mb-6">
+            <div className="grid grid-cols-2 gap-4 mb-6 max-w-sm mx-auto">
               <div className="glass-card p-4 text-center">
                 <Eye className="w-5 h-5 text-neon-green mx-auto mb-1" />
                 <div className="text-2xl font-heading font-bold text-white">{adsWatched}</div>
@@ -102,68 +105,73 @@ export default function AdsPage() {
               </div>
             </div>
 
-            <div className="glass-card p-6 text-center mb-6">
+            <div className="glass-card p-0 overflow-hidden mb-6">
               <AnimatePresence mode="wait">
                 {watching ? (
                   <motion.div
                     key="watching"
-                    initial={{ scale: 0.95, opacity: 0 }}
-                    animate={{ scale: 1, opacity: 1 }}
-                    className="py-6"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    className="p-6"
                   >
-                    <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-neon-green/20 to-emerald-500/20 flex items-center justify-center mx-auto mb-4">
-                      <Loader2 className="w-8 h-8 text-neon-green animate-spin" />
+                    <div className="py-8 text-center">
+                      <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-neon-green/20 to-emerald-500/20 flex items-center justify-center mx-auto mb-4">
+                        <Loader2 className="w-8 h-8 text-neon-green animate-spin" />
+                      </div>
+                      <p className="text-white font-semibold mb-1">Ad opened in new window</p>
+                      <p className="text-gray-500 text-sm mb-6">Complete the ad offer to earn your reward</p>
+                      <div className="flex items-center justify-center gap-2 mb-4">
+                        <span className="text-3xl font-heading font-bold text-neon-green">{timer}s</span>
+                      </div>
+                      <div className="w-full h-2 bg-white/10 rounded-full overflow-hidden mb-6 max-w-xs mx-auto">
+                        <motion.div
+                          className="h-full bg-neon-green rounded-full"
+                          initial={{ width: "0%" }}
+                          animate={{ width: `${(1 - timer / 12) * 100}%` }}
+                          transition={{ duration: 0.3 }}
+                        />
+                      </div>
+                      {timer === 0 ? (
+                        <button onClick={handleComplete} className="btn-primary !py-3 !px-8 font-bold flex items-center gap-2 mx-auto">
+                          <Check className="w-5 h-5" /> Claim Reward
+                        </button>
+                      ) : (
+                        <p className="text-xs text-gray-500">Wait for the timer to finish...</p>
+                      )}
                     </div>
-                    <p className="text-white font-semibold mb-1">Watching ad...</p>
-                    <div className="w-full h-2 bg-white/10 rounded-full overflow-hidden mb-4 max-w-xs mx-auto">
-                      <motion.div
-                        className="h-full bg-neon-green rounded-full"
-                        initial={{ width: "0%" }}
-                        animate={{ width: `${(1 - timer / 12) * 100}%` }}
-                        transition={{ duration: 0.3 }}
-                      />
-                    </div>
-                    <p className="text-3xl font-heading font-bold text-neon-green mb-4">{timer}s</p>
-                    {timer === 0 ? (
-                      <button onClick={handleComplete} className="btn-primary !py-3 !px-8 font-bold flex items-center gap-2 mx-auto">
-                        <Check className="w-5 h-5" /> Claim Reward
-                      </button>
-                    ) : (
-                      <p className="text-xs text-gray-500">Wait for the timer...</p>
-                    )}
                   </motion.div>
                 ) : lastResult ? (
                   <motion.div
                     key="result"
                     initial={{ scale: 0.8, opacity: 0 }}
                     animate={{ scale: 1, opacity: 1 }}
-                    className="py-4"
+                    className="p-8 text-center"
                   >
-                    <div className={`w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-3 ${
+                    <div className={`w-24 h-24 rounded-2xl flex items-center justify-center mx-auto mb-4 ${
                       lastResult.tier === "gold"
                         ? "bg-gradient-to-br from-yellow-500/20 to-amber-400/20"
                         : lastResult.tier === "silver"
                           ? "bg-gradient-to-br from-gray-300/20 to-gray-100/20"
                           : "bg-gradient-to-br from-amber-700/20 to-amber-500/20"
                     }`}>
-                      <span className="text-3xl">{lastResult.emoji}</span>
+                      <span className="text-4xl">{lastResult.emoji}</span>
                     </div>
-                    <div className="text-2xl font-heading font-bold text-neon-green">+{lastResult.points}</div>
-                    <div className="text-gray-400 text-sm">{lastResult.label} Card</div>
+                    <div className="text-3xl font-heading font-bold text-neon-green mb-1">+{lastResult.points}</div>
+                    <div className="text-gray-400">{lastResult.label} Card</div>
                   </motion.div>
                 ) : (
                   <motion.div
                     key="ready"
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
-                    className="py-8"
+                    className="p-10 text-center"
                   >
-                    <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-neon-green/20 to-emerald-500/20 flex items-center justify-center mx-auto mb-4">
-                      <Play className="w-8 h-8 text-neon-green" />
+                    <div className="w-24 h-24 rounded-2xl bg-gradient-to-br from-neon-green/20 to-emerald-500/20 flex items-center justify-center mx-auto mb-4">
+                      <Eye className="w-10 h-10 text-neon-green" />
                     </div>
-                    <p className="text-gray-400 text-sm mb-1">Watch an ad</p>
-                    <p className="text-gray-500 text-xs">Earn a random Scratch Card every time</p>
-                    <div className="flex items-center justify-center gap-3 mt-4 text-xs text-gray-500">
+                    <p className="text-gray-300 text-lg font-semibold mb-2">Ready to earn?</p>
+                    <p className="text-gray-500 text-sm mb-6">Watch a short ad and earn a random Scratch Card</p>
+                    <div className="flex items-center justify-center gap-4 text-xs text-gray-500">
                       <span>🥉 Bronze 10x</span>
                       <span>🥈 Silver 1.5x</span>
                       <span>🥇 Gold 0.5x</span>
@@ -173,14 +181,16 @@ export default function AdsPage() {
               </AnimatePresence>
 
               {!watching && (
-                <button
-                  onClick={startWatching}
-                  disabled={!walletId}
-                  className="btn-primary w-full mt-4 py-4 text-base font-bold flex items-center justify-center gap-2 disabled:opacity-50"
-                >
-                  <Play className="w-5 h-5" />
-                  {lastResult ? "Watch Another Ad" : "Watch Ad"}
-                </button>
+                <div className="px-6 pb-6">
+                  <button
+                    onClick={startWatching}
+                    disabled={!walletId}
+                    className="btn-primary w-full py-4 text-base font-bold flex items-center justify-center gap-2 disabled:opacity-50"
+                  >
+                    <Play className="w-5 h-5" />
+                    {lastResult ? "Watch Another Ad" : "Watch Ad"}
+                  </button>
+                </div>
               )}
             </div>
 
