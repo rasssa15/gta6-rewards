@@ -1,18 +1,19 @@
 "use client"
-import { useState, useEffect } from "react"
-import { Eye, Play, Star, TrendingUp, Gift } from "lucide-react"
+import { useState, useEffect, useRef } from "react"
+import { Eye, Play, Star, TrendingUp, Loader2, Check } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
 import { useWallet } from "@/components/providers/WalletProvider"
-import { HTaAdPlayer } from "@/components/ads/HTaAdPlayer"
 import toast from "react-hot-toast"
 import Link from "next/link"
 
 export default function AdsPage() {
   const { walletId, points, refresh } = useWallet()
   const [watching, setWatching] = useState(false)
+  const [timer, setTimer] = useState(12)
   const [lastResult, setLastResult] = useState<any>(null)
   const [adsWatched, setAdsWatched] = useState(0)
   const [totalPoints, setTotalPoints] = useState(0)
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
   useEffect(() => {
     if (walletId) {
@@ -26,8 +27,31 @@ export default function AdsPage() {
     }
   }, [walletId])
 
-  const handleAdComplete = async () => {
+  useEffect(() => {
+    return () => {
+      if (intervalRef.current) clearInterval(intervalRef.current)
+    }
+  }, [])
+
+  const startWatching = () => {
+    setLastResult(null)
+    setWatching(true)
+    setTimer(12)
+    intervalRef.current = setInterval(() => {
+      setTimer((t) => {
+        if (t <= 1) {
+          if (intervalRef.current) clearInterval(intervalRef.current)
+          return 0
+        }
+        return t - 1
+      })
+    }, 1000)
+  }
+
+  const handleComplete = async () => {
+    if (!walletId) return
     setWatching(false)
+    if (intervalRef.current) clearInterval(intervalRef.current)
     try {
       const res = await fetch("/api/ads/watch", {
         method: "POST",
@@ -46,10 +70,6 @@ export default function AdsPage() {
     } catch {
       toast.error("Network error")
     }
-  }
-
-  const handleAdSkip = () => {
-    handleAdComplete()
   }
 
   return (
@@ -89,9 +109,28 @@ export default function AdsPage() {
                     key="watching"
                     initial={{ scale: 0.95, opacity: 0 }}
                     animate={{ scale: 1, opacity: 1 }}
+                    className="py-6"
                   >
-                    <HTaAdPlayer onComplete={handleAdComplete} onSkip={handleAdSkip} minWatchSeconds={10} />
-                    <p className="text-xs text-gray-500">Let the ad load, then click Done to earn!</p>
+                    <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-neon-green/20 to-emerald-500/20 flex items-center justify-center mx-auto mb-4">
+                      <Loader2 className="w-8 h-8 text-neon-green animate-spin" />
+                    </div>
+                    <p className="text-white font-semibold mb-1">Watching ad...</p>
+                    <div className="w-full h-2 bg-white/10 rounded-full overflow-hidden mb-4 max-w-xs mx-auto">
+                      <motion.div
+                        className="h-full bg-neon-green rounded-full"
+                        initial={{ width: "0%" }}
+                        animate={{ width: `${(1 - timer / 12) * 100}%` }}
+                        transition={{ duration: 0.3 }}
+                      />
+                    </div>
+                    <p className="text-3xl font-heading font-bold text-neon-green mb-4">{timer}s</p>
+                    {timer === 0 ? (
+                      <button onClick={handleComplete} className="btn-primary !py-3 !px-8 font-bold flex items-center gap-2 mx-auto">
+                        <Check className="w-5 h-5" /> Claim Reward
+                      </button>
+                    ) : (
+                      <p className="text-xs text-gray-500">Wait for the timer...</p>
+                    )}
                   </motion.div>
                 ) : lastResult ? (
                   <motion.div
@@ -135,10 +174,7 @@ export default function AdsPage() {
 
               {!watching && (
                 <button
-                  onClick={() => {
-                    setLastResult(null)
-                    setWatching(true)
-                  }}
+                  onClick={startWatching}
                   disabled={!walletId}
                   className="btn-primary w-full mt-4 py-4 text-base font-bold flex items-center justify-center gap-2 disabled:opacity-50"
                 >

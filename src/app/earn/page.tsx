@@ -140,43 +140,6 @@ export default function EarnPage() {
           })}
         </div>
 
-        {/* Coupon Tiers */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4, delay: 0.3 }}
-          className="mt-12"
-        >
-          <h2 className="text-2xl font-heading font-bold text-white mb-2 flex items-center gap-2">
-            <Gift className="w-6 h-6 text-neon-green" /> Coupon Tiers
-          </h2>
-          <p className="text-gray-400 mb-6">Redeem your points for exclusive Steam coupon codes. Three tiers, bigger savings.</p>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            {rewards.map((r, i) => {
-              const Icon = r.icon
-              return (
-                <motion.div
-                  key={r.title}
-                  initial={{ opacity: 0, scale: 0.95 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ duration: 0.4, delay: 0.35 + i * 0.05 }}
-                  className="glass-card p-6 text-center group hover:border-neon-green/30 transition-all"
-                >
-                  <div className={`w-16 h-16 rounded-2xl bg-gradient-to-br ${r.color} flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform`}>
-                    <Icon className="w-8 h-8 text-white" />
-                  </div>
-                  <h3 className="text-white font-bold text-lg">{r.title}</h3>
-                  <p className="text-gray-400 text-sm mt-2 mb-3">{r.desc}</p>
-                  <span className="text-neon-yellow font-mono font-bold text-xl">{r.cost}</span>
-                  <Link href="/rewards" className="btn-primary w-full mt-4 text-sm !py-2.5 block text-center">
-                    View Rewards →
-                  </Link>
-                </motion.div>
-              )
-            })}
-          </div>
-        </motion.div>
-
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}

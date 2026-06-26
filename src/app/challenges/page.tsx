@@ -1,9 +1,8 @@
 "use client"
 import { useState, useEffect, useCallback, useRef } from "react"
-import { Sparkles, Target, CheckCircle, Gift, Eye, Star, RefreshCw, Play } from "lucide-react"
+import { Sparkles, Target, CheckCircle, Gift, Eye, Star, RefreshCw, Loader2, Check } from "lucide-react"
 import { motion } from "framer-motion"
 import { useWallet } from "@/components/providers/WalletProvider"
-import { HTaAdPlayer } from "@/components/ads/HTaAdPlayer"
 import toast from "react-hot-toast"
 
 export default function ChallengesPage() {
@@ -12,7 +11,7 @@ export default function ChallengesPage() {
   const [loading, setLoading] = useState(true)
   const [claiming, setClaiming] = useState<string | null>(null)
   const [showAd, setShowAd] = useState(false)
-  const [adCooldown, setAdCooldown] = useState(0)
+  const [adTimer, setAdTimer] = useState(8)
   const hasWatchedAdRef = useRef(false)
 
   const fetchChallenges = useCallback(() => {
@@ -34,27 +33,25 @@ export default function ChallengesPage() {
     return () => window.removeEventListener("focus", onFocus)
   }, [fetchChallenges])
 
-  // Show ad every 30s after last view
   useEffect(() => {
-    if (!walletId) return
+    if (!showAd) { setAdTimer(8); return }
     const interval = setInterval(() => {
-      setAdCooldown((c) => {
-        if (c <= 0) return 0
-        return c - 1
+      setAdTimer((t) => {
+        if (t <= 1) { clearInterval(interval); return 0 }
+        return t - 1
       })
     }, 1000)
     return () => clearInterval(interval)
-  }, [walletId])
+  }, [showAd])
 
   const triggerAd = () => {
     setShowAd(true)
+    setAdTimer(8)
   }
 
   const handleAdComplete = () => {
     setShowAd(false)
-    setAdCooldown(30)
     hasWatchedAdRef.current = true
-    fetchChallenges()
   }
 
   const handleClaim = async (challengeId: string) => {
@@ -118,10 +115,21 @@ export default function ChallengesPage() {
 
         {showAd && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4">
-            <div className="glass-card p-6 max-w-lg w-full">
-              <h3 className="text-white font-semibold text-center mb-4">Watch an ad to continue</h3>
-              <HTaAdPlayer onComplete={handleAdComplete} onSkip={handleAdComplete} minWatchSeconds={5} />
-              <button onClick={() => setShowAd(false)} className="text-xs text-gray-500 hover:text-white mt-2 block mx-auto">Skip for now</button>
+            <div className="glass-card p-6 max-w-sm w-full text-center">
+              <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-neon-green/20 to-emerald-500/20 flex items-center justify-center mx-auto mb-4">
+                <Loader2 className="w-8 h-8 text-neon-green animate-spin" />
+              </div>
+              <h3 className="text-white font-semibold mb-2">Ad is loading...</h3>
+              <p className="text-gray-400 text-sm mb-4">Please wait while the ad loads</p>
+              <div className="text-3xl font-heading font-bold text-neon-green mb-2">{adTimer}s</div>
+              {adTimer === 0 ? (
+                <button onClick={handleAdComplete} className="btn-primary w-full !py-3 font-bold flex items-center justify-center gap-2">
+                  <Check className="w-5 h-5" /> Continue
+                </button>
+              ) : (
+                <p className="text-xs text-gray-500">Wait for the timer...</p>
+              )}
+              <button onClick={() => setShowAd(false)} className="text-xs text-gray-500 hover:text-white mt-3 block mx-auto">Skip</button>
             </div>
           </div>
         )}
@@ -129,16 +137,6 @@ export default function ChallengesPage() {
         {!walletId && (
           <div className="glass-card p-6 text-center mb-8">
             <p className="text-gray-400">Connect your wallet to track your ad challenge progress.</p>
-          </div>
-        )}
-
-        {/* Inline banner ad */}
-        {walletId && adCooldown === 0 && !showAd && (
-          <div className="glass-card p-3 mb-6 text-center">
-            <p className="text-xs text-gray-500 mb-2">Ad</p>
-            <button onClick={triggerAd} className="btn-secondary text-sm !py-2 !px-4 inline-flex items-center gap-2">
-              <Play className="w-3 h-3" /> Watch Ad to Support
-            </button>
           </div>
         )}
 
