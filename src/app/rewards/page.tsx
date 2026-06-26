@@ -1,19 +1,24 @@
 "use client"
 import { useState, useEffect } from "react"
-import { Gift, ArrowRight, Check, Star, Zap, Monitor, Gamepad2 } from "lucide-react"
+import { Gift, ArrowRight, Check, Star, Monitor, Gamepad2, Globe, ShoppingBag, Radio } from "lucide-react"
 import { motion } from "framer-motion"
 import { formatNumber } from "@/lib/utils"
 import Link from "next/link"
 
-const categoryIcons: Record<string, any> = {
-  "gift-card": Gift,
-  "digital": Monitor,
-  "merch": Gamepad2,
-}
+const PLATFORMS = [
+  { key: "all", label: "All", icon: Gift },
+  { key: "steam", label: "Steam", icon: Monitor },
+  { key: "epic", label: "Epic Games", icon: ShoppingBag },
+  { key: "playstation", label: "PlayStation", icon: Radio },
+  { key: "xbox", label: "Xbox", icon: Globe },
+  { key: "nintendo", label: "Nintendo", icon: Gamepad2 },
+  { key: "gta6", label: "GTA 6", icon: Star },
+]
 
 export default function RewardsPage() {
   const [rewards, setRewards] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
+  const [activePlatform, setActivePlatform] = useState("all")
 
   useEffect(() => {
     fetch("/api/rewards")
@@ -23,6 +28,14 @@ export default function RewardsPage() {
       .finally(() => setLoading(false))
   }, [])
 
+  const filtered = activePlatform === "all"
+    ? rewards
+    : rewards.filter(r => {
+        const cat = r.category || ""
+        if (activePlatform === "gta6") return cat === "coupon-gta6"
+        return cat === `coupon-${activePlatform}`
+      })
+
   return (
     <div className="min-h-screen pt-24 pb-16">
       <div className="page-container">
@@ -31,7 +44,29 @@ export default function RewardsPage() {
             <Gift className="w-8 h-8 text-white" />
           </div>
           <h1 className="text-3xl font-heading font-bold text-white mb-2">Rewards Center</h1>
-          <p className="text-gray-400">Redeem your points for exclusive rewards</p>
+          <p className="text-gray-400">Redeem your points for game coupon codes</p>
+        </div>
+
+        {/* Platform Tabs */}
+        <div className="flex flex-wrap gap-2 justify-center mb-8">
+          {PLATFORMS.map(p => {
+            const Icon = p.icon
+            const isActive = activePlatform === p.key
+            return (
+              <button
+                key={p.key}
+                onClick={() => setActivePlatform(p.key)}
+                className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all ${
+                  isActive
+                    ? "bg-neon-green/20 text-neon-green border border-neon-green/40"
+                    : "glass text-gray-400 hover:text-white border border-transparent"
+                }`}
+              >
+                <Icon className="w-4 h-4" />
+                {p.label}
+              </button>
+            )
+          })}
         </div>
 
         {loading ? (
@@ -45,16 +80,18 @@ export default function RewardsPage() {
               </div>
             ))}
           </div>
-        ) : rewards.length === 0 ? (
+        ) : filtered.length === 0 ? (
           <div className="text-center py-20">
             <Gift className="w-16 h-16 text-gray-600 mx-auto mb-4" />
-            <h3 className="text-xl text-gray-400 font-semibold">No rewards available</h3>
+            <h3 className="text-xl text-gray-400 font-semibold">No rewards in this category</h3>
             <p className="text-gray-600 text-sm mt-2">Check back soon for new rewards.</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {rewards.map((reward, i) => {
-              const Icon = categoryIcons[reward.category] || Gift
+            {filtered.map((reward, i) => {
+              const cat = reward.category || ""
+              const platform = PLATFORMS.find(p => cat === `coupon-${p.key}` || (p.key === "gta6" && cat === "coupon-gta6")) || PLATFORMS[0]
+              const Icon = platform.icon
               return (
                 <motion.div
                   key={reward.id}

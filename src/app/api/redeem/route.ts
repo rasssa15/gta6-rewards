@@ -3,9 +3,12 @@ import { prisma } from "@/lib/prisma"
 import { createHash, randomBytes } from "crypto"
 
 function generateCouponCode(rewardName: string): string {
-  const prefix = rewardName.slice(0, 4).toUpperCase().replace(/[^A-Z0-9]/g, "X")
-  const rand = randomBytes(4).toString("hex").toUpperCase()
-  return `${prefix}-${rand}`
+  const parts = rewardName.split(" - ")
+  const platform = (parts[0] || "").slice(0, 4).toUpperCase().replace(/[^A-Z0-9]/g, "X")
+  const game = parts[1] || rewardName
+  const gameTag = game.replace(/[^A-Z0-9]/gi, "").slice(0, 6).toUpperCase()
+  const rand = randomBytes(3).toString("hex").toUpperCase()
+  return `${platform}-${gameTag}-${rand}`
 }
 
 export async function POST(req: NextRequest) {
