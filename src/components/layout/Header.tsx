@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react"
 import Link from "next/link"
 import { useRouter, usePathname } from "next/navigation"
-import { Gamepad2, Menu, X, User, Shield, Trophy, Sparkles, Gift, HelpCircle, Newspaper, Wallet, LogOut, ChevronDown, Coins, Eye, Settings } from "lucide-react"
+import { Gamepad2, Menu, X, User, Shield, Trophy, Sparkles, Gift, HelpCircle, Newspaper, Wallet, LogOut, ChevronDown, Coins, Eye } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useWallet } from "@/components/providers/WalletProvider"
 import { clearWallet, setLocked } from "@/lib/wallet/storage"
@@ -16,7 +16,6 @@ const navLinks = [
   { label: "Leaderboard", href: "/leaderboard", icon: Trophy },
   { label: "Challenges", href: "/challenges", icon: Sparkles },
   { label: "FAQ", href: "/faq", icon: HelpCircle },
-  { label: "Admin", href: "/admin", icon: Settings },
 ]
 
 export function Header() {
