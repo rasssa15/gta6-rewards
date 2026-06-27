@@ -1,0 +1,50 @@
+/* GTA Vice City / Neon Nights theme */
+html[data-theme="gta-neon"] {
+  --neon-pink: #ff0066;
+  --neon-blue: #00ccff;
+  --neon-purple: #9b2eff;
+  --neon-green: #00ff88;
+  --neon-yellow: #ffcf3f;
+  --neon-orange: #ff6b00;
+  --glass-bg: rgba(26, 5, 51, 0.6);
+  --glass-border: rgba(255, 0, 102, 0.2);
+  --glass-shadow: 0 8px 32px 0 rgba(255, 0, 102, 0.15);
+}
+
+html[data-theme="gta-neon"] body {
+  background: linear-gradient(135deg, #0d0218 0%, #1a0533 50%, #0d0218 100%);
+}
+
+html[data-theme="gta-neon"] .glass-card:hover {
+  border-color: rgba(255, 0, 102, 0.35);
+  box-shadow: 0 16px 48px 0 rgba(255, 0, 102, 0.2), 0 0 0 1px rgba(255, 0, 102, 0.12);
+}
+
+html[data-theme="gta-neon"] .btn-primary {
+  background: linear-gradient(135deg, #ff0066, #9b2eff);
+  box-shadow: 0 4px 20px rgba(255, 0, 102, 0.3);
+}
+
+html[data-theme="gta-neon"] .btn-primary:hover {
+  box-shadow: 0 6px 30px rgba(255, 0, 102, 0.5);
+}
+
+html[data-theme="gta-neon"] .btn-secondary {
+  border-color: rgba(255, 0, 102, 0.3);
+  color: #ff0066;
+}
+
+html[data-theme="gta-neon"] .gradient-text {
+  background: linear-gradient(135deg, #ff0066, #00ccff);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+html[data-theme="gta-neon"] ::selection {
+  background: rgba(255, 0, 102, 0.3);
+}
+
+html[data-theme="gta-neon"] *::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #ff0066, #9b2eff);
+}
