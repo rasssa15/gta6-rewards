@@ -22,7 +22,7 @@ export const metadata: Metadata = {
   description:
     "Your ultimate GTA 6 gaming platform. Earn points, unlock achievements, read the latest news, and redeem exclusive rewards.",
   robots: "index, follow",
-  verification: { google: "UuaBwf-wLs0jLIO8L8GrrWKitbpdZW9xgYNhMwfpnTw" },
+  verification: { google: "KzUihwliNECqZjshnI47VKVhGYgXmu6Ak859BMFJjEI" },
   openGraph: {
     title: "GTA 6 Rewards",
     description: "Gaming news, rewards, and community platform for GTA 6 fans.",
