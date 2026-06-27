@@ -69,25 +69,24 @@ export default function AdsPage() {
 
   useEffect(() => {
     if (watching && videoRef.current) {
+      const v = videoRef.current
+      v.muted = true
+      v.playsInline = true
+      v.preload = "auto"
       const t = setTimeout(() => {
-        videoRef.current?.play().then(() => {
+        v.play().then(() => {
           setAdPlaying(true)
-        }).catch((e) => {
-          if (e.name === "NotAllowedError") {
-            videoRef.current!.muted = true
-            videoRef.current!.play().then(() => setAdPlaying(true)).catch(() => setAdDone(true))
-          } else {
-            setAdDone(true)
-          }
+        }).catch(() => {
+          setAdDone(true)
         })
-      }, 500)
+      }, 300)
       return () => clearTimeout(t)
     }
-  }, [watching])
+  }, [watching, videoUrl])
 
   useEffect(() => {
     if (adSkippable || !adPlaying) return
-    const t = setTimeout(() => setAdSkippable(true), 4000)
+    const t = setTimeout(() => setAdSkippable(true), 5000)
     return () => clearTimeout(t)
   }, [adPlaying, adSkippable])
 
@@ -131,58 +130,61 @@ export default function AdsPage() {
     <div className="min-h-screen pt-24 pb-16">
       {/* Full-screen ad overlay */}
       {watching && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black" onClick={(e) => e.stopPropagation()}>
-          <div className="relative w-full h-full flex flex-col items-center justify-center">
-            <video
-              ref={videoRef}
-              src={videoUrl}
-              onTimeUpdate={handleTimeUpdate}
-              onEnded={handleAdEnd}
-              className="w-full h-full object-contain"
-              playsInline
-              muted
-              controls={false}
-              {...{"webkit-playsinline": "true", "x5-playsinline": "true"}}
-            />
-            {!adPlaying && !adDone && (
-              <div className="absolute inset-0 flex items-center justify-center bg-black/80">
-                <Loader2 className="w-10 h-10 text-neon-green animate-spin" />
+        <div className="fixed inset-0 z-50 bg-black" onClick={(e) => e.stopPropagation()}>
+          <video
+            ref={videoRef}
+            src={videoUrl}
+            onTimeUpdate={handleTimeUpdate}
+            onEnded={handleAdEnd}
+            className="w-full h-full object-cover"
+            playsInline
+            muted
+            autoPlay
+            preload="auto"
+            controls={false}
+            {...{"webkit-playsinline": "true", "x5-playsinline": "true"}}
+          />
+          {!adPlaying && !adDone && (
+            <div className="absolute inset-0 flex items-center justify-center bg-black/60">
+              <div className="text-center">
+                <Loader2 className="w-12 h-12 text-neon-green animate-spin mx-auto mb-3" />
+                <p className="text-white/60 text-sm">Loading ad...</p>
               </div>
-            )}
-            {adSkippable && !adDone && (
-              <button
-                onClick={skipAd}
-                className="absolute bottom-6 right-6 px-4 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-sm text-white flex items-center gap-2 backdrop-blur-sm"
-              >
-                <SkipForward className="w-4 h-4" /> Skip Ad
-              </button>
-            )}
-            {/* Progress bar */}
-            <div className="absolute top-0 left-0 right-0 h-1 bg-white/10">
-              <div className="h-full bg-neon-green transition-all duration-200" style={{ width: `${Math.min(adProgress, 100)}%` }} />
             </div>
-            {/* Timer overlay during ad */}
-            {adPlaying && !adDone && (
-              <div className="absolute top-6 left-6 px-3 py-1.5 rounded-lg bg-black/60 backdrop-blur-sm text-white text-sm font-mono">
-                {timer}s
-              </div>
-            )}
-            {/* Claim overlay when ad is done */}
-            {(adDone || timer === 0) && (
-              <div className="absolute inset-0 flex items-center justify-center bg-black/70 backdrop-blur-sm">
-                <div className="text-center p-8">
-                  <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-neon-green/20 to-emerald-500/20 flex items-center justify-center mx-auto mb-4">
-                    <Check className="w-10 h-10 text-neon-green" />
-                  </div>
-                  <h3 className="text-white text-2xl font-bold mb-2">Ad Complete!</h3>
-                  <p className="text-gray-400 mb-6">Your reward is ready</p>
-                  <button onClick={handleComplete} className="btn-primary !py-3 !px-10 text-lg font-bold flex items-center gap-2 mx-auto">
-                    <Check className="w-5 h-5" /> Claim Reward
-                  </button>
-                </div>
-              </div>
-            )}
+          )}
+          {adSkippable && !adDone && (
+            <button
+              onClick={skipAd}
+              className="absolute bottom-8 right-6 px-5 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-sm text-white flex items-center gap-2 backdrop-blur-sm transition-all z-10"
+            >
+              <SkipForward className="w-4 h-4" /> Skip
+            </button>
+          )}
+          {/* Progress bar */}
+          <div className="absolute top-0 left-0 right-0 h-1.5 bg-white/10 z-10">
+            <div className="h-full bg-neon-green transition-all duration-300 ease-linear" style={{ width: `${Math.min(adProgress, 100)}%` }} />
           </div>
+          {/* Timer */}
+          {adPlaying && !adDone && (
+            <div className="absolute top-6 left-6 px-3 py-1.5 rounded-lg bg-black/50 backdrop-blur-sm text-white/80 text-sm font-mono z-10">
+              {timer}s
+            </div>
+          )}
+          {/* Claim overlay */}
+          {(adDone || timer === 0) && (
+            <div className="absolute inset-0 flex items-center justify-center bg-black/60 z-10">
+              <div className="text-center px-6">
+                <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-neon-green/20 to-emerald-500/20 flex items-center justify-center mx-auto mb-4">
+                  <Check className="w-10 h-10 text-neon-green" />
+                </div>
+                <h3 className="text-white text-2xl font-bold mb-2">Ad Complete!</h3>
+                <p className="text-gray-400 mb-6">Your reward is ready</p>
+                <button onClick={handleComplete} className="btn-primary !py-3 !px-10 text-lg font-bold flex items-center gap-2 mx-auto">
+                  <Check className="w-5 h-5" /> Claim Reward
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       )}
 
