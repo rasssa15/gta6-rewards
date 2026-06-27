@@ -15,12 +15,19 @@ jobs:
         with:
           node-version: 24
 
-      - run: npm install
-        env:
-          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      - run: npm ci
 
       - name: Scrape articles
         run: node scripts/scrape.mjs
-        env:
-          API_URL: ${{ secrets.API_URL || 'https://gta6-rewards.vercel.app' }}
-          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+
+      - name: Commit and push changes
+        run: |
+          git config user.name "gta6-rewards-bot"
+          git config user.email "bot@gta6rewards.com"
+          git add public/data/articles-*.json
+          if git diff --cached --quiet; then
+            echo "No new articles to commit"
+          else
+            git commit -m "chore: auto-scrape new articles from RSS feeds"
+            git push
+          fi

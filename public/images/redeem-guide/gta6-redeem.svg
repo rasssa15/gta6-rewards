@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="600" height="400" viewBox="0 0 600 400">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1a0533"/>
+      <stop offset="100%" stop-color="#0d0218"/>
+    </linearGradient>
+    <linearGradient id="neonPink" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ff0066"/>
+      <stop offset="100%" stop-color="#ff00ff"/>
+    </linearGradient>
+    <linearGradient id="neonBlue" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#00ccff"/>
+      <stop offset="100%" stop-color="#0066ff"/>
+    </linearGradient>
+  </defs>
+  <rect width="600" height="400" rx="12" fill="url(#bg)"/>
+  <rect x="0" y="0" width="600" height="56" fill="#0d0218" rx="12"/>
+  <rect x="0" y="28" width="600" height="28" fill="#0d0218"/>
+  <image x="20" y="6" width="40" height="40" xlink:href="rockstar-logo.png"/>
+  <text x="72" y="32" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#888" letter-spacing="2">ROCKSTAR GAMES</text>
+  <text x="580" y="34" font-family="Arial, sans-serif" font-size="10" fill="#555" text-anchor="end">rockstargames.com</text>
+  <rect x="30" y="70" width="540" height="50" rx="8" fill="#1a0533" stroke="#ff0066" stroke-width="0.5" stroke-opacity="0.3"/>
+  <text x="50" y="92" font-family="Arial, sans-serif" font-size="13" font-weight="bold" fill="#ff0066">GTA 6 Pre-Order Coupon</text>
+  <text x="50" y="110" font-family="Arial, sans-serif" font-size="10" fill="#888">Your coupon code for pre-ordering Grand Theft Auto VI</text>
+  <rect x="30" y="135" width="540" height="85" rx="8" fill="#1a0533" stroke="#00ccff" stroke-width="0.5" stroke-opacity="0.3"/>
+  <text x="50" y="165" font-family="Arial, sans-serif" font-size="12" fill="#00ccff">Coupon Code</text>
+  <rect x="50" y="178" width="360" height="28" rx="4" fill="#0d0218" stroke="#ff0066" stroke-width="1.5"/>
+  <text x="60" y="197" font-family="monospace, monospace" font-size="12" fill="#ff0066" letter-spacing="3">GTA6-PREORDER-X9K2M</text>
+  <rect x="420" y="178" width="90" height="28" rx="4" fill="url(#neonPink)"/>
+  <text x="465" y="197" font-family="Arial, sans-serif" font-size="12" font-weight="bold" fill="#ffffff" text-anchor="middle">Redeem</text>
+  <rect x="30" y="240" width="540" height="115" rx="8" fill="#1a0533" opacity="0.5"/>
+  <text x="50" y="270" font-family="Arial, sans-serif" font-size="13" font-weight="bold" fill="#ff0066">How to Redeem GTA 6 Pre-Order</text>
+  <text x="50" y="295" font-family="Arial, sans-serif" font-size="11" fill="#888">1. Contact GTA 6 Rewards support with your coupon code</text>
+  <text x="50" y="315" font-family="Arial, sans-serif" font-size="11" fill="#888">2. Provide your wallet address for verification</text>
+  <text x="50" y="335" font-family="Arial, sans-serif" font-size="11" fill="#888">3. Pre-order code sent to your email for your chosen platform</text>
+  <circle cx="550" cy="355" r="15" fill="#ff0066" opacity="0.15"/>
+  <text x="550" y="360" font-family="Arial, sans-serif" font-size="16" text-anchor="middle" fill="#ff0066">?</text>
+</svg>

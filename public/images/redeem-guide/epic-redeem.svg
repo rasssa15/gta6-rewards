@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="600" height="400" viewBox="0 0 600 400">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#2a2a2a"/>
+      <stop offset="100%" stop-color="#1a1a1a"/>
+    </linearGradient>
+  </defs>
+  <rect width="600" height="400" rx="12" fill="url(#bg)"/>
+  <rect x="0" y="0" width="600" height="56" fill="#1a1a1a" rx="12"/>
+  <rect x="0" y="28" width="600" height="28" fill="#1a1a1a"/>
+  <image x="20" y="6" width="36" height="40" xlink:href="epic-logo.png"/>
+  <text x="68" y="32" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#ffffff" letter-spacing="3">EPIC GAMES</text>
+  <text x="580" y="34" font-family="Arial, sans-serif" font-size="10" fill="#666" text-anchor="end">epicgames.com/store</text>
+  <rect x="30" y="70" width="340" height="40" rx="6" fill="#333"/>
+  <text x="50" y="95" font-family="Arial, sans-serif" font-size="13" fill="#ccc">Profile</text>
+  <text x="570" y="95" font-family="Arial, sans-serif" font-size="12" fill="#ffffff" text-anchor="end">Redeem Code →</text>
+  <rect x="30" y="130" width="540" height="80" rx="8" fill="#333"/>
+  <text x="50" y="160" font-family="Arial, sans-serif" font-size="12" fill="#ffffff">Redeem Code</text>
+  <rect x="50" y="175" width="320" height="24" rx="4" fill="#2a2a2a" stroke="#ffffff" stroke-width="1.5" stroke-opacity="0.2"/>
+  <text x="60" y="192" font-family="monospace, monospace" font-size="11" fill="#ffffff">EPIC-5USD-D4E5F6</text>
+  <rect x="380" y="175" width="80" height="24" rx="4" fill="#ffffff"/>
+  <text x="420" y="192" font-family="Arial, sans-serif" font-size="12" font-weight="bold" fill="#2a2a2a" text-anchor="middle">Redeem</text>
+  <rect x="30" y="230" width="540" height="120" rx="8" fill="#333" opacity="0.5"/>
+  <text x="50" y="260" font-family="Arial, sans-serif" font-size="13" font-weight="bold" fill="#ffffff">How to Redeem on Epic Games</text>
+  <text x="50" y="285" font-family="Arial, sans-serif" font-size="11" fill="#888">1. Open Epic Games Launcher or visit epicgames.com/store</text>
+  <text x="50" y="305" font-family="Arial, sans-serif" font-size="11" fill="#888">2. Click your profile icon → Redeem Code</text>
+  <text x="50" y="325" font-family="Arial, sans-serif" font-size="11" fill="#888">3. Enter your code → Click Redeem</text>
+  <circle cx="550" cy="345" r="15" fill="#ffffff" opacity="0.15"/>
+  <text x="550" y="350" font-family="Arial, sans-serif" font-size="16" text-anchor="middle" fill="#ffffff">✓</text>
+</svg>

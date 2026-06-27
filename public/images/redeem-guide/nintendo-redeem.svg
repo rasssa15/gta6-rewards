@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="600" height="400" viewBox="0 0 600 400">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#e60012"/>
+      <stop offset="100%" stop-color="#b8000e"/>
+    </linearGradient>
+  </defs>
+  <rect width="600" height="400" rx="12" fill="url(#bg)"/>
+  <rect x="0" y="0" width="600" height="56" fill="#b8000e" rx="12"/>
+  <rect x="0" y="28" width="600" height="28" fill="#b8000e"/>
+  <image x="20" y="6" width="40" height="40" xlink:href="nintendo-logo.png"/>
+  <text x="72" y="32" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#ffffff" letter-spacing="2">NINTENDO</text>
+  <text x="580" y="34" font-family="Arial, sans-serif" font-size="10" fill="#ff9999" text-anchor="end">ec.nintendo.com/redeem</text>
+  <rect x="30" y="70" width="540" height="50" rx="8" fill="#e60012"/>
+  <text x="50" y="92" font-family="Arial, sans-serif" font-size="13" font-weight="bold" fill="#ffffff">Nintendo eShop</text>
+  <text x="50" y="110" font-family="Arial, sans-serif" font-size="10" fill="#ff9999">Enter a download code to add funds</text>
+  <rect x="30" y="135" width="540" height="85" rx="8" fill="#e60012" opacity="0.6"/>
+  <text x="50" y="165" font-family="Arial, sans-serif" font-size="12" fill="#ffffff">Download Code</text>
+  <rect x="50" y="178" width="340" height="28" rx="4" fill="#b8000e" stroke="#ffffff" stroke-width="1.5" stroke-opacity="0.3"/>
+  <text x="60" y="197" font-family="monospace, monospace" font-size="12" fill="#ffffff" letter-spacing="2">A1B2C3D4E5F6G7H8</text>
+  <rect x="400" y="178" width="90" height="28" rx="4" fill="#ffffff"/>
+  <text x="445" y="197" font-family="Arial, sans-serif" font-size="12" font-weight="bold" fill="#e60012" text-anchor="middle">Redeem</text>
+  <rect x="30" y="240" width="540" height="115" rx="8" fill="#e60012" opacity="0.4"/>
+  <text x="50" y="270" font-family="Arial, sans-serif" font-size="13" font-weight="bold" fill="#ffffff">How to Redeem on Nintendo</text>
+  <text x="50" y="295" font-family="Arial, sans-serif" font-size="11" fill="#ff9999">1. On Switch: Nintendo eShop from HOME menu → Redeem Code</text>
+  <text x="50" y="315" font-family="Arial, sans-serif" font-size="11" fill="#ff9999">2. Enter your 16-digit download code</text>
+  <text x="50" y="335" font-family="Arial, sans-serif" font-size="11" fill="#ff9999">3. Confirm — funds added to your eShop balance</text>
+  <circle cx="550" cy="360" r="15" fill="#ffffff" opacity="0.15"/>
+  <text x="550" y="365" font-family="Arial, sans-serif" font-size="16" text-anchor="middle" fill="#ffffff">✓</text>
+</svg>

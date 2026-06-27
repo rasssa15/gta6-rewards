@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" fill="none">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="200" y2="200">
+      <stop offset="0%" stop-color="#1a0533"/>
+      <stop offset="100%" stop-color="#0d0218"/>
+    </linearGradient>
+    <linearGradient id="glow" x1="0" y1="0" x2="200" y2="200">
+      <stop offset="0%" stop-color="#ff0066"/>
+      <stop offset="100%" stop-color="#00ccff"/>
+    </linearGradient>
+  </defs>
+  <rect width="200" height="200" rx="24" fill="url(#bg)" stroke="#ff0066" stroke-width="2"/>
+  <circle cx="100" cy="85" r="40" fill="none" stroke="url(#glow)" stroke-width="3"/>
+  <circle cx="100" cy="85" r="25" fill="url(#glow)" opacity="0.2"/>
+  <circle cx="100" cy="85" r="15" fill="url(#glow)"/>
+  <path d="M100 30L120 70L100 60L80 70L100 30Z" fill="#ffcf3f" opacity="0.8"/>
+  <path d="M100 140L120 100L100 110L80 100L100 140Z" fill="#00ccff" opacity="0.8"/>
+  <path d="M60 85L75 95L65 105Z" fill="#ff0066" opacity="0.6"/>
+  <path d="M140 85L125 95L135 105Z" fill="#00ff88" opacity="0.6"/>
+  <text x="100" y="170" text-anchor="middle" fill="white" font-size="12" font-family="sans-serif" opacity="0.6">NEON THEME</text>
+</svg>

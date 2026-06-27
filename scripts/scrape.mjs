@@ -1,9 +1,38 @@
 import Parser from "rss-parser"
 import * as cheerio from "cheerio"
 import slugify from "slugify"
+import { readFileSync, writeFileSync, mkdirSync, existsSync } from "fs"
+import { join, dirname } from "path"
+import { fileURLToPath } from "url"
 
-const API_URL = process.env.API_URL || "http://localhost:3000"
+const __dirname = dirname(fileURLToPath(import.meta.url))
+const DATA_DIR = join(__dirname, "..", "public", "data")
 
+const CATEGORY_MAP = {
+  "rockstargames.com": "rockstar",
+  "ign.com": "gta-6",
+  "gamespot.com": "gta-6",
+  "pcgamer.com": "pc-gaming",
+  "vg247.com": "gta-6",
+}
+
+const KEYWORD_CATEGORY = {
+  "gta": "gta-6",
+  "grand theft auto": "gta-6",
+  "rockstar": "rockstar",
+  "xbox": "xbox",
+  "playstation": "playstation",
+  "sony": "playstation",
+  "ps5": "playstation",
+  "nintendo": "nintendo",
+  "switch": "nintendo",
+  "pc gaming": "pc-gaming",
+  "steam": "pc-gaming",
+  "esports": "esports",
+  "competitive": "esports",
+}
+
+const CATEGORIES = ["gta-6", "rockstar", "playstation", "xbox", "pc-gaming", "nintendo", "esports"]
 const DEFAULT_FEEDS = [
   "https://www.ign.com/rss/articles",
   "https://www.rockstargames.com/newswire/feed.xml",
@@ -12,38 +41,59 @@ const DEFAULT_FEEDS = [
   "https://www.vg247.com/feed",
 ]
 
+function uuid() {
+  return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, c => {
+    const r = Math.random() * 16 | 0
+    return (c === "x" ? r : (r & 0x3 | 0x8)).toString(16)
+  })
+}
+
+function detectCategory(feedUrl, title, content) {
+  const host = new URL(feedUrl).hostname.replace("www.", "")
+  if (CATEGORY_MAP[host]) return CATEGORY_MAP[host]
+  const text = `${title} ${content}`.toLowerCase()
+  for (const [keyword, cat] of Object.entries(KEYWORD_CATEGORY)) {
+    if (text.includes(keyword)) return cat
+  }
+  return "gta-6"
+}
+
+function loadCategory(cat) {
+  const path = join(DATA_DIR, `articles-${cat}.json`)
+  if (!existsSync(path)) return []
+  return JSON.parse(readFileSync(path, "utf8"))
+}
+
+function saveCategory(cat, articles) {
+  if (!existsSync(DATA_DIR)) mkdirSync(DATA_DIR, { recursive: true })
+  const path = join(DATA_DIR, `articles-${cat}.json`)
+  writeFileSync(path, JSON.stringify(articles, null, 2))
+  console.log(`  Saved ${articles.length} articles to articles-${cat}.json`)
+}
+
+function deduplicate(articles) {
+  const seen = new Set()
+  return articles.filter(a => {
+    const key = a.slug || a.sourceUrl || a.title
+    if (seen.has(key)) return false
+    seen.add(key)
+    return true
+  })
+}
+
 async function scrape() {
   console.log("Starting scraper...")
 
-  const settingsRes = await fetch(`${API_URL}/api/settings`).catch(() => null)
-  let feeds = DEFAULT_FEEDS
-  let autoPublish = false
-  let geminiKey = ""
-
-  if (settingsRes?.ok) {
-    const settings = await settingsRes.json()
-    if (settings.rss_feeds) feeds = settings.rss_feeds.split("\n").filter(Boolean)
-    autoPublish = settings.auto_publish === "true"
-    geminiKey = settings.gemini_api_key || ""
-  }
-
   const parser = new Parser()
-  let total = 0
+  let totalNew = 0
 
-  for (const feedUrl of feeds) {
+  for (const feedUrl of DEFAULT_FEEDS) {
     try {
       const feed = await parser.parseURL(feedUrl.trim())
-      console.log(`Processing: ${feed.title || feedUrl}`)
+      console.log(`\nProcessing: ${feed.title || feedUrl}`)
 
       for (const item of feed.items.slice(0, 5)) {
         if (!item.title || !item.link) continue
-
-        const checkRes = await fetch(`${API_URL}/api/articles?search=${encodeURIComponent(item.title)}&limit=1`)
-        const checkData = await checkRes.json()
-        if (checkData.articles?.length > 0) {
-          console.log(`  Skipping (exists): ${item.title}`)
-          continue
-        }
 
         let content = item.contentSnippet || item.content || ""
         let image = ""
@@ -51,7 +101,7 @@ async function scrape() {
         try {
           const res = await fetch(item.link, {
             headers: { "User-Agent": "Mozilla/5.0 (compatible; GTARewards/1.0)" },
-            timeout: 10000,
+            signal: AbortSignal.timeout(10000),
           })
           const html = await res.text()
           const $ = cheerio.load(html)
@@ -62,68 +112,53 @@ async function scrape() {
           console.log(`  Scrape failed for ${item.link}, using RSS snippet`)
         }
 
-        let rewritten = {
+        const category = detectCategory(feedUrl, item.title, content)
+        const slug = slugify(item.title, { lower: true, strict: true }) + "-" + Date.now()
+
+        const article = {
+          id: uuid(),
           title: item.title.trim(),
+          slug,
+          excerpt: (item.contentSnippet || content).slice(0, 200),
           content,
-          seoTitle: item.title.trim(),
-          seoDesc: (item.contentSnippet || "").slice(0, 160),
-          tags: feed.title || "gaming",
-          readingTime: Math.max(1, Math.ceil((content.split(" ").length || 0) / 200)),
-        }
-
-        if (geminiKey) {
-          try {
-            const { GoogleGenerativeAI } = await import("@google/generative-ai")
-            const genAI = new GoogleGenerativeAI(geminiKey)
-            const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" })
-            const prompt = `Rewrite this gaming article for GTA 6 Rewards platform. Engaging, conversational, keep facts. Return JSON with title, content, seoTitle, seoDesc, tags, readingTime.
-
-Title: ${rewritten.title}
-Content: ${content.slice(0, 3000)}`
-
-            const result = await model.generateContent(prompt)
-            const text = result.response.text()
-            const cleaned = text.replace(/```json\s*/g, "").replace(/```/g, "").trim()
-            try { rewritten = { ...rewritten, ...JSON.parse(cleaned) } } catch {}
-          } catch (e) {
-            console.log("  Gemini rewrite skipped")
-          }
-        }
-
-        const articleData = {
-          title: rewritten.title,
-          slug: slugify(rewritten.title, { lower: true, strict: true }) + "-" + Date.now(),
-          excerpt: rewritten.seoDesc.slice(0, 200),
-          content: rewritten.content,
+          categoryId: category,
+          categorySlug: category,
+          categoryName: category.replace(/-/g, " ").replace(/\b\w/g, c => c.toUpperCase()),
           featuredImage: image,
-          status: autoPublish ? "published" : "draft",
-          tags: rewritten.tags,
-          readingTime: rewritten.readingTime,
+          prices: "",
+          author: feed.title || "RSS",
+          status: "draft",
+          viewCount: 0,
+          readingTime: Math.max(1, Math.ceil(content.split(" ").length / 200)),
+          tags: feed.title || "gaming",
+          metaTitle: item.title.trim().slice(0, 60),
+          metaDescription: (item.contentSnippet || "").slice(0, 160),
+          keywords: "",
+          createdAt: new Date().toISOString(),
           source: feed.title || "RSS",
           sourceUrl: item.link,
-          seoTitle: rewritten.seoTitle,
-          seoDesc: rewritten.seoDesc,
         }
 
-        const createRes = await fetch(`${API_URL}/api/articles`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(articleData),
-        })
-
-        if (createRes.ok) {
-          total++
-          console.log(`  Created: ${articleData.title} (${autoPublish ? "published" : "draft"})`)
-        } else {
-          console.log(`  Failed: ${articleData.title}`)
+        const existingArticles = loadCategory(category)
+        const isDuplicate = existingArticles.some(
+          a => a.sourceUrl === item.link || a.title === item.title
+        )
+        if (isDuplicate) {
+          console.log(`  Skipping (exists): ${item.title}`)
+          continue
         }
+
+        existingArticles.push(article)
+        saveCategory(category, deduplicate(existingArticles))
+        totalNew++
+        console.log(`  Created: ${article.title} (${category}, draft)`)
       }
     } catch (e) {
       console.log(`Error processing feed ${feedUrl}: ${e.message}`)
     }
   }
 
-  console.log(`Done. Created ${total} articles.`)
+  console.log(`\nDone. Created ${totalNew} new articles.`)
 }
 
 scrape().catch(console.error)
