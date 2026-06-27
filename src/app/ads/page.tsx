@@ -1,21 +1,31 @@
 "use client"
 import { useState, useEffect, useRef } from "react"
-import { Eye, Play, Star, TrendingUp, Loader2, Check } from "lucide-react"
-import { motion, AnimatePresence } from "framer-motion"
+import { Eye, Play, Star, TrendingUp, Loader2, Check, SkipForward } from "lucide-react"
 import { useWallet } from "@/components/providers/WalletProvider"
 import toast from "react-hot-toast"
 import Link from "next/link"
-import { HTA_AD_URLS } from "@/lib/hta-ads"
+
+const AD_VIDEOS = [
+  "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4",
+  "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4",
+  "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4",
+  "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4",
+  "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerMeltdowns.mp4",
+]
 
 export default function AdsPage() {
   const { walletId, points, refresh } = useWallet()
   const [watching, setWatching] = useState(false)
-  const [timer, setTimer] = useState(12)
+  const [timer, setTimer] = useState(10)
   const [lastResult, setLastResult] = useState<any>(null)
   const [adsWatched, setAdsWatched] = useState(0)
   const [totalPoints, setTotalPoints] = useState(0)
-  const [adUrl, setAdUrl] = useState("")
-  const [popupBlocked, setPopupBlocked] = useState(false)
+  const [videoUrl, setVideoUrl] = useState("")
+  const [adProgress, setAdProgress] = useState(0)
+  const [adPlaying, setAdPlaying] = useState(false)
+  const [adSkippable, setAdSkippable] = useState(false)
+  const [adDone, setAdDone] = useState(false)
+  const videoRef = useRef<HTMLVideoElement>(null)
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
   useEffect(() => {
@@ -39,19 +49,12 @@ export default function AdsPage() {
   const startWatching = () => {
     setLastResult(null)
     setWatching(true)
-    setTimer(12)
-    setPopupBlocked(false)
-    const selectedUrl = HTA_AD_URLS[Math.floor(Math.random() * HTA_AD_URLS.length)]
-    setAdUrl(selectedUrl)
-
-    try {
-      const win = window.open(selectedUrl, "_blank")
-      if (!win || win.closed || typeof win.closed === "undefined") {
-        setPopupBlocked(true)
-      }
-    } catch {
-      setPopupBlocked(true)
-    }
+    setTimer(10)
+    setAdProgress(0)
+    setAdPlaying(false)
+    setAdSkippable(false)
+    setAdDone(false)
+    setVideoUrl(AD_VIDEOS[Math.floor(Math.random() * AD_VIDEOS.length)])
 
     intervalRef.current = setInterval(() => {
       setTimer((t) => {
@@ -62,6 +65,42 @@ export default function AdsPage() {
         return t - 1
       })
     }, 1000)
+  }
+
+  useEffect(() => {
+    if (watching && videoRef.current) {
+      const t = setTimeout(() => {
+        videoRef.current?.play().then(() => {
+          setAdPlaying(true)
+        }).catch((e) => {
+          if (e.name === "NotAllowedError") {
+            videoRef.current!.muted = true
+            videoRef.current!.play().then(() => setAdPlaying(true)).catch(() => setAdDone(true))
+          } else {
+            setAdDone(true)
+          }
+        })
+      }, 500)
+      return () => clearTimeout(t)
+    }
+  }, [watching])
+
+  useEffect(() => {
+    if (adSkippable || !adPlaying) return
+    const t = setTimeout(() => setAdSkippable(true), 4000)
+    return () => clearTimeout(t)
+  }, [adPlaying, adSkippable])
+
+  const handleTimeUpdate = () => {
+    if (videoRef.current) {
+      setAdProgress(Math.min((videoRef.current.currentTime / videoRef.current.duration) * 100, 100))
+    }
+  }
+
+  const handleAdEnd = () => { setAdDone(true); setAdPlaying(false) }
+
+  const skipAd = () => {
+    if (videoRef.current) videoRef.current.currentTime = videoRef.current.duration
   }
 
   const handleComplete = async () => {
@@ -90,6 +129,63 @@ export default function AdsPage() {
 
   return (
     <div className="min-h-screen pt-24 pb-16">
+      {/* Full-screen ad overlay */}
+      {watching && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black" onClick={(e) => e.stopPropagation()}>
+          <div className="relative w-full h-full flex flex-col items-center justify-center">
+            <video
+              ref={videoRef}
+              src={videoUrl}
+              onTimeUpdate={handleTimeUpdate}
+              onEnded={handleAdEnd}
+              className="w-full h-full object-contain"
+              playsInline
+              muted
+              controls={false}
+              {...{"webkit-playsinline": "true", "x5-playsinline": "true"}}
+            />
+            {!adPlaying && !adDone && (
+              <div className="absolute inset-0 flex items-center justify-center bg-black/80">
+                <Loader2 className="w-10 h-10 text-neon-green animate-spin" />
+              </div>
+            )}
+            {adSkippable && !adDone && (
+              <button
+                onClick={skipAd}
+                className="absolute bottom-6 right-6 px-4 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-sm text-white flex items-center gap-2 backdrop-blur-sm"
+              >
+                <SkipForward className="w-4 h-4" /> Skip Ad
+              </button>
+            )}
+            {/* Progress bar */}
+            <div className="absolute top-0 left-0 right-0 h-1 bg-white/10">
+              <div className="h-full bg-neon-green transition-all duration-200" style={{ width: `${Math.min(adProgress, 100)}%` }} />
+            </div>
+            {/* Timer overlay during ad */}
+            {adPlaying && !adDone && (
+              <div className="absolute top-6 left-6 px-3 py-1.5 rounded-lg bg-black/60 backdrop-blur-sm text-white text-sm font-mono">
+                {timer}s
+              </div>
+            )}
+            {/* Claim overlay when ad is done */}
+            {(adDone || timer === 0) && (
+              <div className="absolute inset-0 flex items-center justify-center bg-black/70 backdrop-blur-sm">
+                <div className="text-center p-8">
+                  <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-neon-green/20 to-emerald-500/20 flex items-center justify-center mx-auto mb-4">
+                    <Check className="w-10 h-10 text-neon-green" />
+                  </div>
+                  <h3 className="text-white text-2xl font-bold mb-2">Ad Complete!</h3>
+                  <p className="text-gray-400 mb-6">Your reward is ready</p>
+                  <button onClick={handleComplete} className="btn-primary !py-3 !px-10 text-lg font-bold flex items-center gap-2 mx-auto">
+                    <Check className="w-5 h-5" /> Claim Reward
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
       <div className="page-container max-w-2xl">
         <div className="text-center mb-8">
           <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-neon-green to-emerald-500 flex items-center justify-center mx-auto mb-4">
@@ -119,62 +215,31 @@ export default function AdsPage() {
             </div>
 
             <div className="glass-card p-0 overflow-hidden mb-6">
-              <AnimatePresence mode="wait">
                 {watching ? (
-                  <motion.div
-                    key="watching"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    className="p-6"
+                  <div className="p-8 text-center"
                   >
-                    <div className="py-8 text-center">
-                      <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-neon-green/20 to-emerald-500/20 flex items-center justify-center mx-auto mb-4">
-                        <Loader2 className="w-8 h-8 text-neon-green animate-spin" />
-                      </div>
-                      <p className="text-white font-semibold mb-1">Ad opened in new window</p>
-                      <p className="text-gray-500 text-sm mb-6">Complete the ad offer to earn your reward</p>
-                      
-                      {popupBlocked && (
-                        <div className="mb-6 p-4 rounded-xl bg-yellow-500/10 border border-yellow-500/20 text-xs text-yellow-500 max-w-xs mx-auto animate-in fade-in duration-200">
-                          <p className="mb-2">Your browser blocked the popup window.</p>
-                          <a
-                            href={adUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            onClick={() => setPopupBlocked(false)}
-                            className="inline-flex items-center gap-1 font-bold underline hover:text-yellow-400"
-                          >
-                            Click here to open the ad manually
-                          </a>
-                        </div>
-                      )}
-
-                      <div className="flex items-center justify-center gap-2 mb-4">
-                        <span className="text-3xl font-heading font-bold text-neon-green">{timer}s</span>
-                      </div>
-                      <div className="w-full h-2 bg-white/10 rounded-full overflow-hidden mb-6 max-w-xs mx-auto">
-                        <motion.div
-                          className="h-full bg-neon-green rounded-full"
-                          initial={{ width: "0%" }}
-                          animate={{ width: `${(1 - timer / 12) * 100}%` }}
-                          transition={{ duration: 0.3 }}
-                        />
-                      </div>
-                      {timer === 0 ? (
-                        <button onClick={handleComplete} className="btn-primary !py-3 !px-8 font-bold flex items-center gap-2 mx-auto">
-                          <Check className="w-5 h-5" /> Claim Reward
-                        </button>
-                      ) : (
-                        <p className="text-xs text-gray-500">Wait for the timer to finish...</p>
-                      )}
+                    <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-yellow-500/20 to-amber-400/20 flex items-center justify-center mx-auto mb-4">
+                      <Loader2 className="w-8 h-8 text-yellow-400 animate-spin" />
                     </div>
-                  </motion.div>
+                    <p className="text-white font-semibold mb-1">Ad playing</p>
+                    <p className="text-gray-400 text-xs mb-6">Watch the full-screen ad to earn your reward</p>
+
+                    <div className="flex items-center justify-center gap-2 mb-4">
+                      <span className="text-3xl font-heading font-bold text-neon-green">{timer}s</span>
+                    </div>
+                    <div className="w-full h-2 bg-white/10 rounded-full overflow-hidden mb-6 max-w-xs mx-auto">
+                      <div className="h-full bg-neon-green rounded-full" />
+                    </div>
+                    {adDone || timer === 0 ? (
+                      <button onClick={handleComplete} className="btn-primary !py-3 !px-8 font-bold flex items-center gap-2 mx-auto">
+                        <Check className="w-5 h-5" /> Claim Reward
+                      </button>
+                    ) : (
+                      <p className="text-xs text-gray-500">Watch the ad to earn your reward</p>
+                    )}
+                  </div>
                 ) : lastResult ? (
-                  <motion.div
-                    key="result"
-                    initial={{ scale: 0.8, opacity: 0 }}
-                    animate={{ scale: 1, opacity: 1 }}
-                    className="p-8 text-center"
+                  <div className="p-8 text-center"
                   >
                     <div className={`w-24 h-24 rounded-2xl flex items-center justify-center mx-auto mb-4 ${
                       lastResult.tier === "gold"
@@ -187,13 +252,9 @@ export default function AdsPage() {
                     </div>
                     <div className="text-3xl font-heading font-bold text-neon-green mb-1">+{lastResult.points}</div>
                     <div className="text-gray-400">{lastResult.label} Card</div>
-                  </motion.div>
+                  </div>
                 ) : (
-                  <motion.div
-                    key="ready"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    className="p-10 text-center"
+                  <div className="p-10 text-center"
                   >
                     <div className="w-24 h-24 rounded-2xl bg-gradient-to-br from-neon-green/20 to-emerald-500/20 flex items-center justify-center mx-auto mb-4">
                       <Eye className="w-10 h-10 text-neon-green" />
@@ -205,9 +266,8 @@ export default function AdsPage() {
                       <span>🥈 Silver 1.5x</span>
                       <span>🥇 Gold 0.5x</span>
                     </div>
-                  </motion.div>
+                  </div>
                 )}
-              </AnimatePresence>
 
               {!watching && (
                 <div className="px-6 pb-6">
