@@ -6,7 +6,10 @@ import { ParticleBackground } from "@/components/ui/ParticleBackground"
 import { Toaster } from "react-hot-toast"
 import { WalletProvider } from "@/components/providers/WalletProvider"
 import { AdScripts } from "@/components/ads/AdScripts"
+import AnimationWrapper from "@/components/AnimationWrapper"
+import { ThemeProvider } from "@/components/ThemeProvider"
 import "./globals.css"
+import "./themes/gta-neon.css"
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-body" })
 const orbitron = Orbitron({ subsets: ["latin"], variable: "--font-heading" })
@@ -19,6 +22,7 @@ export const metadata: Metadata = {
   description:
     "Your ultimate GTA 6 gaming platform. Earn points, unlock achievements, read the latest news, and redeem exclusive rewards.",
   robots: "index, follow",
+  verification: { google: "googlec339ed16f5cf7a2e.html" },
   openGraph: {
     title: "GTA 6 Rewards",
     description: "Gaming news, rewards, and community platform for GTA 6 fans.",
@@ -32,10 +36,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en" className="dark">
       <head>
         <meta name="referrer" content="no-referrer-when-downgrade" />
-        <meta name="hilltopads" content="8abb2678eba68dde39ef" />
       </head>
       <body className={`${inter.variable} ${orbitron.variable} font-body antialiased`}>
         <WalletProvider>
+          <ThemeProvider>
+          <AnimationWrapper>
           <ParticleBackground />
           <Header />
           <main className="relative z-10 min-h-screen pt-16">{children}</main>
@@ -52,6 +57,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             }}
           />
           <AdScripts />
+          </AnimationWrapper>
+          </ThemeProvider>
         </WalletProvider>
       </body>
     </html>
