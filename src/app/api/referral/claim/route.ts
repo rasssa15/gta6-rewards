@@ -9,7 +9,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "walletId and code required" }, { status: 400 })
     }
 
-    let user = getUserByWalletId(walletId)
+    let user: any = getUserByWalletId(walletId)
     if (!user) {
       try {
         user = await prisma.user.findUnique({ where: { walletId } })

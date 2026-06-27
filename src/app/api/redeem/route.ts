@@ -66,15 +66,16 @@ export async function POST(req: NextRequest) {
 
     // Referral bonus on first redemption
     const redemptionCount = await prisma.redemption.count({ where: { userId: user.id } })
-    if (redemptionCount === 1 && user.referrerId) {
+    const referrerId = (user as any).referrerId
+    if (redemptionCount === 1 && referrerId) {
       const referrerBonus = 10 + Math.round(reward.pointsCost * 0.2)
       await prisma.user.update({
-        where: { id: user.referrerId },
+        where: { id: referrerId },
         data: { points: { increment: referrerBonus } },
       })
       await prisma.pointTransaction.create({
         data: {
-          userId: user.referrerId,
+          userId: referrerId,
           amount: referrerBonus,
           reason: `Referral bonus: ${user.name} redeemed ${reward.name}`,
         },

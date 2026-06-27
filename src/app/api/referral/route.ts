@@ -11,7 +11,7 @@ export async function GET(req: NextRequest) {
   }
 
   try {
-    let user = getUserByWalletId(walletId)
+    let user: any = getUserByWalletId(walletId)
     if (!user) {
       try {
         user = await prisma.user.findUnique({ where: { walletId } })
