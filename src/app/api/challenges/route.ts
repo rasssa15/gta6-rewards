@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
-import { prisma } from "@/lib/prisma"
+import { getUserByWalletId } from "@/lib/data"
 
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url)
@@ -7,6 +7,7 @@ export async function GET(req: NextRequest) {
   const walletId = searchParams.get("walletId")
 
   try {
+    const { prisma } = await import("@/lib/prisma")
     const challenges = await prisma.challenge.findMany({
       where: { active: true },
     })
@@ -15,10 +16,20 @@ export async function GET(req: NextRequest) {
     let resolvedId: string | null = null
 
     if (walletId) {
-      const user = await prisma.user.findUnique({ where: { walletId } })
-      if (user) {
-        adsWatched = user.adsWatched
-        resolvedId = user.id
+      const jsonUser = getUserByWalletId(walletId)
+      if (jsonUser) {
+        adsWatched = jsonUser.adsWatched
+        resolvedId = jsonUser.id
+      } else {
+        try {
+          const dbUser = await prisma.user.findUnique({ where: { walletId } })
+          if (dbUser) {
+            adsWatched = dbUser.adsWatched
+            resolvedId = dbUser.id
+          }
+        } catch (e) {
+          console.error("DB user lookup failed:", e)
+        }
       }
     } else if (userId) {
       const user = await prisma.user.findUnique({ where: { id: userId } })
@@ -58,12 +69,14 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json(challengesWithProgress)
   } catch (error) {
+    console.error("Failed to fetch challenges:", error)
     return NextResponse.json({ error: "Failed to fetch challenges" }, { status: 500 })
   }
 }
 
 export async function POST(req: NextRequest) {
   try {
+    const { prisma } = await import("@/lib/prisma")
     const data = await req.json()
     const challenge = await prisma.challenge.create({ data })
     return NextResponse.json(challenge, { status: 201 })

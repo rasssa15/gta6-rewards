@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
+import { getUserByWalletId } from "@/lib/data"
 import { prisma } from "@/lib/prisma"
 import { createHash, randomBytes } from "crypto"
 
@@ -18,23 +19,37 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "userId or walletId, and rewardId required" }, { status: 400 })
     }
 
-    const [user, reward] = await Promise.all([
-      walletId ? prisma.user.findUnique({ where: { walletId } }) : prisma.user.findUnique({ where: { id: userId } }),
-      prisma.reward.findUnique({ where: { id: rewardId } }),
-    ])
-
-    if (!user) return NextResponse.json({ error: "User not found. Connect your wallet first." }, { status: 404 })
+    const reward = await prisma.reward.findUnique({ where: { id: rewardId } })
     if (!reward) return NextResponse.json({ error: "Reward not found" }, { status: 404 })
+
+    let user = null
+    if (walletId) {
+      user = getUserByWalletId(walletId)
+      if (!user) {
+        try {
+          user = await prisma.user.findUnique({ where: { walletId } })
+        } catch (e) {
+          console.error("DB user lookup failed:", e)
+        }
+      }
+    } else if (userId) {
+      user = await prisma.user.findUnique({ where: { id: userId } })
+    }
+    if (!user) return NextResponse.json({ error: "User not found. Connect your wallet first." }, { status: 404 })
     if (reward.stock < 1) return NextResponse.json({ error: "Out of stock" }, { status: 400 })
     if (user.points < reward.pointsCost) {
       return NextResponse.json({ error: "Not enough points" }, { status: 400 })
     }
 
+    const isWallpaperPack = reward.category === "wallpaper-pack"
+    const isThemePack = reward.category === "theme-pack"
+    const themeName = isThemePack ? reward.name.toLowerCase().includes("gta") ? "gta-neon" : "default" : null
     const couponCode = reward.category?.startsWith("coupon") ? generateCouponCode(reward.name) : null
+    const status = couponCode || isWallpaperPack || isThemePack ? "completed" : "pending"
 
     const [redemption] = await Promise.all([
       prisma.redemption.create({
-        data: { userId: user.id, rewardId, status: couponCode ? "completed" : "pending" },
+        data: { userId: user.id, rewardId, status },
       }),
       prisma.reward.update({
         where: { id: rewardId },
@@ -42,7 +57,7 @@ export async function POST(req: NextRequest) {
       }),
       prisma.user.update({
         where: { id: user.id },
-        data: { points: { decrement: reward.pointsCost } },
+        data: { points: { decrement: reward.pointsCost }, ...(themeName ? { theme: themeName } : {}) },
       }),
       prisma.pointTransaction.create({
         data: { userId: user.id, amount: -reward.pointsCost, reason: `Redeemed: ${reward.name}`, reference: rewardId },
@@ -66,7 +81,7 @@ export async function POST(req: NextRequest) {
       })
     }
 
-    return NextResponse.json({ redemption, couponCode }, { status: 201 })
+    return NextResponse.json({ redemption, couponCode, isWallpaperPack, isThemePack, themeName }, { status: 201 })
   } catch (error) {
     return NextResponse.json({ error: "Failed to redeem" }, { status: 500 })
   }

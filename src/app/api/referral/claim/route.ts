@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
+import { getUserByWalletId } from "@/lib/data"
 import { prisma } from "@/lib/prisma"
 
 export async function POST(req: NextRequest) {
@@ -8,7 +9,14 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "walletId and code required" }, { status: 400 })
     }
 
-    const user = await prisma.user.findUnique({ where: { walletId } })
+    let user = getUserByWalletId(walletId)
+    if (!user) {
+      try {
+        user = await prisma.user.findUnique({ where: { walletId } })
+      } catch (e) {
+        console.error("DB user lookup failed:", e)
+      }
+    }
     if (!user) {
       return NextResponse.json({ error: "User not found. Create a wallet first." }, { status: 404 })
     }
