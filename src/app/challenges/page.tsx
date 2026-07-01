@@ -1,7 +1,8 @@
 "use client"
 import { useState, useEffect, useCallback, useRef } from "react"
 import { Sparkles, Target, CheckCircle, Gift, Eye, Star, RefreshCw, Loader2, Check } from "lucide-react"
-import { motion } from "framer-motion"
+import Link from "next/link"
+import { AdBanner } from "@/components/ads/AdBanner"
 import { useWallet } from "@/components/providers/WalletProvider"
 import toast from "react-hot-toast"
 
@@ -81,6 +82,9 @@ export default function ChallengesPage() {
         const totalPts = data.scratchResults?.reduce((s: number, r: any) => s + r.points, 0) || 0
         toast.success(`Claimed! +${data.xpReward} XP, ${count} cards (${totalPts} pts)!`)
         refresh()
+        try {
+          window.open("https://www.effectivecpmnetwork.com/ferya5qq?key=0fdf4c14f0056af80dff7d2b13c4d1ee", "_blank")
+        } catch {}
       }
       setChallenges((prev) =>
         prev.map((c) =>
@@ -106,6 +110,7 @@ export default function ChallengesPage() {
           </div>
           <h1 className="text-3xl font-heading font-bold text-white mb-2">Ad Challenges</h1>
           <p className="text-gray-400">Watch ads, hit milestones, earn big rewards</p>
+          <AdBanner adKey="728x90-challenges-top" height={90} width={728} className="mt-6 mb-4" />
           {walletId && (
             <button onClick={fetchChallenges} className="mt-3 text-xs text-gray-500 hover:text-neon-green transition-colors inline-flex items-center gap-1">
               <RefreshCw className="w-3 h-3" /> Refresh progress
@@ -135,8 +140,20 @@ export default function ChallengesPage() {
         )}
 
         {!walletId && (
-          <div className="glass-card p-6 text-center mb-8">
-            <p className="text-gray-400">Connect your wallet to track your ad challenge progress.</p>
+          <div className="glass-card p-8 text-center mb-8">
+            <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-neon-purple/20 to-neon-blue/20 flex items-center justify-center mx-auto mb-4">
+              <Target className="w-8 h-8 text-neon-purple" />
+            </div>
+            <h3 className="text-white font-semibold mb-2">Wallet Required</h3>
+            <p className="text-gray-400 text-sm mb-6">Create or unlock your wallet to track challenges and claim rewards.</p>
+            <div className="flex flex-col sm:flex-row gap-3 justify-center">
+              <Link href="/wallet/create" className="btn-primary !py-2.5 !px-6 text-sm font-semibold">
+                Create Wallet
+              </Link>
+              <Link href="/wallet/login" className="btn-secondary !py-2.5 !px-6 text-sm font-semibold">
+                Unlock Wallet
+              </Link>
+            </div>
           </div>
         )}
 
@@ -157,93 +174,88 @@ export default function ChallengesPage() {
             <p className="text-gray-600 text-sm mt-2">Check back later.</p>
           </div>
         ) : (
-          <div className="space-y-3">
-            {challenges.map((challenge, i) => (
-              <motion.div
-                key={challenge.id}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.3, delay: i * 0.05 }}
-                className={`glass-card p-5 ${challenge.completed ? "border-neon-green/30 opacity-70" : ""}`}
-              >
-                <div className="flex items-start justify-between gap-4">
-                  <div className="flex items-start gap-3 flex-1 min-w-0">
-                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${
-                      isChest(challenge)
-                        ? "bg-gradient-to-br from-yellow-500/20 to-amber-400/20"
-                        : "bg-gradient-to-br from-yellow-500/20 to-orange-500/20"
-                    }`}>
-                      {isChest(challenge) ? (
-                        <Gift className="w-5 h-5 text-yellow-400" />
-                      ) : (
-                        <Star className="w-5 h-5 text-yellow-400" />
-                      )}
-                    </div>
-                    <div className="min-w-0">
-                      <h3 className="text-white font-semibold text-sm flex items-center gap-2 flex-wrap">
-                        {challenge.title}
-                        {challenge.completed && <CheckCircle className="w-3.5 h-3.5 text-neon-green shrink-0" />}
-                      </h3>
-                      <p className="text-gray-400 text-xs mt-0.5">{challenge.description}</p>
-                      <div className="flex items-center gap-3 mt-2">
-                        <span className="text-xs text-gray-500 flex items-center gap-1">
-                          <Eye className="w-3 h-3" /> {challenge.target} ads
-                        </span>
-                        <span className="text-xs text-neon-purple font-mono">+{challenge.xpReward} XP</span>
+          <>
+            <AdBanner adKey="728x90-challenges-mid" height={90} width={728} className="mb-6" />
+            <div className="space-y-3">
+              {challenges.map((challenge) => (
+                <div
+                  key={challenge.id}
+                  className={`glass-card p-5 ${challenge.completed ? "border-neon-green/30 opacity-70" : ""}`}
+                >
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="flex items-start gap-3 flex-1 min-w-0">
+                      <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${
+                        isChest(challenge)
+                          ? "bg-gradient-to-br from-yellow-500/20 to-amber-400/20"
+                          : "bg-gradient-to-br from-yellow-500/20 to-orange-500/20"
+                      }`}>
                         {isChest(challenge) ? (
-                          <span className="text-xs text-yellow-400 font-mono">🎁 5 cards</span>
+                          <Gift className="w-5 h-5 text-yellow-400" />
                         ) : (
-                          <span className="text-xs text-yellow-400 font-mono">🥇 Gold card</span>
+                          <Star className="w-5 h-5 text-yellow-400" />
                         )}
                       </div>
+                      <div className="min-w-0">
+                        <h3 className="text-white font-semibold text-sm flex items-center gap-2 flex-wrap">
+                          {challenge.title}
+                          {challenge.completed && <CheckCircle className="w-3.5 h-3.5 text-neon-green shrink-0" />}
+                        </h3>
+                        <p className="text-gray-400 text-xs mt-0.5">{challenge.description}</p>
+                        <div className="flex items-center gap-3 mt-2">
+                          <span className="text-xs text-gray-500 flex items-center gap-1">
+                            <Eye className="w-3 h-3" /> {challenge.target} ads
+                          </span>
+                          <span className="text-xs text-neon-purple font-mono">+{challenge.xpReward} XP</span>
+                          {isChest(challenge) ? (
+                            <span className="text-xs text-yellow-400 font-mono">🎁 5 cards</span>
+                          ) : (
+                            <span className="text-xs text-yellow-400 font-mono">🥇 Gold card</span>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => handleClaim(challenge.id)}
+                      disabled={challenge.completed || !walletId || claiming === challenge.id || challenge.progress < challenge.target}
+                      className={`px-4 py-2 rounded-xl text-xs font-semibold shrink-0 ${
+                        challenge.completed
+                          ? "bg-neon-green/10 text-neon-green cursor-default"
+                          : challenge.progress >= challenge.target
+                            ? "bg-gradient-to-r from-neon-green to-emerald-500 text-white hover:shadow-lg hover:shadow-neon-green/20"
+                            : "glass text-gray-500 cursor-not-allowed"
+                      }`}
+                    >
+                      {claiming === challenge.id ? (
+                        <span>Claiming...</span>
+                      ) : challenge.completed ? (
+                        "Claimed ✓"
+                      ) : challenge.progress >= challenge.target ? (
+                        "Claim →"
+                      ) : (
+                        `${challenge.progress}/${challenge.target}`
+                      )}
+                    </button>
+                  </div>
+                  <div className="mt-3">
+                    <div className="flex items-center justify-between text-xs text-gray-600 mb-1">
+                      <span>Ads watched</span>
+                      <span>{(challenge.progress ?? 0)}/{challenge.target || "?"}</span>
+                    </div>
+                    <div className="progress-bar">
+                      <div
+                        className="progress-fill"
+                        style={{ width: `${Math.min((challenge.progress / challenge.target) * 100, 100)}%` }}
+                      />
                     </div>
                   </div>
-                  <button
-                    onClick={() => handleClaim(challenge.id)}
-                    disabled={challenge.completed || !walletId || claiming === challenge.id || challenge.progress < challenge.target}
-                    className={`px-4 py-2 rounded-xl text-xs font-semibold transition-all shrink-0 ${
-                      challenge.completed
-                        ? "bg-neon-green/10 text-neon-green cursor-default"
-                        : challenge.progress >= challenge.target
-                          ? "bg-gradient-to-r from-neon-green to-emerald-500 text-white hover:shadow-lg hover:shadow-neon-green/20 animate-pulse"
-                          : "glass text-gray-500 cursor-not-allowed"
-                    }`}
-                  >
-                    {claiming === challenge.id ? (
-                      <span className="animate-pulse">Claiming...</span>
-                    ) : challenge.completed ? (
-                      "Claimed ✓"
-                    ) : challenge.progress >= challenge.target ? (
-                      "Claim →"
-                    ) : (
-                      `${challenge.progress}/${challenge.target}`
-                    )}
-                  </button>
                 </div>
-                <div className="mt-3">
-                  <div className="flex items-center justify-between text-xs text-gray-600 mb-1">
-                    <span>Ads watched</span>
-                    <span>{(challenge.progress ?? 0)}/{challenge.target || "?"}</span>
-                  </div>
-                  <div className="progress-bar">
-                    <div
-                      className="progress-fill"
-                      style={{ width: `${Math.min((challenge.progress / challenge.target) * 100, 100)}%` }}
-                    />
-                  </div>
-                </div>
-              </motion.div>
-            ))}
-          </div>
+              ))}
+            </div>
+          </>
         )}
 
-        <div className="mt-10 glass-card p-6 text-center">
-          <Eye className="w-8 h-8 text-neon-green mx-auto mb-2" />
-          <h3 className="text-white font-semibold mb-1">How it works</h3>
-          <p className="text-gray-400 text-sm">
-            Every ad you watch counts toward these milestones. Progress auto-tracks — no manual steps needed.
-            Hit the target and claim your reward!
-          </p>
+        <div className="mt-8">
+          <AdBanner adKey="300x250-challenges-bottom" height={250} width={300} />
         </div>
       </div>
     </div>

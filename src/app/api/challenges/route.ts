@@ -8,8 +8,9 @@ export async function GET(req: NextRequest) {
 
   try {
     const { prisma } = await import("@/lib/prisma")
+    const EXCLUDED_KEYS = ["read_3_articles", "earn_20_points", "visit_daily"]
     const challenges = await prisma.challenge.findMany({
-      where: { active: true },
+      where: { active: true, key: { notIn: EXCLUDED_KEYS } },
     })
 
     let adsWatched = 0

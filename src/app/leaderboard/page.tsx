@@ -2,6 +2,7 @@
 import { useState, useEffect } from "react"
 import { Trophy, Medal, TrendingUp, Clock, Calendar, Users, Star, Zap, Crown } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
+import { AdBanner } from "@/components/ads/AdBanner"
 
 const periods = [
   { key: "daily", label: "Daily", icon: Clock },
@@ -86,6 +87,16 @@ export default function LeaderboardPage() {
             )
           })}
         </motion.div>
+
+        {/* 468×60 AD */}
+        <div className="mb-8">
+          <AdBanner adKey="468x60-leaderboard-mid" height={60} width={468} className="flex justify-center" />
+        </div>
+
+        {/* 728×90 AD */}
+        <div className="mb-8">
+          <AdBanner adKey="7e7419c72404cab7787c27dfdac31321" height={90} width={728} className="flex justify-center" />
+        </div>
 
         {/* Top 3 podium */}
         {!loading && players.length >= 3 && (
@@ -223,6 +234,10 @@ export default function LeaderboardPage() {
             </motion.div>
           </AnimatePresence>
         )}
+        {/* 160×300 AD */}
+        <div className="mt-8 flex justify-center">
+          <AdBanner adKey="160x300-leaderboard-bottom" height={300} width={160} className="flex justify-center" />
+        </div>
       </div>
     </div>
   )

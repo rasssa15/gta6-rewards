@@ -1,70 +1,76 @@
 "use client"
 import { useState, useEffect, useRef } from "react"
-import { Share2, Bookmark, MessageSquare, Eye, Loader2, SkipForward, X } from "lucide-react"
+import { Share2, Bookmark, MessageSquare } from "lucide-react"
 import { useWallet } from "@/components/providers/WalletProvider"
+import { SmartLinkPopunder } from "@/components/ads/SmartLinkPopunder"
 import toast from "react-hot-toast"
 import { formatDate } from "@/lib/utils"
 
 interface Article { id: string; title: string; content: string }
 interface Comment { id: string; content: string; userName: string; createdAt: string }
 
-const AD_VIDEOS = [
-  "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4",
-  "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4",
-  "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4",
-  "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4",
-  "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerMeltdowns.mp4",
-]
-
 export default function ArticleClient({ article, comments: initialComments }: { article: Article; comments: Comment[] }) {
   const { walletId } = useWallet()
   const [bookmarked, setBookmarked] = useState(false)
   const [comments, setComments] = useState<Comment[]>(initialComments)
   const [commentText, setCommentText] = useState("")
-  const [showAd, setShowAd] = useState(true)
-  const [adPlaying, setAdPlaying] = useState(false)
-  const [adProgress, setAdProgress] = useState(0)
-  const [adSkippable, setAdSkippable] = useState(false)
-  const [adDone, setAdDone] = useState(false)
-  const videoRef = useRef<HTMLVideoElement>(null)
-  const adVideo = useRef(AD_VIDEOS[Math.floor(Math.random() * AD_VIDEOS.length)])
+  const adInjected = useRef(false)
+
+  const autoPopup = useRef(false)
 
   useEffect(() => {
-    if (!showAd) return
-    const t = setTimeout(() => setShowAd(false), 15000)
-    return () => clearTimeout(t)
-  }, [showAd])
+    if (autoPopup.current) return
+    autoPopup.current = true
+    const timer = setTimeout(() => {
+      try {
+        window.open("https://www.effectivecpmnetwork.com/ferya5qq?key=0fdf4c14f0056af80dff7d2b13c4d1ee", "_blank")
+      } catch {}
+    }, 1500)
+    return () => clearTimeout(timer)
+  }, [])
 
   useEffect(() => {
-    if (!showAd && walletId) {
-      fetch(`/api/articles/${article.id}/view`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ userId: walletId }) }).catch(() => {})
+    if (adInjected.current) return
+    adInjected.current = true
+
+    const injectAd = (containerId: string, type: "skyscraper" | "small-skyscraper") => {
+      const container = document.getElementById(containerId)
+      if (!container) return
+
+      if (type === "skyscraper") {
+        const inline = document.createElement("script")
+        inline.text = `atOptions={'key':'14c436bda0b1d02724d0618980143ce5','format':'iframe','height':600,'width':160,'params':{}};`
+        container.appendChild(inline)
+        const invoke = document.createElement("script")
+        invoke.src = "https://evidentbummerhike.com/14c436bda0b1d02724d0618980143ce5/invoke.js"
+        container.appendChild(invoke)
+      }
+
+      if (type === "small-skyscraper") {
+        const inline = document.createElement("script")
+        inline.text = `atOptions={'key':'0eda691a40adbc5636d43af20fdda82d','format':'iframe','height':300,'width':160,'params':{}};`
+        container.appendChild(inline)
+        const invoke = document.createElement("script")
+        invoke.src = "https://evidentbummerhike.com/0eda691a40adbc5636d43af20fdda82d/invoke.js"
+        container.appendChild(invoke)
+      }
     }
-  }, [showAd, walletId, article.id])
 
-  useEffect(() => {
-    if (videoRef.current && showAd) {
-      const t = setTimeout(() => {
-        videoRef.current?.play().catch(() => setAdDone(true))
-        setAdPlaying(true)
-      }, 500)
-      return () => clearTimeout(t)
+    injectAd("ht-skyscraper-placeholder", "skyscraper")
+    injectAd("ht-small-skyscraper-placeholder", "small-skyscraper")
+
+    const incontent = document.getElementById("adsterra-incontent")
+    if (incontent) {
+      const s = document.createElement("script")
+      s.async = true
+      s.setAttribute("data-cfasync", "false")
+      s.src = "https://evidentbummerhike.com/f301214e059ca70b56b447bf6850594e/invoke.js"
+      incontent.appendChild(s)
+      const d = document.createElement("div")
+      d.id = "container-f301214e059ca70b56b447bf6850594e"
+      incontent.appendChild(d)
     }
-  }, [showAd])
-
-  useEffect(() => {
-    if (adSkippable || !adPlaying) return
-    const t = setTimeout(() => setAdSkippable(true), 4000)
-    return () => clearTimeout(t)
-  }, [adPlaying, adSkippable])
-
-  const handleTimeUpdate = () => {
-    if (videoRef.current) {
-      setAdProgress(Math.min((videoRef.current.currentTime / videoRef.current.duration) * 100, 100))
-    }
-  }
-
-  const handleAdEnd = () => { setAdDone(true); setAdPlaying(false) }
-  const closeAd = () => { setShowAd(false) }
+  }, [])
 
   const handleBookmark = async () => {
     if (!walletId || !article) return toast.error("Connect wallet to bookmark")
@@ -98,43 +104,8 @@ export default function ArticleClient({ article, comments: initialComments }: { 
 
   return (
     <>
-      {showAd && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
-          <div className="glass-card p-6 max-w-lg w-full text-center relative">
-            <button onClick={closeAd} className="absolute top-3 right-3 text-gray-400 hover:text-white transition-colors">
-              <X className="w-5 h-5" />
-            </button>
-            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-neon-green/20 to-emerald-500/20 flex items-center justify-center mx-auto mb-3">
-              <Eye className="w-6 h-6 text-neon-green" />
-            </div>
-            <h3 className="text-white font-bold text-lg mb-1">Quick ad before reading</h3>
-            <p className="text-gray-400 text-xs mb-4">Close or let it finish to continue</p>
-            <div className="relative rounded-xl overflow-hidden bg-black mb-3">
-              <video ref={videoRef} src={adVideo.current} onTimeUpdate={handleTimeUpdate} onEnded={handleAdEnd} className="w-full aspect-video object-cover rounded-xl" playsInline controls={false} />
-              {!adPlaying && !adDone && (
-                <div className="absolute inset-0 flex items-center justify-center bg-black/60">
-                  <Loader2 className="w-6 h-6 text-neon-green animate-spin" />
-                </div>
-              )}
-              {adSkippable && !adDone && (
-                <button onClick={() => { if (videoRef.current) videoRef.current.currentTime = videoRef.current.duration }} className="absolute bottom-2 right-2 px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-xs text-white transition-all flex items-center gap-1">
-                  <SkipForward className="w-3 h-3" /> Skip
-                </button>
-              )}
-            </div>
-            <div className="w-full h-1 bg-white/10 rounded-full overflow-hidden mb-3">
-              <div className="h-full bg-neon-green rounded-full transition-all duration-300" style={{ width: `${Math.min(adProgress, 100)}%` }} />
-            </div>
-            {adDone ? (
-              <button onClick={closeAd} className="btn-primary w-full !py-3 font-bold text-base flex items-center justify-center gap-2">
-                <X className="w-4 h-4" /> Read Article
-              </button>
-            ) : (
-              <button onClick={closeAd} className="text-xs text-gray-400 hover:text-white underline">Skip ad &rarr;</button>
-            )}
-          </div>
-        </div>
-      )}
+      <SmartLinkPopunder />
+
       <div className="flex items-center gap-2 mb-8">
         <button onClick={handleBookmark} className={`p-2 rounded-lg glass hover:bg-white/10 transition-all ${bookmarked ? "text-neon-blue" : "text-gray-400"}`}>
           <Bookmark className="w-4 h-4" />
@@ -143,7 +114,13 @@ export default function ArticleClient({ article, comments: initialComments }: { 
           <Share2 className="w-4 h-4" />
         </button>
       </div>
+
       <div className="prose prose-invert max-w-none text-gray-300 leading-relaxed" dangerouslySetInnerHTML={{ __html: article.content }} />
+
+      <div className="my-6 flex flex-col items-center gap-4">
+        <div id="adsterra-incontent" className="flex justify-center w-full" />
+      </div>
+
       <div className="mt-12 glass-card p-6">
         <h3 className="text-lg font-heading font-bold text-white mb-4 flex items-center gap-2">
           <MessageSquare className="w-5 h-5 text-neon-blue" /> Comments ({comments.length})

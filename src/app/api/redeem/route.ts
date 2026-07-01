@@ -1,23 +1,18 @@
 import { NextRequest, NextResponse } from "next/server"
 import { getUserByWalletId } from "@/lib/data"
 import { prisma } from "@/lib/prisma"
-import { createHash, randomBytes } from "crypto"
+import { detectUserCountry, resolveCodeCountry, getPlatformHours } from "@/lib/codes"
 
-function generateCouponCode(rewardName: string): string {
-  const parts = rewardName.split(" - ")
-  const platform = (parts[0] || "").slice(0, 4).toUpperCase().replace(/[^A-Z0-9]/g, "X")
-  const game = parts[1] || rewardName
-  const gameTag = game.replace(/[^A-Z0-9]/gi, "").slice(0, 6).toUpperCase()
-  const rand = randomBytes(3).toString("hex").toUpperCase()
-  return `${platform}-${gameTag}-${rand}`
-}
+const VALID_PLATFORMS = ["steam", "epic", "nintendo", "xbox", "playstation"]
 
 export async function POST(req: NextRequest) {
   try {
-    const { userId, walletId, rewardId } = await req.json()
+    const { userId, walletId, rewardId, platform } = await req.json()
     if ((!userId && !walletId) || !rewardId) {
       return NextResponse.json({ error: "userId or walletId, and rewardId required" }, { status: 400 })
     }
+
+    const selectedPlatform = VALID_PLATFORMS.includes(platform) ? platform : "steam"
 
     const reward = await prisma.reward.findUnique({ where: { id: rewardId } })
     if (!reward) return NextResponse.json({ error: "Reward not found" }, { status: 404 })
@@ -44,12 +39,41 @@ export async function POST(req: NextRequest) {
     const isWallpaperPack = reward.category === "wallpaper-pack"
     const isThemePack = reward.category === "theme-pack"
     const themeName = isThemePack ? reward.name.toLowerCase().includes("gta") ? "gta-neon" : "default" : null
-    const couponCode = reward.category?.startsWith("coupon") ? generateCouponCode(reward.name) : null
-    const status = couponCode || isWallpaperPack || isThemePack ? "completed" : "pending"
+
+    // Instant rewards (wallpaper, theme) no timer
+    if (isWallpaperPack || isThemePack) {
+      const [redemption] = await Promise.all([
+        prisma.redemption.create({
+          data: { userId: user.id, rewardId, status: "completed" },
+        }),
+        prisma.reward.update({
+          where: { id: rewardId },
+          data: { stock: { decrement: 1 } },
+        }),
+        prisma.user.update({
+          where: { id: user.id },
+          data: { points: { decrement: reward.pointsCost }, ...(themeName ? { theme: themeName } : {}) },
+        }),
+        prisma.pointTransaction.create({
+          data: { userId: user.id, amount: -reward.pointsCost, reason: `Redeemed: ${reward.name}`, reference: rewardId },
+        }),
+      ])
+      return NextResponse.json({ redemption, isWallpaperPack, isThemePack, themeName }, { status: 201 })
+    }
+
+    // Coupon code rewards — 24h timer + 20 popup ads
+    const userCountry = detectUserCountry(req) || "US"
+    const region = (user as any).region || ""
+    const { codeCountry, codePrefix, label } = resolveCodeCountry(userCountry, region)
+    const codeAvailableAt = new Date(Date.now() + 24 * 60 * 60 * 1000)
 
     const [redemption] = await Promise.all([
       prisma.redemption.create({
-        data: { userId: user.id, rewardId, status },
+        data: {
+          userId: user.id, rewardId, status: "pending_code",
+          codeAvailableAt, popupAdsClicked: 0, popupAdsRequired: 20,
+          userCountry, codeCountry, codePrefix,
+        },
       }),
       prisma.reward.update({
         where: { id: rewardId },
@@ -57,7 +81,7 @@ export async function POST(req: NextRequest) {
       }),
       prisma.user.update({
         where: { id: user.id },
-        data: { points: { decrement: reward.pointsCost }, ...(themeName ? { theme: themeName } : {}) },
+        data: { points: { decrement: reward.pointsCost } },
       }),
       prisma.pointTransaction.create({
         data: { userId: user.id, amount: -reward.pointsCost, reason: `Redeemed: ${reward.name}`, reference: rewardId },
@@ -82,7 +106,16 @@ export async function POST(req: NextRequest) {
       })
     }
 
-    return NextResponse.json({ redemption, couponCode, isWallpaperPack, isThemePack, themeName }, { status: 201 })
+    return NextResponse.json({
+      redemption: {
+        ...redemption,
+        codeAvailableAt: codeAvailableAt.toISOString(),
+        codeCountry: label,
+        codePrefix,
+      },
+      isCoupon: true,
+      message: `Code will be available in 24 hours for ${label}. Watch 20 popup ads to unlock it.`,
+    }, { status: 201 })
   } catch (error) {
     return NextResponse.json({ error: "Failed to redeem" }, { status: 500 })
   }

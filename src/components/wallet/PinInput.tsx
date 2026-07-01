@@ -29,11 +29,11 @@ export function PinInput({ length = 6, value, onChange, onComplete, error, disab
         {Array.from({ length }).map((_, i) => (
           <div
             key={i}
-            className={`w-10 h-12 sm:w-12 sm:h-14 rounded-xl border-2 flex items-center justify-center text-xl sm:text-2xl font-bold transition-all duration-200 ${
+            className={`w-10 h-12 sm:w-12 sm:h-14 rounded-xl border-2 flex items-center justify-center text-xl sm:text-2xl font-bold ${
               i < value.length
                 ? "border-neon-blue bg-neon-blue/10 text-white scale-105"
                 : "border-white/10 bg-white/5"
-            } ${error ? "border-red-500 animate-shake" : ""}`}
+            } ${error ? "border-red-500" : ""}`}
           >
             {i < value.length ? "●" : ""}
           </div>
@@ -49,7 +49,7 @@ export function PinInput({ length = 6, value, onChange, onComplete, error, disab
         onChange={handleChange}
         disabled={disabled}
         placeholder="Enter PIN"
-        className="w-64 px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white text-lg text-center focus:outline-none focus:border-neon-blue focus:ring-1 focus:ring-neon-blue/50 transition-all"
+        className="w-64 px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white text-lg text-center focus:outline-none focus:border-neon-blue focus:ring-1 focus:ring-neon-blue/50"
         autoComplete="off"
       />
       {error && <p className="text-red-400 text-sm text-center">{error}</p>}

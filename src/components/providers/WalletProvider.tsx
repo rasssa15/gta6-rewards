@@ -9,6 +9,7 @@ interface WalletContextType {
   name: string
   points: number
   level: number
+  theme: string
   refresh: () => void
   isLoading: boolean
 }
@@ -20,6 +21,7 @@ const WalletContext = createContext<WalletContextType>({
   name: "Player",
   points: 0,
   level: 1,
+  theme: "default",
   refresh: () => {},
   isLoading: false,
 })
@@ -36,6 +38,7 @@ export function WalletProvider({ children }: { children: ReactNode }) {
     name: "Player",
     points: 0,
     level: 1,
+    theme: "default",
     isLoading: true,
   })
 
@@ -59,6 +62,7 @@ export function WalletProvider({ children }: { children: ReactNode }) {
               points: data.points ?? 0,
               level: data.level ?? 1,
               name: data.name || session.name || "Player",
+              theme: data.theme || "default",
             }))
           }
         } catch {}

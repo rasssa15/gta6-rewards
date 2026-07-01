@@ -6,6 +6,7 @@ import { ParticleBackground } from "@/components/ui/ParticleBackground"
 import { Toaster } from "react-hot-toast"
 import { WalletProvider } from "@/components/providers/WalletProvider"
 import { AdScripts } from "@/components/ads/AdScripts"
+import { ConsentBanner } from "@/components/ads/ConsentBanner"
 import AnimationWrapper from "@/components/AnimationWrapper"
 import { ThemeProvider } from "@/components/ThemeProvider"
 import "./globals.css"
@@ -35,7 +36,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en" className="dark">
       <head>
-        <meta name="referrer" content="no-referrer-when-downgrade" />
+        <meta name="referrer" content="strict-origin-when-cross-origin" />
+        <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4766594802116036" crossOrigin="anonymous"></script>
       </head>
       <body className={`${inter.variable} ${orbitron.variable} font-body antialiased`}>
         <WalletProvider>
@@ -45,6 +47,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <Header />
           <main className="relative z-10 min-h-screen pt-16">{children}</main>
           <Footer />
+          <ConsentBanner />
           <Toaster
             position="bottom-right"
             toastOptions={{

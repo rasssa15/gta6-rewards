@@ -1,6 +1,8 @@
 import { GoogleGenerativeAI } from "@google/generative-ai"
 import slugify from "slugify"
 import { createHash } from "crypto"
+import { generateImageWithOpenAI } from "./openai-image"
+import { buildImagePrompt } from "./worker-image"
 
 const API_KEY = process.env.GEMINI_API_KEY || ""
 const genAI = API_KEY ? new GoogleGenerativeAI(API_KEY) : null
@@ -176,10 +178,16 @@ function buildFallbackArticle(headline: string): string {
   return paragraphs.join("\n")
 }
 
-export function generateArticleImage(title: string, category: string): string {
+export async function generateArticleImage(title: string, category: string): Promise<string> {
+  const prompt = buildImagePrompt(title, category)
+  const openAiUrl = await generateImageWithOpenAI(prompt)
+  if (openAiUrl) return openAiUrl
+  const workerUrl = process.env.WORKER_IMAGE_GEN_URL
+  if (workerUrl) {
+    const params = new URLSearchParams({ prompt, width: "1200", height: "675" })
+    return `${workerUrl}?${params.toString()}`
+  }
   const seed = hashSeed(title)
-  const catId = CATEGORY_SLUGS.indexOf(category)
-  const seedNum = (parseInt(seed.slice(0, 8), 16) % 100) + 1 + catId * 20
   return `https://picsum.photos/seed/${seed}/1200/675`
 }
 

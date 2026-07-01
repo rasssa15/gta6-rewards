@@ -9,7 +9,7 @@ export const dynamic = "force-dynamic"
 function checkAdminAuth(): boolean {
   const cookieStore = cookies()
   const adminAuth = cookieStore.get("admin_auth_cookie")?.value
-  const adminPassword = process.env.ADMIN_PASSWORD || "gta6admin2026"
+  const adminPassword = process.env.ADMIN_PASSWORD
   return adminAuth === adminPassword
 }
 
@@ -37,7 +37,7 @@ export async function GET(req: Request) {
         excerpt: article.excerpt || article.title,
         content: article.content,
         categoryId: category,
-        featuredImage: generateArticleImage(article.title, category),
+        featuredImage: await generateArticleImage(article.title, category),
         author: "GTA 6 Rewards AI",
         status: "published",
         tags: article.tags,

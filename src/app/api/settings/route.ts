@@ -5,7 +5,7 @@ import { cookies } from "next/headers"
 function checkAdminAuth(): boolean {
   const cookieStore = cookies()
   const adminAuth = cookieStore.get("admin_auth_cookie")?.value
-  const adminPassword = process.env.ADMIN_PASSWORD || "gta6admin2026"
+  const adminPassword = process.env.ADMIN_PASSWORD
   return adminAuth === adminPassword
 }
 

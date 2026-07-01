@@ -21,7 +21,7 @@ const navLinks = [
 export function Header() {
   const router = useRouter()
   const pathname = usePathname()
-  const { isConnected, isLocked_, walletId, name, points, level, refresh } = useWallet()
+  const { isConnected, isLocked_, walletId, name, points, level, refresh, isLoading } = useWallet()
   const [isOpen, setIsOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
   const [showWalletMenu, setShowWalletMenu] = useState(false)
@@ -51,7 +51,7 @@ export function Header() {
   return (
     <header
       className={cn(
-        "fixed top-0 left-0 right-0 z-50 transition-all duration-300",
+        "fixed top-0 left-0 right-0 z-50",
         scrolled
           ? "bg-[#0a0a0f]/80 backdrop-blur-xl border-b border-white/5"
           : "bg-transparent"
@@ -60,7 +60,7 @@ export function Header() {
       <div className="page-container">
         <div className="flex items-center justify-between h-16 sm:h-20">
           <Link href="/" className="flex items-center gap-2 group shrink-0">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-neon-pink to-neon-purple flex items-center justify-center group-hover:shadow-lg group-hover:shadow-neon-pink/25 transition-all duration-300">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-neon-pink to-neon-purple flex items-center justify-center group-hover:shadow-lg group-hover:shadow-neon-pink/25">
               <Gamepad2 className="w-5 h-5 text-white" />
             </div>
             <span className="text-xl font-heading font-bold gradient-text hidden sm:block">
@@ -77,7 +77,7 @@ export function Header() {
                   key={link.href}
                   href={link.href}
                   className={cn(
-                    "px-3 py-2 text-sm rounded-lg transition-all duration-200 flex items-center gap-2",
+                    "px-3 py-2 text-sm rounded-lg flex items-center gap-2",
                     isActive
                       ? "text-white bg-white/10"
                       : "text-gray-300 hover:text-white hover:bg-white/5"
@@ -91,11 +91,11 @@ export function Header() {
           </nav>
 
           <div className="flex items-center gap-3">
-            {isConnected && !isLocked_ && walletId ? (
+            {isLoading ? null : isConnected && !isLocked_ && walletId ? (
               <div className="relative">
                 <button
                   onClick={() => setShowWalletMenu(!showWalletMenu)}
-                  className="flex items-center gap-2 px-3 py-2 rounded-xl glass hover:bg-white/10 transition-all"
+                  className="flex items-center gap-2 px-3 py-2 rounded-xl glass hover:bg-white/10"
                 >
                   <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-neon-blue to-neon-purple flex items-center justify-center">
                     <span className="text-xs font-bold text-white">
@@ -120,7 +120,7 @@ export function Header() {
                       <Link
                         href="/dashboard"
                         onClick={() => setShowWalletMenu(false)}
-                        className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-gray-300 hover:text-white hover:bg-white/5 transition-all"
+                        className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-gray-300 hover:text-white hover:bg-white/5"
                       >
                         <User className="w-4 h-4" />
                         Dashboard
@@ -128,7 +128,7 @@ export function Header() {
                       <Link
                         href="/rewards"
                         onClick={() => setShowWalletMenu(false)}
-                        className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-gray-300 hover:text-white hover:bg-white/5 transition-all"
+                        className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-gray-300 hover:text-white hover:bg-white/5"
                       >
                         <Gift className="w-4 h-4" />
                         Rewards
@@ -136,14 +136,14 @@ export function Header() {
                       <hr className="my-1 border-white/5" />
                       <button
                         onClick={() => { handleLock(); setShowWalletMenu(false) }}
-                        className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-gray-300 hover:text-white hover:bg-white/5 transition-all w-full text-left"
+                        className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-gray-300 hover:text-white hover:bg-white/5 w-full text-left"
                       >
                         <Shield className="w-4 h-4" />
                         Lock Wallet
                       </button>
                       <button
                         onClick={() => { handleDisconnect(); setShowWalletMenu(false) }}
-                        className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-red-400 hover:text-red-300 hover:bg-white/5 transition-all w-full text-left"
+                        className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-red-400 hover:text-red-300 hover:bg-white/5 w-full text-left"
                       >
                         <LogOut className="w-4 h-4" />
                         Disconnect
@@ -157,28 +157,11 @@ export function Header() {
                 <Wallet className="w-4 h-4" />
                 Unlock
               </Link>
-            ) : (
-              <>
-                <div className="hidden sm:flex items-center gap-2">
-                  <Link href="/wallet/create" className="btn-primary text-sm !px-4 !py-2">
-                    Create Wallet
-                  </Link>
-                  <Link href="/wallet/login" className="btn-secondary text-sm !px-4 !py-2">
-                    Login
-                  </Link>
-                </div>
-                <div className="flex sm:hidden items-center">
-                  <Link href="/wallet/create" className="btn-primary text-xs !px-2.5 !py-1.5 flex items-center gap-1">
-                    <Wallet className="w-3.5 h-3.5" />
-                    Create
-                  </Link>
-                </div>
-              </>
-            )}
+            ) : null}
 
             <button
               onClick={() => setIsOpen(!isOpen)}
-              className="lg:hidden p-2 rounded-lg hover:bg-white/5 transition-all"
+              className="lg:hidden p-2 rounded-lg hover:bg-white/5"
             >
               {isOpen ? <X className="w-6 h-6 text-white" /> : <Menu className="w-6 h-6 text-white" />}
             </button>
@@ -186,7 +169,7 @@ export function Header() {
         </div>
 
         {isOpen && (
-          <div className="lg:hidden border-t border-white/5 py-4 animate-in slide-in-from-top-2 duration-200">
+          <div className="lg:hidden border-t border-white/5 py-4">
             <nav className="flex flex-col gap-1">
               {navLinks.map((link) => {
                 const Icon = link.icon
@@ -197,7 +180,7 @@ export function Header() {
                     href={link.href}
                     onClick={() => setIsOpen(false)}
                     className={cn(
-                      "flex items-center gap-3 px-4 py-3 rounded-xl text-sm transition-all",
+                      "flex items-center gap-3 px-4 py-3 rounded-xl text-sm",
                       isActive ? "text-white bg-white/10" : "text-gray-300 hover:text-white hover:bg-white/5"
                     )}
                   >

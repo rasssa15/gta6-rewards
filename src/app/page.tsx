@@ -7,7 +7,8 @@ import {
   TrendingUp, Users, Star, ChevronRight, Coins, Zap, Play, Eye
 } from "lucide-react"
 import OnlinePlayerBadge from "@/components/ui/OnlinePlayerBadge"
-import { motion, useScroll, useTransform } from "framer-motion"
+import { useWallet } from "@/components/providers/WalletProvider"
+import { AdBanner } from "@/components/ads/AdBanner"
 
 function AnimatedCounter({ target, suffix = "" }: { target: number; suffix?: string }) {
   const [count, setCount] = useState(0)
@@ -106,13 +107,9 @@ const howItWorks = [
 ]
 
 export default function HomePage() {
+  const { isConnected, walletId, isLoading } = useWallet()
   const [stats, setStats] = useState({ users: 80000, articles: 50, points: 12500000 })
   const [featuredArticles, setFeaturedArticles] = useState<any[]>([])
-
-  const heroRef = useRef<HTMLElement>(null)
-  const { scrollYProgress } = useScroll({ target: heroRef, offset: ["start start", "end start"] })
-  const heroY = useTransform(scrollYProgress, [0, 1], ["0%", "30%"])
-  const heroOpacity = useTransform(scrollYProgress, [0, 0.7], [1, 0])
 
   useEffect(() => {
     fetch("/api/articles?limit=3").then(r => r.json()).then(d => {
@@ -130,9 +127,9 @@ export default function HomePage() {
   return (
     <div className="min-h-screen">
       {/* ---- HERO ---- */}
-      <section ref={heroRef} className="hero-section relative min-h-[90vh] sm:min-h-screen flex flex-col justify-center overflow-hidden">
+      <section className="hero-section relative min-h-[90vh] sm:min-h-screen flex flex-col justify-center overflow-hidden">
         {/* Cityscape background */}
-        <motion.div style={{ y: heroY }} className="absolute inset-0 z-0">
+        <div className="absolute inset-0 z-0">
           <Image
             src="/images/hero-cityscape.png"
             alt="GTA 6 Neon City"
@@ -143,27 +140,22 @@ export default function HomePage() {
           {/* Dark overlay gradient */}
           <div className="absolute inset-0 bg-gradient-to-b from-[#070710]/60 via-[#070710]/40 to-[#070710]" />
           <div className="absolute inset-0 bg-gradient-to-r from-[#070710]/80 via-transparent to-[#070710]/80" />
-        </motion.div>
+        </div>
 
         {/* Animated orbs */}
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 rounded-full bg-neon-purple/10 blur-[120px] pointer-events-none animate-float" />
-        <div className="absolute bottom-1/4 right-1/4 w-80 h-80 rounded-full bg-neon-blue/10 blur-[100px] pointer-events-none animate-float" style={{ animationDelay: "1.5s" }} />
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 rounded-full bg-neon-purple/10 blur-[120px] pointer-events-none" />
+        <div className="absolute bottom-1/4 right-1/4 w-80 h-80 rounded-full bg-neon-blue/10 blur-[100px] pointer-events-none" style={{ animationDelay: "1.5s" }} />
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full bg-neon-pink/5 blur-[150px] pointer-events-none" />
 
-        <motion.div
-          style={{ opacity: heroOpacity }}
+        <div
           className="page-container relative z-10 text-center py-32 sm:py-40"
         >
-          <motion.div
-            initial={{ opacity: 0, y: 40 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, ease: [0.25, 0.46, 0.45, 0.94] }}
-          >
+          <div>
             <div className="mb-8 flex justify-center">
               <OnlinePlayerBadge />
             </div>
 
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass border border-neon-pink/20 text-xs font-semibold text-neon-pink uppercase tracking-widest mb-8 animate-pulse-glow">
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass border border-neon-pink/20 text-xs font-semibold text-neon-pink uppercase tracking-widest mb-8">
               <Zap className="w-3 h-3" />
               <span>GTA 6 Rewards Platform — Now Live</span>
             </div>
@@ -180,15 +172,26 @@ export default function HomePage() {
             </p>
 
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-              <Link
-                href="/wallet/create"
-                className="btn-primary text-base sm:text-lg py-4 px-8 flex items-center gap-3 shine-effect"
-                id="hero-cta-create"
-              >
-                <Shield className="w-5 h-5" />
-                Start Earning Free
-                <ArrowRight className="w-5 h-5" />
-              </Link>
+              {isConnected && walletId ? (
+                <Link
+                  href="/dashboard"
+                  className="btn-primary text-base sm:text-lg py-4 px-8 flex items-center gap-3 shine-effect"
+                >
+                  <Shield className="w-5 h-5" />
+                  Go to Dashboard
+                  <ArrowRight className="w-5 h-5" />
+                </Link>
+              ) : (
+                <Link
+                  href="/wallet/create"
+                  className="btn-primary text-base sm:text-lg py-4 px-8 flex items-center gap-3 shine-effect"
+                  id="hero-cta-create"
+                >
+                  <Shield className="w-5 h-5" />
+                  Start Earning Free
+                  <ArrowRight className="w-5 h-5" />
+                </Link>
+              )}
               <Link
                 href="/earn"
                 className="btn-secondary text-base sm:text-lg py-4 px-8 flex items-center gap-3"
@@ -198,13 +201,10 @@ export default function HomePage() {
                 How It Works
               </Link>
             </div>
-          </motion.div>
+          </div>
 
           {/* Stats row */}
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.4 }}
+          <div
             className="grid grid-cols-3 gap-4 sm:gap-8 max-w-2xl mx-auto mt-16 sm:mt-20"
           >
             {[
@@ -220,36 +220,32 @@ export default function HomePage() {
                 <div className="text-[10px] sm:text-xs text-gray-500 mt-1">{s.label}</div>
               </div>
             ))}
-          </motion.div>
-        </motion.div>
+          </div>
+        </div>
 
         {/* Scroll indicator */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 1.5 }}
+        <div
           className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 z-10"
         >
           <span className="text-xs text-gray-600 uppercase tracking-widest">Scroll</span>
-          <motion.div
-            animate={{ y: [0, 8, 0] }}
-            transition={{ repeat: Infinity, duration: 1.5, ease: "easeInOut" }}
+          <div
             className="w-5 h-8 rounded-full border border-white/20 flex items-start justify-center p-1"
           >
             <div className="w-1 h-2 rounded-full bg-neon-pink" />
-          </motion.div>
-        </motion.div>
+          </div>
+        </div>
       </section>
+
+      {/* ---- 728×90 AD ---- */}
+      <div className="page-container py-4">
+        <AdBanner adKey="7e7419c72404cab7787c27dfdac31321" height={90} width={728} className="flex justify-center" />
+      </div>
 
       {/* ---- HOW IT WORKS ---- */}
       <section className="py-20 sm:py-28 relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-b from-transparent via-neon-purple/5 to-transparent pointer-events-none" />
         <div className="page-container">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
+          <div
             className="text-center mb-16"
           >
             <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-neon-purple/10 border border-neon-purple/20 text-xs text-neon-purple uppercase tracking-widest font-semibold mb-4">
@@ -262,7 +258,7 @@ export default function HomePage() {
             <p className="text-gray-400 max-w-lg mx-auto">
               No credit card, no sign-up hassle. Just create a wallet and start earning.
             </p>
-          </motion.div>
+          </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 relative">
             {/* Connector lines */}
@@ -272,12 +268,8 @@ export default function HomePage() {
             {howItWorks.map((step, i) => {
               const Icon = step.icon
               return (
-                <motion.div
+                <div
                   key={step.step}
-                  initial={{ opacity: 0, y: 30 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.5, delay: i * 0.15 }}
                   className="relative z-10 text-center"
                 >
                   <div className="relative inline-flex mb-6">
@@ -290,7 +282,7 @@ export default function HomePage() {
                   </div>
                   <h3 className="text-white font-heading font-bold text-lg mb-2">{step.title}</h3>
                   <p className="text-gray-400 text-sm leading-relaxed max-w-xs mx-auto">{step.desc}</p>
-                </motion.div>
+                </div>
               )
             })}
           </div>
@@ -300,10 +292,7 @@ export default function HomePage() {
       {/* ---- LATEST NEWS ---- */}
       <section className="py-16 sm:py-20">
         <div className="page-container">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
+          <div
             className="flex items-center justify-between mb-10"
           >
             <div>
@@ -313,20 +302,16 @@ export default function HomePage() {
               </div>
               <h2 className="text-2xl sm:text-3xl font-heading font-bold text-white">Latest GTA 6 Updates</h2>
             </div>
-            <Link href="/news" className="hidden sm:flex items-center gap-1.5 text-sm text-neon-blue hover:text-neon-blue/80 font-semibold transition-colors">
+            <Link href="/news" className="hidden sm:flex items-center gap-1.5 text-sm text-neon-blue hover:text-neon-blue/80 font-semibold">
               View All <ChevronRight className="w-4 h-4" />
             </Link>
-          </motion.div>
+          </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {featuredArticles.length > 0
               ? featuredArticles.map((article: any, i: number) => (
-                <motion.div
+                <div
                   key={article.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.4, delay: i * 0.1 }}
                 >
                   <Link href={`/news/${article.slug}`} className="glass-card p-0 overflow-hidden group block neon-glow-card shine-effect" id={`news-card-${i}`}>
                     {article.featuredImage ? (
@@ -334,7 +319,7 @@ export default function HomePage() {
                         <img
                           src={article.featuredImage}
                           alt={article.title}
-                          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                          className="w-full h-full object-cover"
                         />
                         <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
                       </div>
@@ -349,7 +334,7 @@ export default function HomePage() {
                           {article.category.name}
                         </span>
                       )}
-                      <h3 className="text-white font-semibold mt-1.5 group-hover:text-neon-blue transition-colors line-clamp-2 leading-snug">
+                      <h3 className="text-white font-semibold mt-1.5 group-hover:text-neon-blue line-clamp-2 leading-snug">
                         {article.title}
                       </h3>
                       <p className="text-gray-400 text-sm mt-2 line-clamp-2 leading-relaxed">{article.excerpt}</p>
@@ -362,7 +347,7 @@ export default function HomePage() {
                       </div>
                     </div>
                   </Link>
-                </motion.div>
+                </div>
               ))
               : Array.from({ length: 3 }).map((_, i) => (
                 <div key={i} className="glass-card p-0 overflow-hidden">
@@ -384,15 +369,16 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* ---- 728×90 AD ---- */}
+      <div className="page-container py-4">
+        <AdBanner adKey="7e7419c72404cab7787c27dfdac31321" height={90} width={728} className="flex justify-center" />
+      </div>
+
       {/* ---- FEATURES GRID ---- */}
       <section className="py-20 sm:py-28 relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-b from-transparent via-neon-blue/3 to-transparent pointer-events-none" />
         <div className="page-container">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
+          <div
             className="text-center mb-16"
           >
             <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-neon-green/10 border border-neon-green/20 text-xs text-neon-green uppercase tracking-widest font-semibold mb-4">
@@ -405,32 +391,28 @@ export default function HomePage() {
             <p className="text-gray-400 max-w-lg mx-auto">
               Built for serious GTA 6 fans. News, rewards, community — all in one place.
             </p>
-          </motion.div>
+          </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
             {features.map((f, i) => {
               const Icon = f.icon
               return (
-                <motion.div
+                <div
                   key={f.title}
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.4, delay: i * 0.07 }}
                 >
                   <Link href={f.href} className={`glass-card p-6 group flex flex-col gap-4 block neon-glow-card shine-effect h-full`} id={`feature-${f.title.toLowerCase().replace(" ", "-")}`}>
-                    <div className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${f.color} flex items-center justify-center feature-icon flex-shrink-0 transition-transform duration-300 group-hover:scale-110`}>
+                    <div className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${f.color} flex items-center justify-center feature-icon flex-shrink-0`}>
                       <Icon className={`w-6 h-6 ${f.iconColor}`} />
                     </div>
                     <div>
-                      <h3 className="text-white font-heading font-bold mb-2 group-hover:gradient-text transition-colors">{f.title}</h3>
+                      <h3 className="text-white font-heading font-bold mb-2 group-hover:gradient-text">{f.title}</h3>
                       <p className="text-gray-400 text-sm leading-relaxed">{f.desc}</p>
                     </div>
-                    <div className={`flex items-center gap-1.5 text-xs font-semibold ${f.iconColor} mt-auto opacity-0 group-hover:opacity-100 transition-opacity`}>
+                    <div className={`flex items-center gap-1.5 text-xs font-semibold ${f.iconColor} mt-auto`}>
                       Explore <ArrowRight className="w-3 h-3" />
                     </div>
                   </Link>
-                </motion.div>
+                </div>
               )
             })}
           </div>
@@ -440,11 +422,7 @@ export default function HomePage() {
       {/* ---- REWARDS BANNER ---- */}
       <section className="py-16 sm:py-20">
         <div className="page-container">
-          <motion.div
-            initial={{ opacity: 0, scale: 0.97 }}
-            whileInView={{ opacity: 1, scale: 1 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
+          <div
             className="relative rounded-3xl overflow-hidden"
           >
             {/* Background image */}
@@ -475,10 +453,17 @@ export default function HomePage() {
                 Just your private phrase — and a world of rewards waiting.
               </p>
               <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-                <Link href="/wallet/create" className="btn-primary text-base py-4 px-10 flex items-center gap-3 shine-effect" id="cta-create-wallet">
-                  <Shield className="w-5 h-5" />
-                  Create Free Wallet
-                </Link>
+                {isConnected && walletId ? (
+                  <Link href="/dashboard" className="btn-primary text-base py-4 px-10 flex items-center gap-3 shine-effect">
+                    <Shield className="w-5 h-5" />
+                    Go to Dashboard <ArrowRight className="w-5 h-5" />
+                  </Link>
+                ) : (
+                  <Link href="/wallet/create" className="btn-primary text-base py-4 px-10 flex items-center gap-3 shine-effect" id="cta-create-wallet">
+                    <Shield className="w-5 h-5" />
+                    Create Free Wallet
+                  </Link>
+                )}
                 <Link href="/rewards" className="btn-secondary text-base py-4 px-8 flex items-center gap-3" id="cta-view-rewards">
                   <Gift className="w-5 h-5" />
                   Browse Rewards
@@ -488,7 +473,7 @@ export default function HomePage() {
                 🔐 AES-256 encrypted · 🌐 No email required · ⚡ Instant setup
               </p>
             </div>
-          </motion.div>
+          </div>
         </div>
       </section>
     </div>

@@ -50,7 +50,7 @@ export function Footer() {
           {/* Brand */}
           <div className="col-span-2 sm:col-span-4 lg:col-span-2">
             <Link href="/" className="flex items-center gap-2.5 mb-5 group" id="footer-brand">
-              <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-neon-pink to-neon-purple flex items-center justify-center group-hover:shadow-lg group-hover:shadow-neon-pink/30 transition-all duration-300">
+              <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-neon-pink to-neon-purple flex items-center justify-center group-hover:shadow-lg group-hover:shadow-neon-pink/30">
                 <Gamepad2 className="w-5 h-5 text-white" />
               </div>
               <span className="text-xl font-heading font-bold gradient-text">GTA6 Rewards</span>
@@ -67,7 +67,7 @@ export function Footer() {
                   key={social.label}
                   href={social.href}
                   aria-label={social.label}
-                  className={`w-10 h-10 rounded-xl glass flex items-center justify-center text-gray-500 ${social.color} transition-all duration-200 hover:scale-110 hover:bg-white/10`}
+                  className={`w-10 h-10 rounded-xl glass flex items-center justify-center text-gray-500 ${social.color} hover:bg-white/10`}
                   id={`footer-social-${social.label.toLowerCase()}`}
                 >
                   <social.icon className="w-4 h-4" />
@@ -87,7 +87,7 @@ export function Footer() {
                   <li key={link.label}>
                     <Link
                       href={link.href}
-                      className="text-gray-500 hover:text-white text-sm transition-colors duration-200 flex items-center gap-1 group"
+                      className="text-gray-500 hover:text-white text-sm flex items-center gap-1 group"
                     >
                       <span>{link.label}</span>
                     </Link>
@@ -108,7 +108,7 @@ export function Footer() {
           </p>
           <div className="flex items-center gap-3">
             <span className="flex items-center gap-1.5 text-xs text-neon-green font-mono">
-              <span className="w-1.5 h-1.5 rounded-full bg-neon-green animate-pulse" />
+              <span className="w-1.5 h-1.5 rounded-full bg-neon-green" />
               Live Platform
             </span>
           </div>

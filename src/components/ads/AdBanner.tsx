@@ -34,9 +34,7 @@ export function AdBanner({ adKey, height, width, format = "iframe", className }:
     invokeScript.async = true
     container.appendChild(invokeScript)
 
-    return () => {
-      container.innerHTML = ""
-    }
+    return () => { container.innerHTML = "" }
   }, [adKey, height, width, format])
 
   return <div ref={containerRef} className={className} />

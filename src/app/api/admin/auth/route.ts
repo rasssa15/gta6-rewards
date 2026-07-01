@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from "next/server"
 export async function POST(req: NextRequest) {
   try {
     const { password } = await req.json()
-    const adminPassword = process.env.ADMIN_PASSWORD || "gta6admin2026"
+    const adminPassword = process.env.ADMIN_PASSWORD
     if (password === adminPassword) {
       const response = NextResponse.json({ success: true })
       response.cookies.set("admin_auth_cookie", password, {

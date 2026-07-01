@@ -1,7 +1,7 @@
 "use client"
-import { useState } from "react"
+import React, { useState } from "react"
 import { HelpCircle, ChevronDown, Search } from "lucide-react"
-import { motion } from "framer-motion"
+import { AdBanner } from "@/components/ads/AdBanner"
 
 const faqs = [
   {
@@ -18,7 +18,7 @@ const faqs = [
   },
   {
     q: "How do scratch cards work?",
-    a: "There are 3 tiers: 🥉 Bronze (1–2 pts, very common 10x weight), 🥈 Silver (2–5 pts, uncommon 1.5x), 🥇 Gold (5–10 pts, rare 0.5x). Early on you get full points, but the more you earn the harder it gets — points decay toward a ~250–300 lifetime ceiling. No hard cap, just diminishing returns.",
+    a: "No details about the point system.",
   },
   {
     q: "How do I watch ads to earn cards?",
@@ -46,7 +46,7 @@ const faqs = [
   },
   {
     q: "How does the leaderboard work?",
-    a: "The all-time leaderboard shows the top players by real points. Real users replace fake entries when they have higher scores. Daily, Weekly, and Monthly tabs use seeded random rankings that shuffle daily for variety. Compete for bragging rights!",
+    a: "The all-time leaderboard ranks players by real points (500–25,500 range). Real users from the database appear alongside generated profiles, with higher scores pushing you up the ranks. Daily, Weekly, and Monthly tabs use seeded random rankings that shuffle daily for variety. Compete for bragging rights!",
   },
   {
     q: "What is a recovery phrase?",
@@ -99,6 +99,8 @@ export default function FAQPage() {
           <p className="text-gray-400">Frequently asked questions</p>
         </div>
 
+        <AdBanner adKey="728x90-faq-top" height={90} width={728} className="mb-8" />
+
         <div className="relative mb-8">
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
           <input
@@ -112,30 +114,27 @@ export default function FAQPage() {
 
         <div className="space-y-2">
           {filtered.map((faq, i) => (
-            <motion.div
-              key={i}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.2, delay: i * 0.02 }}
-              className="glass-card overflow-hidden"
-            >
-              <button
-                onClick={() => setOpenId(openId === i ? null : i)}
-                className="w-full p-5 flex items-center justify-between text-left"
-              >
-                <span className="text-white font-medium pr-4">{faq.q}</span>
-                <ChevronDown
-                  className={`w-5 h-5 text-gray-400 shrink-0 transition-transform duration-200 ${
-                    openId === i ? "rotate-180" : ""
-                  }`}
-                />
-              </button>
-              {openId === i && (
-                <div className="px-5 pb-5 text-gray-400 text-sm leading-relaxed">
-                  {faq.a}
-                </div>
-              )}
-            </motion.div>
+            <React.Fragment key={i}>
+              <div className="glass-card overflow-hidden">
+                <button
+                  onClick={() => setOpenId(openId === i ? null : i)}
+                  className="w-full p-5 flex items-center justify-between text-left"
+                >
+                  <span className="text-white font-medium pr-4">{faq.q}</span>
+                  <ChevronDown
+                    className={`w-5 h-5 text-gray-400 shrink-0 ${
+                      openId === i ? "rotate-180" : ""
+                    }`}
+                  />
+                </button>
+                {openId === i && (
+                  <div className="px-5 pb-5 text-gray-400 text-sm leading-relaxed">
+                    {faq.a}
+                  </div>
+                )}
+              </div>
+              {i === 5 && <AdBanner adKey="300x250-faq-mid" height={250} width={300} className="my-4 mx-auto" />}
+            </React.Fragment>
           ))}
         </div>
 
@@ -144,6 +143,10 @@ export default function FAQPage() {
             <p className="text-gray-500">No results found for "{search}"</p>
           </div>
         )}
+
+        <div className="mt-8">
+          <AdBanner adKey="468x60-faq-bottom" height={60} width={468} />
+        </div>
       </div>
     </div>
   )

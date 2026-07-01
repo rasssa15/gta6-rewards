@@ -51,16 +51,27 @@ export async function GET(req: NextRequest) {
       .slice(0, limit)
 
     if (period === "all") {
-      // All-time: show real points with no cap, real users replace fake ones by rank
-      const ranked = merged.map((u, i) => ({
-        rank: i + 1,
-        walletId: u.walletId,
-        name: u.name || "Player",
-        points: Math.max(u.points || 0, 0),
-        level: u.level || 1,
-        badges: 0,
-      }))
-      return NextResponse.json(ranked)
+      // All-time: fake users get varied points based on walletId seed; real users use actual points
+      const realUsers = merged.filter(u => u._real)
+      const fakeUsersMap = new Map(merged.filter(u => !u._real).map(u => [u.walletId, u]))
+      const allFake = getLeaderboard("all", 500)
+      const withPoints = allFake.map(u => {
+        const seed = seededRandom(u.walletId + "all")
+        const fake = fakeUsersMap.has(u.walletId) ? fakeUsersMap.get(u.walletId)! : u
+        return { ...fake, points: Math.round(500 + seed * 25000) }
+      })
+      const combined = [...withPoints, ...realUsers]
+        .sort((a, b) => (b.points || 0) - (a.points || 0))
+        .slice(0, limit)
+        .map((u, i) => ({
+          rank: i + 1,
+          walletId: u.walletId,
+          name: u.name || "Player",
+          points: Math.max(u.points || 0, 0),
+          level: u.level || 1,
+          badges: 0,
+        }))
+      return NextResponse.json(combined)
     }
 
     // Daily / Weekly / Monthly: random decreasing points by rank

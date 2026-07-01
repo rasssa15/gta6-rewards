@@ -5,6 +5,7 @@ import { Newspaper, Clock, Eye, ChevronDown, Search, Coins } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
 import { formatDate } from "@/lib/utils"
 import { useRouter, useSearchParams } from "next/navigation"
+import { AdBanner } from "@/components/ads/AdBanner"
 
 interface Article {
   id: string
@@ -134,6 +135,11 @@ export default function NewsGrid({
             {cat.name}
           </Link>
         ))}
+      </div>
+
+      {/* 320×50 AD between filters and articles */}
+      <div className="mb-8">
+        <AdBanner adKey="a32d05859c7cdc4b19c45ea2746367ad" height={50} width={320} className="flex justify-center" />
       </div>
 
       {/* Articles grid */}

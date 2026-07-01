@@ -11,7 +11,7 @@ model User {
   id        String   @id @default(uuid())
   walletId  String   @unique
   name      String   @default("Player")
-  points    Int      @default(0)
+  points    Float    @default(0)
   level     Int      @default(1)
   xp        Int      @default(0)
   adsWatched Int     @default(0)
@@ -32,6 +32,9 @@ model User {
   articleViews     ArticleView[]
   comments         Comment[]
   articleBookmarks ArticleBookmark[]
+  theme             String   @default("default")
+  region            String   @default("")
+  popupAdsClicked   Int      @default(0)
 
   @@map("users")
 }
@@ -115,7 +118,7 @@ model PointTransaction {
   id        String   @id @default(uuid())
   userId    String
   user      User     @relation(fields: [userId], references: [id])
-  amount    Int
+  amount    Float
   reason    String
   reference String   @default("")
   createdAt DateTime @default(now())
@@ -140,14 +143,24 @@ model Reward {
 }
 
 model Redemption {
-  id         String   @id @default(uuid())
-  userId     String
-  user       User     @relation(fields: [userId], references: [id])
-  rewardId   String
-  reward     Reward   @relation(fields: [rewardId], references: [id])
-  status     String   @default("pending")
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+  id               String   @id @default(uuid())
+  userId           String
+  user             User     @relation(fields: [userId], references: [id])
+  rewardId         String
+  reward           Reward   @relation(fields: [rewardId], references: [id])
+  status           String   @default("pending_code")
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  codeAvailableAt  DateTime?
+  popupAdsClicked  Int      @default(0)
+  popupAdsRequired Int      @default(20)
+  code             String?
+  codeViewed       Boolean  @default(false)
+  codeViewCount    Int      @default(0)
+  userCountry      String   @default("")
+  codeCountry      String   @default("")
+  codePrefix       String   @default("AE")
+  platform         String   @default("steam")
 
   @@map("redemptions")
 }
@@ -214,7 +227,7 @@ model ScratchResult {
   id        String   @id @default(uuid())
   userId    String
   user      User     @relation(fields: [userId], references: [id])
-  points    Int      @default(0)
+  points    Float    @default(0)
   createdAt DateTime @default(now())
 
   @@map("scratch_results")

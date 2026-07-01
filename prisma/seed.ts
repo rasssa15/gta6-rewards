@@ -39,13 +39,14 @@ async function main() {
     })
   }
 
-  const dailyChallenges = [
-    { key: "read_3_articles", title: "Read 3 Articles", description: "Read three articles today", xpReward: 30, pointReward: 15, type: "read_articles", target: 3 },
-    { key: "earn_20_points", title: "Earn 20 Points", description: "Earn 20 points through any activity", xpReward: 40, pointReward: 20, type: "earn_points", target: 20 },
-    { key: "visit_daily", title: "Daily Visitor", description: "Just visit the site today", xpReward: 10, pointReward: 5, type: "daily_visit", target: 1 },
+  const adChallenges = [
+    { key: "watch_10", title: "Watch 10 Ads", description: "Watch 10 ads to earn rewards", xpReward: 20, pointReward: 10, type: "watch_ads", target: 10 },
+    { key: "watch_25", title: "Watch 25 Ads", description: "Watch 25 ads to earn rewards", xpReward: 30, pointReward: 15, type: "watch_ads", target: 25 },
+    { key: "watch_50", title: "Watch 50 Ads", description: "Watch 50 ads to earn rewards", xpReward: 50, pointReward: 25, type: "watch_ads", target: 50 },
+    { key: "watch_100", title: "Watch 100 Ads", description: "Watch 100 ads to earn rewards", xpReward: 80, pointReward: 50, type: "watch_ads", target: 100 },
   ]
 
-  for (const ch of dailyChallenges) {
+  for (const ch of adChallenges) {
     await prisma.challenge.upsert({
       where: { key: ch.key },
       update: {},
@@ -54,11 +55,16 @@ async function main() {
   }
 
   const rewards = [
-    { name: "Steam $5 Gift Card", description: "Steam digital gift card", pointsCost: 500, stock: 10, category: "gift-card" },
-    { name: "Steam $10 Gift Card", description: "Steam digital gift card", pointsCost: 900, stock: 5, category: "gift-card" },
-    { name: "Xbox Game Pass 1 Month", description: "Xbox Game Pass Ultimate", pointsCost: 800, stock: 5, category: "gift-card" },
-    { name: "GTA 6 Wallpaper Pack", description: "Exclusive GTA 6 wallpapers", pointsCost: 50, stock: 100, category: "digital" },
-    { name: "GTA 6 Theme Pack", description: "Custom GTA 6 theme for your dashboard", pointsCost: 100, stock: 50, category: "digital" },
+    { name: "GTA 6 - Pre-Order Code", description: "Secure your copy of GTA 6 on any platform. Be first in Vice City.", pointsCost: 1000, stock: 50, category: "coupon-gta6" },
+    { name: "Steam - $5 Game Coupon", description: "Redeem for any Steam game of your choice.", pointsCost: 170, stock: 30, category: "coupon-steam" },
+    { name: "Steam - $10 Game Coupon", description: "Get $10 off your next Steam purchase.", pointsCost: 300, stock: 20, category: "coupon-steam" },
+    { name: "Epic Games - $5 Coupon", description: "Save on Epic Games Store purchases.", pointsCost: 170, stock: 25, category: "coupon-epic" },
+    { name: "PlayStation - $5 Store Credit", description: "Add funds to your PlayStation Network wallet.", pointsCost: 200, stock: 20, category: "coupon-playstation" },
+    { name: "Xbox - $5 Gift Code", description: "Redeem on Xbox Marketplace for games and add-ons.", pointsCost: 200, stock: 20, category: "coupon-xbox" },
+    { name: "Nintendo eShop - $5 Code", description: "Add credit to your Nintendo eShop account.", pointsCost: 200, stock: 15, category: "coupon-nintendo" },
+    { name: "Steam - Mystery Game Key", description: "Random Steam game key — could be anything from indie gems to AAA titles!", pointsCost: 120, stock: 40, category: "coupon-steam" },
+    { name: "100 GTA Wallpaper Pack", description: "100 exclusive GTA-themed HD wallpapers — Vice City sunsets, neon skylines, sports cars, and more. Instant digital download.", pointsCost: 30, stock: 999, category: "wallpaper-pack" },
+    { name: "GTA VI - Neon Theme Pack", description: "Unlock the exclusive GTA Vice City neon theme. Transforms your entire dashboard with vibrant neon pink, blue, and purple gradients.", pointsCost: 50, stock: 50, category: "theme-pack" },
   ]
 
   for (const r of rewards) {
@@ -69,7 +75,27 @@ async function main() {
     })
   }
 
-  console.log("Database seeded successfully")
+  // Set reward images based on category
+  const allRewards = await prisma.reward.findMany({ where: { active: true } })
+  for (const r of allRewards) {
+    const cat = r.category
+    if (cat === "wallpaper-pack") {
+      const imagePath = "/images/rewards/wallpaper-pack.svg"
+    } else if (cat === "theme-pack") {
+      const imagePath = "/images/rewards/theme-pack.svg"
+      if (!r.image || r.image === "") {
+        await prisma.reward.update({ where: { id: r.id }, data: { image: imagePath } })
+      }
+    } else {
+      const plat = cat.replace("coupon-", "")
+      const imagePath = `/images/rewards/${plat}-coupon.svg`
+      if (!r.image || r.image === "") {
+        await prisma.reward.update({ where: { id: r.id }, data: { image: imagePath } })
+      }
+    }
+  }
+
+  console.log("Database seeded successfully with rewards and images")
 }
 
 main()

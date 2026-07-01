@@ -1,25 +1,37 @@
 export default {
   async fetch(request, env) {
-    if (request.method !== "POST") {
-      return new Response("Send POST with JSON body: { prompt, width?, height? }", { status: 405 })
+    const url = new URL(request.url)
+    const isGet = request.method === "GET"
+
+    let prompt
+    let width = 1200
+    let height = 675
+
+    if (isGet) {
+      prompt = url.searchParams.get("prompt")
+      width = parseInt(url.searchParams.get("width") || "1200")
+      height = parseInt(url.searchParams.get("height") || "675")
+      if (!prompt) {
+        return new Response("Missing 'prompt' query param", { status: 400 })
+      }
+    } else if (request.method === "POST") {
+      let body
+      try {
+        body = await request.json()
+      } catch {
+        return new Response("Invalid JSON", { status: 400 })
+      }
+      prompt = body.prompt
+      width = body.width || 1200
+      height = body.height || 675
+      if (!prompt) {
+        return new Response("Missing 'prompt' field", { status: 400 })
+      }
+    } else {
+      return new Response("Send GET with ?prompt= or POST with JSON body", { status: 405 })
     }
 
-    let body
-    try {
-      body = await request.json()
-    } catch {
-      return new Response("Invalid JSON", { status: 400 })
-    }
-
-    if (!body.prompt) {
-      return new Response("Missing 'prompt' field", { status: 400 })
-    }
-
-    const inputs = {
-      prompt: body.prompt,
-      width: body.width || 1200,
-      height: body.height || 675,
-    }
+    const inputs = { prompt, width, height }
 
     try {
       const result = await env.AI.run(
@@ -27,9 +39,7 @@ export default {
         inputs
       )
 
-      const imageData = result
-        ? result.image || result
-        : result
+      const imageData = result?.image || result
 
       return new Response(imageData, {
         headers: {

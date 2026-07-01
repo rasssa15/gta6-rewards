@@ -14,3 +14,4 @@ next-env.d.ts
 generated/
 
 # public/images/
+.env*
