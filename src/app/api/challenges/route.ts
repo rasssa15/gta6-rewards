@@ -1,10 +1,18 @@
 import { NextRequest, NextResponse } from "next/server"
 import { getUserByWalletId } from "@/lib/data"
+import { checkRateLimit } from "@/lib/rate-limit"
 
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url)
   const userId = searchParams.get("userId")
   const walletId = searchParams.get("walletId")
+  const ip = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown"
+  const { allowed, resetAt } = checkRateLimit(ip, req.method, req.nextUrl.pathname, walletId || userId || undefined)
+  if (!allowed) {
+    return NextResponse.json({ error: "Too many requests. Please slow down." }, {
+      status: 429, headers: { "Retry-After": String(Math.ceil((resetAt - Date.now()) / 1000)), "X-RateLimit-Remaining": "0" },
+    })
+  }
 
   try {
     const { prisma } = await import("@/lib/prisma")
@@ -78,7 +86,15 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   try {
     const { prisma } = await import("@/lib/prisma")
+    const { checkRateLimit } = await import("@/lib/rate-limit")
     const data = await req.json()
+    const ip = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown"
+    const { allowed, resetAt } = checkRateLimit(ip, req.method, req.nextUrl.pathname)
+    if (!allowed) {
+      return NextResponse.json({ error: "Too many requests. Please slow down." }, {
+        status: 429, headers: { "Retry-After": String(Math.ceil((resetAt - Date.now()) / 1000)), "X-RateLimit-Remaining": "0" },
+      })
+    }
     const challenge = await prisma.challenge.create({ data })
     return NextResponse.json(challenge, { status: 201 })
   } catch (error) {

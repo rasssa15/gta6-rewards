@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { getCommentsForArticle, getAllArticles } from "@/lib/data"
 import { prisma } from "@/lib/prisma"
+import { checkRateLimit } from "@/lib/rate-limit"
 
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url)
@@ -42,6 +43,13 @@ export async function POST(req: NextRequest) {
     const { content, articleId, walletId, parentId } = await req.json()
     if (!content || !articleId || !walletId) {
       return NextResponse.json({ error: "content, articleId, walletId required" }, { status: 400 })
+    }
+    const ip = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown"
+    const { allowed, resetAt } = checkRateLimit(ip, req.method, req.nextUrl.pathname, walletId)
+    if (!allowed) {
+      return NextResponse.json({ error: "Too many requests. Please slow down." }, {
+        status: 429, headers: { "Retry-After": String(Math.ceil((resetAt - Date.now()) / 1000)), "X-RateLimit-Remaining": "0" },
+      })
     }
 
     const user = await prisma.user.upsert({

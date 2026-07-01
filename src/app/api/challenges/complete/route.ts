@@ -7,8 +7,16 @@ export async function POST(req: NextRequest) {
   try {
     const { prisma } = await import("@/lib/prisma")
     const { awardScratchCard } = await import("@/lib/scratch-card")
+    const { checkRateLimit } = await import("@/lib/rate-limit")
 
     const { userId, walletId, challengeId } = await req.json()
+    const ip = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown"
+    const { allowed, resetAt } = checkRateLimit(ip, req.method, req.nextUrl.pathname, walletId || userId)
+    if (!allowed) {
+      return NextResponse.json({ error: "Too many requests. Please slow down." }, {
+        status: 429, headers: { "Retry-After": String(Math.ceil((resetAt - Date.now()) / 1000)), "X-RateLimit-Remaining": "0" },
+      })
+    }
     if ((!userId && !walletId) || !challengeId) {
       return NextResponse.json({ error: "userId/walletId and challengeId required" }, { status: 400 })
     }

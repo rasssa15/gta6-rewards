@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
+import { checkRateLimit } from "@/lib/rate-limit"
 
 const AD_POINTS_CAP = 120
 
@@ -24,6 +25,13 @@ export async function POST(req: NextRequest) {
     const { walletId } = await req.json()
     if (!walletId) {
       return NextResponse.json({ error: "walletId required" }, { status: 400 })
+    }
+    const ip = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown"
+    const { allowed, remaining: rateRemaining, resetAt } = checkRateLimit(ip, req.method, req.nextUrl.pathname, walletId)
+    if (!allowed) {
+      return NextResponse.json({ error: "Too many requests. Please slow down." }, {
+        status: 429, headers: { "Retry-After": String(Math.ceil((resetAt - Date.now()) / 1000)), "X-RateLimit-Remaining": "0" },
+      })
     }
 
     const user = await prisma.user.findFirst({

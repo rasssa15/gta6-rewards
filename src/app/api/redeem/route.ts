@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server"
 import { getUserByWalletId } from "@/lib/data"
 import { prisma } from "@/lib/prisma"
 import { detectUserCountry, resolveCodeCountry, getPlatformHours } from "@/lib/codes"
+import { checkRateLimit } from "@/lib/rate-limit"
 
 const VALID_PLATFORMS = ["steam", "epic", "nintendo", "xbox", "playstation"]
 
@@ -10,6 +11,13 @@ export async function POST(req: NextRequest) {
     const { userId, walletId, rewardId, platform } = await req.json()
     if ((!userId && !walletId) || !rewardId) {
       return NextResponse.json({ error: "userId or walletId, and rewardId required" }, { status: 400 })
+    }
+    const ip = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown"
+    const { allowed, resetAt } = checkRateLimit(ip, req.method, req.nextUrl.pathname, walletId || userId)
+    if (!allowed) {
+      return NextResponse.json({ error: "Too many requests. Please slow down." }, {
+        status: 429, headers: { "Retry-After": String(Math.ceil((resetAt - Date.now()) / 1000)), "X-RateLimit-Remaining": "0" },
+      })
     }
 
     const selectedPlatform = VALID_PLATFORMS.includes(platform) ? platform : "steam"

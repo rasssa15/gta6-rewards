@@ -32,7 +32,15 @@ export async function PATCH(
 ) {
   try {
     const { prisma } = await import("@/lib/prisma")
+    const { checkRateLimit } = await import("@/lib/rate-limit")
     const body = await req.json()
+    const ip = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown"
+    const { allowed, resetAt } = checkRateLimit(ip, req.method, "/api/users", params.walletId)
+    if (!allowed) {
+      return NextResponse.json({ error: "Too many requests. Please slow down." }, {
+        status: 429, headers: { "Retry-After": String(Math.ceil((resetAt - Date.now()) / 1000)), "X-RateLimit-Remaining": "0" },
+      })
+    }
     const allowedFields = ["name", "region"]
     const data: Record<string, any> = {}
     for (const key of allowedFields) {
