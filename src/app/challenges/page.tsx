@@ -3,6 +3,7 @@ import { useState, useEffect, useCallback, useRef } from "react"
 import { Sparkles, Target, CheckCircle, Gift, Eye, Star, RefreshCw, Loader2, Check } from "lucide-react"
 import Link from "next/link"
 import { AdBanner } from "@/components/ads/AdBanner"
+import { AdsterraBanner } from "@/components/ads/AdsterraBanner"
 import { useWallet } from "@/components/providers/WalletProvider"
 import toast from "react-hot-toast"
 
@@ -110,7 +111,7 @@ export default function ChallengesPage() {
           </div>
           <h1 className="text-3xl font-heading font-bold text-white mb-2">Ad Challenges</h1>
           <p className="text-gray-400">Watch ads, hit milestones, earn big rewards</p>
-          <AdBanner adKey="728x90-challenges-top" height={90} width={728} className="mt-6 mb-4" />
+          <AdBanner adKey="7e7419c72404cab7787c27dfdac31321" height={90} width={728} className="mt-6 mb-4" />
           {walletId && (
             <button onClick={fetchChallenges} className="mt-3 text-xs text-gray-500 hover:text-neon-green transition-colors inline-flex items-center gap-1">
               <RefreshCw className="w-3 h-3" /> Refresh progress
@@ -175,7 +176,14 @@ export default function ChallengesPage() {
           </div>
         ) : (
           <>
-            <AdBanner adKey="728x90-challenges-mid" height={90} width={728} className="mb-6" />
+            <div className="flex gap-4 mb-6">
+              <div className="hidden lg:block shrink-0">
+                <AdsterraBanner type="skyscraper" />
+              </div>
+              <div className="flex-1">
+                <AdBanner adKey="7e7419c72404cab7787c27dfdac31321" height={90} width={728} />
+              </div>
+            </div>
             <div className="space-y-3">
               {challenges.map((challenge) => (
                 <div
@@ -254,8 +262,9 @@ export default function ChallengesPage() {
           </>
         )}
 
-        <div className="mt-8">
-          <AdBanner adKey="300x250-challenges-bottom" height={250} width={300} />
+        <div className="mt-8 flex flex-col items-center gap-4">
+          <AdBanner adKey="7e7419c72404cab7787c27dfdac31321" height={90} width={728} />
+          <AdsterraBanner type="responsive" />
         </div>
       </div>
     </div>

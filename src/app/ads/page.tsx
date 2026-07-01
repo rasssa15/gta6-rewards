@@ -2,6 +2,8 @@
 import { useState, useEffect, useRef, useCallback } from "react"
 import { Eye, Play, Star, ExternalLink, AlertCircle, Loader2, Check } from "lucide-react"
 import { useWallet } from "@/components/providers/WalletProvider"
+import { AdBanner } from "@/components/ads/AdBanner"
+import { AdsterraBanner } from "@/components/ads/AdsterraBanner"
 import toast from "react-hot-toast"
 import Link from "next/link"
 
@@ -112,7 +114,17 @@ export default function AdsPage() {
 
   return (
     <div className="min-h-screen pt-24 pb-16">
-      <div className="page-container max-w-2xl">
+      <div className="page-container max-w-4xl">
+        <div className="flex gap-4 mb-6">
+          <div className="hidden lg:block shrink-0">
+            <AdsterraBanner type="skyscraper" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <AdBanner adKey="7e7419c72404cab7787c27dfdac31321" height={90} width={728} className="mb-4" />
+            <AdsterraBanner type="small-skyscraper" className="mb-4 lg:hidden" />
+          </div>
+        </div>
+
         <div className="text-center mb-8">
           <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-neon-green to-emerald-500 flex items-center justify-center mx-auto mb-4">
             <Eye className="w-8 h-8 text-white" />
@@ -227,6 +239,10 @@ export default function AdsPage() {
             </div>
           </>
         )}
+        <div className="mt-8 flex flex-col items-center gap-4">
+          <AdBanner adKey="7e7419c72404cab7787c27dfdac31321" height={90} width={728} />
+          <AdsterraBanner type="responsive" />
+        </div>
       </div>
     </div>
   )

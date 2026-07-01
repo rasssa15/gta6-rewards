@@ -2,6 +2,7 @@
 import Link from "next/link"
 import { Gift, Newspaper, Sparkles, Eye, RefreshCw, Users, ChevronRight, Coins, Zap, Trophy, Flame } from "lucide-react"
 import { AdBanner } from "@/components/ads/AdBanner"
+import { AdsterraBanner } from "@/components/ads/AdsterraBanner"
 
 const earnMethods = [
   {
@@ -71,12 +72,16 @@ export default function EarnPage() {
           <p className="text-gray-400">Every action gives you a random Scratch Card</p>
         </div>
 
-        <div className="mb-8">
-          <AdBanner adKey="7e7419c72404cab7787c27dfdac31321" height={90} width={728} className="flex justify-center" />
-        </div>
-
-        <div className="flex justify-center mb-8">
-          <AdBanner adKey="earn-sidebar" height={300} width={160} className="flex justify-center" />
+        <div className="flex gap-4 mb-8">
+          <div className="hidden lg:block shrink-0">
+            <AdsterraBanner type="skyscraper" />
+          </div>
+          <div className="flex-1">
+            <AdBanner adKey="7e7419c72404cab7787c27dfdac31321" height={90} width={728} />
+            <div className="mt-4">
+              <AdsterraBanner type="small-skyscraper" />
+            </div>
+          </div>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -125,7 +130,7 @@ export default function EarnPage() {
         </div>
 
         <div className="flex justify-center mt-10">
-          <AdBanner adKey="earn-bottom" height={60} width={468} className="flex justify-center" />
+          <AdBanner adKey="a32d05859c7cdc4b19c45ea2746367ad" height={50} width={320} />
         </div>
       </div>
     </div>
