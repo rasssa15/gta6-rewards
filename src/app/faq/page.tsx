@@ -76,6 +76,10 @@ const faqs = [
     q: "Is this a real rewards platform?",
     a: "No — this is a fictional fan project for entertainment. All points, coupons, and rewards are simulated. No real gift cards, money, or prizes are distributed. It's just for fun! See the /terms page for full details.",
   },
+  {
+    q: "Why should I never close an ad before it fully opens?",
+    a: "Do NOT close any ad until it finishes opening. When ads appear on articles, the watch page, or as popups — let them load completely. Clicking on popup ads 1-2 times increases your chance to earn points. If you close ads before they open, the coupon code system may flag your account and your code may not generate. Always let ads fully load and interact with popups for the best rewards.",
+  },
 ]
 
 export default function FAQPage() {
