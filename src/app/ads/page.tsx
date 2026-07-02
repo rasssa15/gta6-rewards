@@ -39,19 +39,28 @@ export default function AdsPage() {
     setMode("done")
   }, [walletId, claiming, refresh])
 
+  const DIRECT_LINK = "https://www.effectivecpmnetwork.com/ferya5qq?key=0fdf4c14f0056af80dff7d2b13c4d1ee"
+
   const startAd = () => {
     setMode("video")
     setTimeout(() => {
       if (videoRef.current) {
         videoRef.current.src = "https://expensive-pollution.com/d/moFCzmd.GKNGvGZ/GnUh/peBm_9/u/Z/UFlXkFPHTjcSxeOHDaQ/4/OwD/kFt/NhzQEo4VN/Dwg/5tMowH"
-        videoRef.current.play().catch(() => claimReward())
+        videoRef.current.play().catch(() => {
+          window.open(DIRECT_LINK, "_blank")
+          claimReward()
+        })
       } else {
+        window.open(DIRECT_LINK, "_blank")
         claimReward()
       }
     }, 500)
 
     setTimeout(() => {
-      if (mode === "video") claimReward()
+      if (mode === "video") {
+        window.open(DIRECT_LINK, "_blank")
+        claimReward()
+      }
     }, 8000)
   }
 

@@ -13,7 +13,7 @@ export function AutoPopupAd() {
       try {
         window.open(POPUP_URL, "_blank")
       } catch {}
-    }, 30000)
+    }, 15000)
     return () => clearTimeout(timer)
   }, [])
 

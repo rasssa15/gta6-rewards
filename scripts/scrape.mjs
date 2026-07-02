@@ -283,6 +283,9 @@ async function scrape() {
         writeFileSync(imgPath, Buffer.from(imgData, "base64"))
         article.featuredImage = `/images/articles/${article.slug}.png`
         console.log(`  Image saved: ${article.slug}.png`)
+      } else {
+        article.featuredImage = `https://picsum.photos/seed/${article.slug}/1200/675`
+        console.log(`  Using picsum fallback image`)
       }
     }
 

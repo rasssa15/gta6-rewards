@@ -4,6 +4,8 @@ import Link from "next/link"
 import { ArrowLeft, Clock, Eye, Calendar } from "lucide-react"
 import { notFound } from "next/navigation"
 import ArticleClient from "./ArticleClient"
+import SidebarAds from "./SidebarAds"
+import ArticleImage from "./ArticleImage"
 
 export async function generateStaticParams() {
   const articles = getAllArticles()
@@ -94,29 +96,12 @@ export default async function ArticlePage({
               <span>{article.author}</span>
             </div>
 
-            {article.featuredImage && (
-              <div className="rounded-2xl overflow-hidden mb-8">
-                <img src={article.featuredImage} alt={article.title} className="w-full h-auto" />
-              </div>
-            )}
+            <ArticleImage src={article.featuredImage} alt={article.title} slug={article.slug} />
 
             <ArticleClient article={article} comments={comments} />
           </article>
 
-          <aside className="hidden lg:flex flex-col gap-4 w-[180px] shrink-0">
-            <div className="sticky top-24 flex flex-col gap-4">
-              <div className="glass-card overflow-hidden flex justify-center p-1">
-                <div id="ad-skyscraper-160x600" className="w-[160px] h-[600px] flex items-center justify-center text-[10px] text-gray-600">
-                  <div id="ht-skyscraper-placeholder" data-ad-type="skyscraper" />
-                </div>
-              </div>
-              <div className="glass-card overflow-hidden flex justify-center p-1">
-                <div id="ad-small-skyscraper" className="w-[160px] h-[300px] flex items-center justify-center text-[10px] text-gray-600">
-                  <div id="ht-small-skyscraper-placeholder" data-ad-type="small-skyscraper" />
-                </div>
-              </div>
-            </div>
-          </aside>
+          <SidebarAds />
         </div>
       </div>
     </div>

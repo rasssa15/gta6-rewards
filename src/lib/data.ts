@@ -94,7 +94,7 @@ export function getAllArticles(): ArticleData[] {
     const chunk = cache.get(cat)
     if (chunk) all.push(...chunk)
   }
-  return all
+  return all.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
 }
 
 export function getArticleBySlug(slug: string): ArticleData | undefined {
@@ -142,7 +142,8 @@ export function getArticles(options: {
   }
 
   const total = all.length
-  const articles = all.slice(offset, offset + limit)
+  const sorted = all.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+  const articles = sorted.slice(offset, offset + limit)
   return { articles, total }
 }
 

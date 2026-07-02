@@ -21,14 +21,14 @@ export function StickyFooterAd() {
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
+          const d = document.createElement("div")
+          d.id = "container-f301214e059ca70b56b447bf6850594e"
+          el.appendChild(d)
           const s = document.createElement("script")
           s.async = true
           s.setAttribute("data-cfasync", "false")
           s.src = "https://evidentbummerhike.com/f301214e059ca70b56b447bf6850594e/invoke.js"
           el.appendChild(s)
-          const d = document.createElement("div")
-          d.id = "container-f301214e059ca70b56b447bf6850594e"
-          el.appendChild(d)
           setLoaded(true)
           observer.disconnect()
         }

@@ -22,18 +22,18 @@ const AD_CONFIG: Record<string, AdConfig> = {
     script: "https://evidentbummerhike.com/f301214e059ca70b56b447bf6850594e/invoke.js",
   },
   skyscraper: {
-    key: "14c436bda0b1d02724d0618980143ce5",
+    key: "14c436b60c41a18bb9f73c3ebfe72863",
     height: 600,
     width: 160,
-    script: "https://evidentbummerhike.com/14c436bda0b1d02724d0618980143ce5/invoke.js",
-    containerId: "container-14c436bda0b1d02724d0618980143ce5",
+    script: "https://evidentbummerhike.com/14c436b60c41a18bb9f73c3ebfe72863/invoke.js",
+    containerId: "container-14c436b60c41a18bb9f73c3ebfe72863",
   },
   "small-skyscraper": {
-    key: "0eda691a40adbc5636d43af20fdda82d",
+    key: "0eda691a2c2d80a93114f023a3d7f665",
     height: 300,
     width: 160,
-    script: "https://evidentbummerhike.com/0eda691a40adbc5636d43af20fdda82d/invoke.js",
-    containerId: "container-0eda691a40adbc5636d43af20fdda82d",
+    script: "https://evidentbummerhike.com/0eda691a2c2d80a93114f023a3d7f665/invoke.js",
+    containerId: "container-0eda691a2c2d80a93114f023a3d7f665",
   },
 }
 
@@ -66,23 +66,15 @@ export function LazyAd({ type, minHeight, className }: LazyAdProps) {
     const config = AD_CONFIG[type]
     if (!config) return
 
-    if (type === "responsive") {
-      const script = document.createElement("script")
-      script.async = true
-      script.setAttribute("data-cfasync", "false")
-      script.src = config.script
-      container.appendChild(script)
-      const div = document.createElement("div")
-      div.id = config.containerId
-      container.appendChild(div)
-    } else {
-      const inline = document.createElement("script")
-      inline.text = `atOptions={'key':'${config.key}','format':'iframe','height':${config.height},'width':${config.width},'params':{}};`
-      container.appendChild(inline)
-      const invoke = document.createElement("script")
-      invoke.src = config.script
-      container.appendChild(invoke)
-    }
+    const div = document.createElement("div")
+    div.id = config.containerId
+    container.appendChild(div)
+
+    const script = document.createElement("script")
+    script.async = true
+    script.setAttribute("data-cfasync", "false")
+    script.src = config.script
+    container.appendChild(script)
 
     setLoaded(true)
     return () => { container.innerHTML = "" }
