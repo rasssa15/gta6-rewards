@@ -23,7 +23,7 @@ jobs:
       - name: Scrape articles
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
-          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
         run: node scripts/scrape.mjs
 
       - name: Commit and push changes
