@@ -2,7 +2,6 @@
 import { useState, useEffect, useRef, useCallback } from "react"
 import { Eye, Play, Star, ExternalLink, AlertCircle, Loader2, Check } from "lucide-react"
 import { useWallet } from "@/components/providers/WalletProvider"
-import { AdBanner } from "@/components/ads/AdBanner"
 import { AdsterraBanner } from "@/components/ads/AdsterraBanner"
 import toast from "react-hot-toast"
 import Link from "next/link"
@@ -120,17 +119,15 @@ export default function AdsPage() {
             <AdsterraBanner type="skyscraper" />
           </div>
           <div className="flex-1 min-w-0">
-            <AdBanner adKey="7e7419c72404cab7787c27dfdac31321" height={90} width={728} className="mb-4" />
-            <AdsterraBanner type="small-skyscraper" className="mb-4 lg:hidden" />
+            <AdsterraBanner type="responsive" />
+            <div className="text-center mb-8 mt-4">
+              <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-neon-green to-emerald-500 flex items-center justify-center mx-auto mb-4">
+                <Eye className="w-8 h-8 text-white" />
+              </div>
+              <h1 className="text-3xl font-heading font-bold text-white mb-2">Watch Ads</h1>
+              <p className="text-gray-400">Watch ads to earn rewards</p>
+            </div>
           </div>
-        </div>
-
-        <div className="text-center mb-8">
-          <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-neon-green to-emerald-500 flex items-center justify-center mx-auto mb-4">
-            <Eye className="w-8 h-8 text-white" />
-          </div>
-          <h1 className="text-3xl font-heading font-bold text-white mb-2">Watch Ads</h1>
-          <p className="text-gray-400">Watch ads to earn rewards</p>
         </div>
 
         {!walletId ? (
@@ -239,9 +236,10 @@ export default function AdsPage() {
             </div>
           </>
         )}
+
         <div className="mt-8 flex flex-col items-center gap-4">
-          <AdBanner adKey="7e7419c72404cab7787c27dfdac31321" height={90} width={728} />
           <AdsterraBanner type="responsive" />
+          <AdsterraBanner type="small-skyscraper" />
         </div>
       </div>
     </div>

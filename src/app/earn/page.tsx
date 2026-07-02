@@ -1,7 +1,6 @@
 "use client"
 import Link from "next/link"
 import { Gift, Newspaper, Sparkles, Eye, RefreshCw, Users, ChevronRight, Coins, Zap, Trophy, Flame } from "lucide-react"
-import { AdBanner } from "@/components/ads/AdBanner"
 import { AdsterraBanner } from "@/components/ads/AdsterraBanner"
 
 const earnMethods = [
@@ -65,22 +64,18 @@ export default function EarnPage() {
   return (
     <div className="min-h-screen pt-24 pb-16">
       <div className="page-container max-w-4xl">
-        <div className="mb-8">
-          <h1 className="text-3xl sm:text-5xl font-heading font-bold text-white mb-2">
-            Earn <span className="bg-gradient-to-r from-neon-green to-neon-blue bg-clip-text text-transparent">Big</span>
-          </h1>
-          <p className="text-gray-400">Every action gives you a random Scratch Card</p>
-        </div>
-
-        <div className="flex gap-4 mb-8">
+        <div className="flex gap-4 mb-6">
           <div className="hidden lg:block shrink-0">
             <AdsterraBanner type="skyscraper" />
           </div>
-          <div className="flex-1">
-            <AdBanner adKey="7e7419c72404cab7787c27dfdac31321" height={90} width={728} />
-            <div className="mt-4">
-              <AdsterraBanner type="small-skyscraper" />
+          <div className="flex-1 min-w-0">
+            <div className="mb-8">
+              <h1 className="text-3xl sm:text-5xl font-heading font-bold text-white mb-2">
+                Earn <span className="bg-gradient-to-r from-neon-green to-neon-blue bg-clip-text text-transparent">Big</span>
+              </h1>
+              <p className="text-gray-400">Every action gives you a random Scratch Card</p>
             </div>
+            <AdsterraBanner type="responsive" />
           </div>
         </div>
 
@@ -111,8 +106,8 @@ export default function EarnPage() {
           })}
         </div>
 
-        <div className="mt-10">
-          <AdBanner adKey="a32d05859c7cdc4b19c45ea2746367ad" height={50} width={320} className="flex justify-center" />
+        <div className="mt-6">
+          <AdsterraBanner type="responsive" />
         </div>
 
         <div className="mt-10 glass-card p-8 text-center relative overflow-hidden">
@@ -129,8 +124,9 @@ export default function EarnPage() {
           </Link>
         </div>
 
-        <div className="flex justify-center mt-10">
-          <AdBanner adKey="a32d05859c7cdc4b19c45ea2746367ad" height={50} width={320} />
+        <div className="mt-10 flex flex-col items-center gap-4">
+          <AdsterraBanner type="responsive" />
+          <AdsterraBanner type="small-skyscraper" />
         </div>
       </div>
     </div>

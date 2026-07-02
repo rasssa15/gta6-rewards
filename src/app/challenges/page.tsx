@@ -2,7 +2,6 @@
 import { useState, useEffect, useCallback, useRef } from "react"
 import { Sparkles, Target, CheckCircle, Gift, Eye, Star, RefreshCw, Loader2, Check } from "lucide-react"
 import Link from "next/link"
-import { AdBanner } from "@/components/ads/AdBanner"
 import { AdsterraBanner } from "@/components/ads/AdsterraBanner"
 import { useWallet } from "@/components/providers/WalletProvider"
 import toast from "react-hot-toast"
@@ -104,19 +103,26 @@ export default function ChallengesPage() {
 
   return (
     <div className="min-h-screen pt-24 pb-16">
-      <div className="page-container max-w-3xl">
-        <div className="text-center mb-10">
-          <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-neon-green to-neon-blue flex items-center justify-center mx-auto mb-4">
-            <Star className="w-8 h-8 text-white" />
+      <div className="page-container max-w-4xl">
+        <div className="flex gap-4 mb-6">
+          <div className="hidden lg:block shrink-0">
+            <AdsterraBanner type="skyscraper" />
           </div>
-          <h1 className="text-3xl font-heading font-bold text-white mb-2">Ad Challenges</h1>
-          <p className="text-gray-400">Watch ads, hit milestones, earn big rewards</p>
-          <AdBanner adKey="7e7419c72404cab7787c27dfdac31321" height={90} width={728} className="mt-6 mb-4" />
-          {walletId && (
-            <button onClick={fetchChallenges} className="mt-3 text-xs text-gray-500 hover:text-neon-green transition-colors inline-flex items-center gap-1">
-              <RefreshCw className="w-3 h-3" /> Refresh progress
-            </button>
-          )}
+          <div className="flex-1 min-w-0">
+            <div className="text-center mb-6">
+              <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-neon-green to-neon-blue flex items-center justify-center mx-auto mb-4">
+                <Star className="w-8 h-8 text-white" />
+              </div>
+              <h1 className="text-3xl font-heading font-bold text-white mb-2">Ad Challenges</h1>
+              <p className="text-gray-400">Watch ads, hit milestones, earn big rewards</p>
+              {walletId && (
+                <button onClick={fetchChallenges} className="mt-3 text-xs text-gray-500 hover:text-neon-green transition-colors inline-flex items-center gap-1">
+                  <RefreshCw className="w-3 h-3" /> Refresh progress
+                </button>
+              )}
+            </div>
+            <AdsterraBanner type="responsive" />
+          </div>
         </div>
 
         {showAd && (
@@ -176,15 +182,8 @@ export default function ChallengesPage() {
           </div>
         ) : (
           <>
-            <div className="flex gap-4 mb-6">
-              <div className="hidden lg:block shrink-0">
-                <AdsterraBanner type="skyscraper" />
-              </div>
-              <div className="flex-1">
-                <AdBanner adKey="7e7419c72404cab7787c27dfdac31321" height={90} width={728} />
-              </div>
-            </div>
-            <div className="space-y-3">
+            <AdsterraBanner type="responsive" />
+            <div className="space-y-3 mt-6">
               {challenges.map((challenge) => (
                 <div
                   key={challenge.id}
@@ -263,8 +262,8 @@ export default function ChallengesPage() {
         )}
 
         <div className="mt-8 flex flex-col items-center gap-4">
-          <AdBanner adKey="7e7419c72404cab7787c27dfdac31321" height={90} width={728} />
           <AdsterraBanner type="responsive" />
+          <AdsterraBanner type="small-skyscraper" />
         </div>
       </div>
     </div>

@@ -22,7 +22,7 @@ const nextConfig = {
               "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
               "img-src 'self' data: blob: https: http:",
               "font-src 'self' https://fonts.gstatic.com",
-              "frame-src 'self' https://www.effectivecpmnetwork.com https://expensive-pollution.com https://pleased-report.com https://evidentbummerhike.com",
+              "frame-src 'self' https://www.effectivecpmnetwork.com https://expensive-pollution.com https://pleased-report.com https://evidentbummerhike.com https://www.highperformanceformat.com https://massivesalad.com",
               "connect-src 'self' https://*.vercel.app",
               "media-src 'self' https://expensive-pollution.com",
             ].join("; "),
