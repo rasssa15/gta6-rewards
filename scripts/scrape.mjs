@@ -4,34 +4,7 @@ import { fileURLToPath } from "url"
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const DATA_DIR = join(__dirname, "..", "public", "data")
-
-const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY || ""
-const OPENROUTER_MODEL = process.env.OPENROUTER_MODEL || "meta-llama/llama-3.3-70b-instruct:free"
 const TINYFISH_API_KEY = process.env.TINYFISH_API_KEY || ""
-
-async function openrouterChat(messages, options = {}) {
-  if (!OPENROUTER_API_KEY) return null
-  const res = await fetch("https://openrouter.ai/api/v1/chat/completions", {
-    method: "POST",
-    headers: {
-      "Authorization": `Bearer ${OPENROUTER_API_KEY}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      model: options.model || OPENROUTER_MODEL,
-      messages,
-      temperature: options.temperature ?? 0.7,
-      max_tokens: options.max_tokens ?? 8192,
-    }),
-  })
-  if (!res.ok) {
-    const err = await res.text()
-    console.log(`  OpenRouter error (${res.status}): ${err.slice(0, 200)}`)
-    return null
-  }
-  const data = await res.json()
-  return data.choices?.[0]?.message?.content || null
-}
 
 async function tinyfishSearch(query) {
   if (!TINYFISH_API_KEY) return null
@@ -158,66 +131,38 @@ function isDuplicate(article, existingArticles) {
   return existingArticles.some(a => a.sourceUrl === article.sourceUrl || a.title === article.title)
 }
 
-const FALLBACK_TOPICS = {
-  "gta-6": [
-    { topic: "GTA 6 Leak Reveals New Gameplay Mechanics in Vice City", description: "Fresh leaks reveal exciting new gameplay mechanics coming to GTA 6's Vice City.", imagePrompt: "GTA 6 Vice City neon skyline at sunset with palm trees, cinematic game screenshot style" },
-    { topic: "Rockstar Confirms GTA 6 Map Size Details", description: "Rockstar Games has reportedly finalized the GTA 6 map design, significantly larger than any previous entry.", imagePrompt: "Aerial view of massive game map with cities and countryside, GTA style" },
-  ],
-  rockstar: [
-    { topic: "Rockstar Games Announces Major Update for GTA Online", description: "Rockstar Games has unveiled plans for a massive GTA Online update with new missions, vehicles, and properties.", imagePrompt: "GTA Online heist crew in tactical gear, explosive action scene" },
-  ],
-  playstation: [
-    { topic: "PlayStation 5 Pro Specs and Release Date Rumors Surface", description: "Latest PS5 Pro rumors point to significant hardware upgrades with ray tracing improvements and 8K support.", imagePrompt: "PS5 Pro console concept design with blue LED lighting" },
-  ],
-  xbox: [
-    { topic: "Xbox Game Pass Adds Major Third-Party Titles", description: "Xbox Game Pass continues to expand with several major third-party titles joining the subscription service.", imagePrompt: "Xbox green neon logo on dark background with game boxes floating" },
-  ],
-  "pc-gaming": [
-    { topic: "PC Gaming Hardware Sales Surge Globally", description: "PC gaming hardware sales are experiencing a global surge as gamers upgrade their systems.", imagePrompt: "High-end gaming PC with RGB lighting, glass side panel" },
-  ],
-  nintendo: [
-    { topic: "Nintendo Switch 2 Backward Compatibility Details", description: "New details about Nintendo's next console suggest full backward compatibility with existing Switch games.", imagePrompt: "Nintendo Switch 2 concept design with colorful Joy-Cons" },
-  ],
-  esports: [
-    { topic: "Esports Tournament Prize Pools Reach Record Levels", description: "Esports tournament prize pools have reached unprecedented levels in 2026.", imagePrompt: "Massive esports arena with crowd cheering, stage with trophy, neon lights" },
-  ],
+const FALLBACK_CONTENT = {
+  intro: `The gaming community is buzzing with excitement following the latest developments. This breaking news has captured the attention of players worldwide, with discussions heating up across social media platforms, gaming forums, and community channels.`,
+  body1: `Industry analysts have been quick to weigh in on the significance of this development, noting that it arrives at a pivotal moment for the gaming industry. The current landscape is characterized by rapid technological advancement, shifting player expectations, and intense competition among major publishers and platform holders.`,
+  body2: `Sources close to the situation have indicated that this development represents a significant milestone that could have far-reaching implications for how players experience their favorite franchises in the coming months and years. The details that have emerged thus far paint a picture of ambitious planning and execution.`,
+  body3: `The response from the community has been overwhelmingly positive, with fans expressing enthusiasm about what this means for the future of their favorite gaming experiences. Many have taken to social media to share their reactions, theories, and hopes for what comes next.`,
+  body4: `As with any major gaming news story, it is important to note that some details may still be subject to change as official announcements and confirmations emerge. The gaming industry moves quickly, and the information landscape can shift rapidly.`,
+  body5: `For those who want to stay up to date with this developing story, following official social media channels, trusted gaming news outlets, and community discussion hubs is the best way to ensure you do not miss any important updates.`,
+  outro: `This announcement serves as yet another reminder of the dynamic and ever-evolving nature of the interactive entertainment industry, where innovation, creativity, and player engagement continue to drive the medium forward.`,
 }
 
-function buildFallbackArticle(title) {
-  const paragraphs = [
-    `<p>The gaming community is buzzing with excitement following the latest developments surrounding ${title.toLowerCase()}. This breaking news has captured the attention of players worldwide, with discussions already heating up across social media platforms, gaming forums, and community channels dedicated to tracking every detail of this evolving story.</p>`,
-    `<p>Industry analysts have been quick to weigh in on the significance of this development, noting that it arrives at a pivotal moment for the gaming industry. The current landscape is characterized by rapid technological advancement, shifting player expectations, and intense competition among major publishers and platform holders, making any major announcement particularly consequential.</p>`,
-    `<p>Sources close to the situation have indicated that this development represents a significant milestone that could have far-reaching implications for how players experience their favorite franchises in the coming months and years. The details that have emerged thus far paint a picture of ambitious planning and execution by the teams involved.</p>`,
-    `<p>The response from the community has been overwhelmingly positive, with fans expressing enthusiasm about what this means for the future of their favorite gaming experiences. Many have taken to social media to share their reactions, theories, and hopes for what comes next, creating a groundswell of engagement that developers are sure to be monitoring closely.</p>`,
-    `<p>As with any major gaming news story, it is important to note that some details may still be subject to change as official announcements and confirmations emerge. The gaming industry moves quickly, and the information landscape can shift rapidly as new details come to light through official channels and verified sources.</p>`,
-    `<p>For those who want to stay up to date with this developing story, following official social media channels, trusted gaming news outlets, and community discussion hubs is the best way to ensure you do not miss any important updates. The GTA 6 Rewards team will continue to monitor this story and provide comprehensive coverage as new information becomes available to the public.</p>`,
-    `<p>This announcement serves as yet another reminder of the dynamic and ever-evolving nature of the interactive entertainment industry, where innovation, creativity, and player engagement continue to drive the medium forward. The coming weeks and months promise to bring even more exciting developments that will shape the future of gaming for years to come.</p>`,
-  ]
+function buildArticle(title, sourceContent) {
+  const paragraphs = sourceContent
+    ? sourceContent.split("\n").filter(l => l.trim()).slice(0, 10).map(l => `<p>${l.trim().slice(0, 500)}</p>`)
+    : [
+        `<p>${FALLBACK_CONTENT.intro}</p>`,
+        `<h2>What We Know So Far</h2>`,
+        `<p>${FALLBACK_CONTENT.body1}</p>`,
+        `<p>${FALLBACK_CONTENT.body2}</p>`,
+        `<h2>Community Response</h2>`,
+        `<p>${FALLBACK_CONTENT.body3}</p>`,
+        `<h2>Looking Ahead</h2>`,
+        `<p>${FALLBACK_CONTENT.body4}</p>`,
+        `<p>${FALLBACK_CONTENT.body5}</p>`,
+        `<p>${FALLBACK_CONTENT.outro}</p>`,
+      ]
+
+  const fullText = paragraphs.join(" ")
   return {
     title,
     content: paragraphs.join("\n"),
     excerpt: paragraphs[0].replace(/<[^>]+>/g, "").slice(0, 155),
-    readingTime: Math.max(3, Math.ceil(paragraphs.join(" ").split(" ").length / 200)),
-    imageData: null,
-  }
-}
-
-async function fetchArticleContent(url) {
-  const content = await tinyfishFetch(url)
-  if (content) return content
-  try {
-    const res = await fetch(url, {
-      headers: { "User-Agent": "Mozilla/5.0 (compatible; GTARewardsBot/1.0)" },
-      signal: AbortSignal.timeout(10000),
-    })
-    const html = await res.text()
-    const match = html.match(/<article[^>]*>([\s\S]*?)<\/article>/i)
-      || html.match(/<main[^>]*>([\s\S]*?)<\/main>/i)
-      || html.match(/<body[^>]*>([\s\S]*?)<\/body>/i)
-    if (match) return match[1].replace(/<script[^>]*>[\s\S]*?<\/script>/gi, "").replace(/<style[^>]*>[\s\S]*?<\/style>/gi, "").replace(/<nav[^>]*>[\s\S]*?<\/nav>/gi, "").slice(0, 5000)
-    return html.replace(/<script[^>]*>[\s\S]*?<\/script>/gi, "").replace(/<style[^>]*>[\s\S]*?<\/style>/gi, "").slice(0, 5000)
-  } catch {
-    return null
+    readingTime: Math.max(3, Math.ceil(fullText.split(" ").length / 200)),
   }
 }
 
@@ -225,12 +170,12 @@ async function searchTrendingTopics(category) {
   console.log(`  Searching TinyFish for: "${category.search}"`)
   const results = await tinyfishSearch(category.search)
   if (results && results.length > 0) {
-    const top = results.slice(0, 3)
-    const topic = top[Math.floor(Math.random() * Math.min(top.length, 3))]
+    const top = results.slice(0, 5)
+    const topic = top[Math.floor(Math.random() * top.length)]
     let sourceContent = null
     if (topic.url) {
       console.log(`  Fetching article: ${topic.url}`)
-      sourceContent = await fetchArticleContent(topic.url)
+      sourceContent = await tinyfishFetch(topic.url)
     }
     return {
       topic: topic.title,
@@ -241,59 +186,27 @@ async function searchTrendingTopics(category) {
     }
   }
 
-  const fallbacks = FALLBACK_TOPICS[category.id] || FALLBACK_TOPICS["gta-6"]
-  const fallback = fallbacks[Math.floor(Math.random() * fallbacks.length)]
-  console.log(`  Using fallback topic: ${fallback.topic}`)
+  const fallbackTopics = {
+    "gta-6": "GTA 6 Vice City Gameplay Reveal",
+    rockstar: "Rockstar Games New Project Update",
+    playstation: "PlayStation 5 Pro Launch Details",
+    xbox: "Xbox Game Pass New Additions",
+    "pc-gaming": "Next Gen PC Hardware Releases",
+    nintendo: "Nintendo Switch 2 Development News",
+    esports: "Major Esports Tournament Announcement",
+  }
+  const topic = fallbackTopics[category.id] || "Gaming Industry Update"
   return {
-    topic: fallback.topic,
-    description: fallback.description,
+    topic,
+    description: `Latest news about ${topic}`,
     sourceUrl: "",
     sourceContent: null,
-    imagePrompt: fallback.imagePrompt,
-  }
-}
-
-async function rewriteArticle(title, sourceContent, category) {
-  const systemMsg = `You are a professional gaming journalist writing for GTA 6 Rewards. Respond with valid JSON only.`
-
-  const userMsg = `Write a gaming news article about "${title}" for category "${category}".
-
-${sourceContent ? `SOURCE MATERIAL (use this for facts, rewrite in your own words):\n${sourceContent.slice(0, 6000)}` : "Write an original article based on general gaming knowledge."}
-
-Requirements:
-- 800-1500 words of unique, engaging HTML content
-- Use <h2> for subheadings, <p> for paragraphs
-- Gaming-community tone: exciting, informed
-- SEO-friendly
-- Do NOT attribute to any source
-- Write as original journalism
-
-Return JSON:
-{
-  "title": "Optimized SEO headline",
-  "content": "Full HTML content with <p> and <h2> tags",
-  "excerpt": "1-2 sentence summary (max 160 chars)",
-  "readingTime": number (minutes)
-}
-
-Only return valid JSON, no markdown.`
-
-  try {
-    const result = await openrouterChat([
-      { role: "system", content: systemMsg },
-      { role: "user", content: userMsg },
-    ], { temperature: 0.7, max_tokens: 8192 })
-    if (!result) throw new Error("Empty response")
-    const cleaned = result.replace(/```json|```/g, "").trim()
-    return JSON.parse(cleaned)
-  } catch (e) {
-    console.log(`  Rewrite failed: ${e.message}, using fallback`)
-    return buildFallbackArticle(title)
+    imagePrompt: `${topic} gaming news screenshot style, cinematic`,
   }
 }
 
 async function scrape() {
-  console.log("Starting scraper (TinyFish search + OpenRouter writing)...")
+  console.log("Starting scraper (TinyFish search + fallback writing)...")
   const db = await getPrisma()
   let totalNew = 0
 
@@ -326,7 +239,7 @@ async function scrape() {
       metaDescription: topic.description.slice(0, 160),
       keywords: category.keywords,
       createdAt: new Date().toISOString(),
-      source: topic.sourceUrl ? "TinyFish Search" : "AI Generated",
+      source: topic.sourceUrl ? "TinyFish" : "AI Generated",
       sourceUrl: topic.sourceUrl || "",
     }
 
@@ -335,24 +248,22 @@ async function scrape() {
       continue
     }
 
-    console.log(`  Rewriting article with LLM...`)
-    const rewritten = await rewriteArticle(topic.topic, topic.sourceContent, category.id)
-    if (rewritten) {
-      article.title = rewritten.title || article.title
-      article.content = rewritten.content || article.content
-      article.excerpt = rewritten.excerpt || article.excerpt.slice(0, 160)
-      article.readingTime = rewritten.readingTime || Math.max(1, Math.ceil(article.content.split(" ").length / 200))
+    console.log(`  Building article...`)
+    const rewritten = buildArticle(topic.topic, topic.sourceContent)
+    article.title = rewritten.title || article.title
+    article.content = rewritten.content || article.content
+    article.excerpt = rewritten.excerpt || article.excerpt.slice(0, 160)
+    article.readingTime = rewritten.readingTime || Math.max(1, Math.ceil(article.content.split(" ").length / 200))
 
-      if (topic.imagePrompt) {
-        console.log(`  Generating image...`)
-        const imgData = await generateImage(topic.imagePrompt)
-        if (imgData) {
-          const imgPath = join(DATA_DIR, "..", "images", "articles", `${article.slug}.png`)
-          if (!existsSync(dirname(imgPath))) mkdirSync(dirname(imgPath), { recursive: true })
-          writeFileSync(imgPath, Buffer.from(imgData, "base64"))
-          article.featuredImage = `/images/articles/${article.slug}.png`
-          console.log(`  Image saved: ${article.slug}.png`)
-        }
+    if (topic.imagePrompt) {
+      console.log(`  Generating image...`)
+      const imgData = await generateImage(topic.imagePrompt)
+      if (imgData) {
+        const imgPath = join(DATA_DIR, "..", "images", "articles", `${article.slug}.png`)
+        if (!existsSync(dirname(imgPath))) mkdirSync(dirname(imgPath), { recursive: true })
+        writeFileSync(imgPath, Buffer.from(imgData, "base64"))
+        article.featuredImage = `/images/articles/${article.slug}.png`
+        console.log(`  Image saved: ${article.slug}.png`)
       }
     }
 
