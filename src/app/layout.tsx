@@ -9,6 +9,7 @@ import { AdScripts } from "@/components/ads/AdScripts"
 import { ConsentBanner } from "@/components/ads/ConsentBanner"
 import { StickyFooterAd } from "@/components/ads/StickyFooterAd"
 import { HeaderAd } from "@/components/ads/HeaderAd"
+import { AutoPopupAd } from "@/components/ads/AutoPopupAd"
 import AnimationWrapper from "@/components/AnimationWrapper"
 import { ThemeProvider } from "@/components/ThemeProvider"
 import "./globals.css"
@@ -62,6 +63,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               },
             }}
           />
+          <AutoPopupAd />
           <StickyFooterAd />
           <AdScripts />
           </AnimationWrapper>
