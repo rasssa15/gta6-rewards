@@ -1,4 +1,3 @@
-import Parser from "rss-parser"
 import { readFileSync, writeFileSync, mkdirSync, existsSync } from "fs"
 import { join, dirname } from "path"
 import { fileURLToPath } from "url"
@@ -7,7 +6,8 @@ const __dirname = dirname(fileURLToPath(import.meta.url))
 const DATA_DIR = join(__dirname, "..", "public", "data")
 
 const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY || ""
-const OPENROUTER_MODEL = process.env.OPENROUTER_MODEL || "google/gemini-2.0-flash-exp:free"
+const OPENROUTER_MODEL = process.env.OPENROUTER_MODEL || "meta-llama/llama-3.3-70b-instruct:free"
+const TINYFISH_API_KEY = process.env.TINYFISH_API_KEY || ""
 
 async function openrouterChat(messages, options = {}) {
   if (!OPENROUTER_API_KEY) return null
@@ -31,6 +31,39 @@ async function openrouterChat(messages, options = {}) {
   }
   const data = await res.json()
   return data.choices?.[0]?.message?.content || null
+}
+
+async function tinyfishSearch(query) {
+  if (!TINYFISH_API_KEY) return null
+  try {
+    const res = await fetch(`https://api.search.tinyfish.ai?query=${encodeURIComponent(query)}&language=en`, {
+      headers: { "X-API-Key": TINYFISH_API_KEY },
+    })
+    if (!res.ok) return null
+    const data = await res.json()
+    return data.results || []
+  } catch {
+    return null
+  }
+}
+
+async function tinyfishFetch(url) {
+  if (!TINYFISH_API_KEY) return null
+  try {
+    const res = await fetch("https://api.fetch.tinyfish.ai", {
+      method: "POST",
+      headers: {
+        "X-API-Key": TINYFISH_API_KEY,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ urls: [url] }),
+    })
+    if (!res.ok) return null
+    const data = await res.json()
+    return data.results?.[0]?.markdown || data.results?.[0]?.text || null
+  } catch {
+    return null
+  }
 }
 
 async function generateImage(prompt) {
@@ -63,13 +96,13 @@ async function generateImage(prompt) {
 }
 
 const CATEGORIES = [
-  { id: "gta-6", keywords: "GTA 6, Grand Theft Auto VI, Vice City, GTA 6 leaks, GTA 6 news" },
-  { id: "rockstar", keywords: "Rockstar Games, Take-Two, Red Dead Redemption, Rockstar news" },
-  { id: "playstation", keywords: "PlayStation, PS5, PS5 Pro, Sony gaming, PlayStation Plus" },
-  { id: "xbox", keywords: "Xbox, Xbox Series X, Xbox Game Pass, Microsoft gaming, Xbox news" },
-  { id: "pc-gaming", keywords: "PC gaming, Steam, NVIDIA, AMD, gaming hardware, PC games" },
-  { id: "nintendo", keywords: "Nintendo, Switch 2, Mario, Zelda, Nintendo news" },
-  { id: "esports", keywords: "Esports, competitive gaming, tournaments, Valorant, CS2, League of Legends" },
+  { id: "gta-6", search: "GTA 6 news leaks 2026", keywords: "GTA 6, Grand Theft Auto VI, Vice City" },
+  { id: "rockstar", search: "Rockstar Games news 2026", keywords: "Rockstar Games, Take-Two, Red Dead Redemption" },
+  { id: "playstation", search: "PlayStation PS5 news 2026", keywords: "PlayStation, PS5, PS5 Pro, Sony gaming" },
+  { id: "xbox", search: "Xbox news 2026", keywords: "Xbox, Xbox Series X, Xbox Game Pass" },
+  { id: "pc-gaming", search: "PC gaming news 2026", keywords: "PC gaming, Steam, NVIDIA, AMD" },
+  { id: "nintendo", search: "Nintendo Switch news 2026", keywords: "Nintendo, Switch, Mario, Zelda" },
+  { id: "esports", search: "esports tournaments news 2026", keywords: "Esports, competitive gaming, tournaments" },
 ]
 
 let prisma = null
@@ -81,7 +114,7 @@ async function getPrisma() {
     await prisma.$connect()
     console.log("  Connected to database")
     return prisma
-  } catch (e) {
+  } catch {
     console.log("  No database available, saving to JSON only")
     return null
   }
@@ -121,79 +154,36 @@ function deduplicate(articles) {
   })
 }
 
-function isDuplicate(article, existingArticles, db) {
-  if (existingArticles.some(a => a.sourceUrl === article.sourceUrl || a.title === article.title)) return true
-  return false
+function isDuplicate(article, existingArticles) {
+  return existingArticles.some(a => a.sourceUrl === article.sourceUrl || a.title === article.title)
 }
 
 const FALLBACK_TOPICS = {
   "gta-6": [
-    { topic: "GTA 6 Leak Reveals New Gameplay Mechanics in Vice City", description: "Fresh leaks from the GTA 6 development community reveal exciting new gameplay mechanics coming to Vice City. Sources close to Rockstar Games indicate the team is implementing revolutionary systems that will change how players interact with the open world.", imagePrompt: "GTA 6 Vice City neon skyline at sunset with palm trees, cinematic game screenshot style" },
-    { topic: "Rockstar Confirms GTA 6 Map Size Details", description: "Rockstar Games has reportedly finalized the GTA 6 map design, with insiders claiming it will be significantly larger than any previous entry. The map is said to span multiple cities and diverse biomes.", imagePrompt: "Aerial view of massive game map with cities and countryside, GTA style" },
-    { topic: "GTA 6 Storyline Rumors: Multiple Protagonists Return", description: "New rumors suggest GTA 6 will feature multiple protagonists similar to GTA V, with interconnected storylines set in a modern-day Vice City. Fans are speculating about character reveals.", imagePrompt: "Three mysterious silhouettes standing back to back, Vice City skyline behind, cinematic lighting" },
+    { topic: "GTA 6 Leak Reveals New Gameplay Mechanics in Vice City", description: "Fresh leaks reveal exciting new gameplay mechanics coming to GTA 6's Vice City.", imagePrompt: "GTA 6 Vice City neon skyline at sunset with palm trees, cinematic game screenshot style" },
+    { topic: "Rockstar Confirms GTA 6 Map Size Details", description: "Rockstar Games has reportedly finalized the GTA 6 map design, significantly larger than any previous entry.", imagePrompt: "Aerial view of massive game map with cities and countryside, GTA style" },
   ],
   rockstar: [
-    { topic: "Rockstar Games Announces Major Update for GTA Online", description: "Rockstar Games has unveiled plans for a massive GTA Online update that promises to expand the multiplayer experience with new missions, vehicles, and properties.", imagePrompt: "GTA Online heist crew in tactical gear, explosive action scene" },
-    { topic: "Rockstar's Next-Gen RAGE Engine Details Revealed", description: "Technical details about Rockstar's next-generation RAGE engine have emerged, showcasing groundbreaking physics, lighting, and AI systems.", imagePrompt: "Game engine wireframe rendering of detailed cityscape at night" },
+    { topic: "Rockstar Games Announces Major Update for GTA Online", description: "Rockstar Games has unveiled plans for a massive GTA Online update with new missions, vehicles, and properties.", imagePrompt: "GTA Online heist crew in tactical gear, explosive action scene" },
   ],
   playstation: [
-    { topic: "PlayStation 5 Pro Specs and Release Date Rumors Surface", description: "The latest PlayStation 5 Pro rumors point to a significant hardware upgrade with ray tracing improvements and 8K support, potentially launching this holiday season.", imagePrompt: "PS5 Pro console concept design with blue LED lighting, sleek futuristic look" },
-    { topic: "Sony Secures Major Third-Party Exclusives for 2025", description: "Sony has reportedly secured exclusive deals for several major third-party titles coming to PlayStation platforms throughout 2025 and beyond.", imagePrompt: "PlayStation logo with silhouette of game characters, dramatic lighting" },
+    { topic: "PlayStation 5 Pro Specs and Release Date Rumors Surface", description: "Latest PS5 Pro rumors point to significant hardware upgrades with ray tracing improvements and 8K support.", imagePrompt: "PS5 Pro console concept design with blue LED lighting" },
   ],
   xbox: [
-    { topic: "Xbox Game Pass Adds Major Third-Party Titles", description: "Microsoft's Xbox Game Pass continues to expand with several major third-party titles joining the subscription service this month.", imagePrompt: "Xbox green neon logo on dark background with game boxes floating" },
-    { topic: "Microsoft Teases Next-Gen Xbox Hardware Plans", description: "Microsoft has offered glimpses into their next-generation Xbox hardware strategy, focusing on cloud integration and cross-platform play.", imagePrompt: "Futuristic Xbox console prototype with green neon accents, concept art" },
+    { topic: "Xbox Game Pass Adds Major Third-Party Titles", description: "Xbox Game Pass continues to expand with several major third-party titles joining the subscription service.", imagePrompt: "Xbox green neon logo on dark background with game boxes floating" },
   ],
   "pc-gaming": [
-    { topic: "PC Gaming Hardware Sales Surge Globally", description: "PC gaming hardware sales are experiencing a global surge as gamers upgrade their systems for upcoming titles.", imagePrompt: "High-end gaming PC with RGB lighting, glass side panel, gaming setup" },
-    { topic: "NVIDIA and AMD Battle for GPU Supremacy", description: "The GPU war heats up as NVIDIA and AMD prepare to launch their next-generation graphics cards.", imagePrompt: "NVIDIA vs AMD GPU side by side, futuristic tech lab background" },
+    { topic: "PC Gaming Hardware Sales Surge Globally", description: "PC gaming hardware sales are experiencing a global surge as gamers upgrade their systems.", imagePrompt: "High-end gaming PC with RGB lighting, glass side panel" },
   ],
   nintendo: [
     { topic: "Nintendo Switch 2 Backward Compatibility Details", description: "New details about Nintendo's next console suggest full backward compatibility with existing Switch games.", imagePrompt: "Nintendo Switch 2 concept design with colorful Joy-Cons" },
-    { topic: "Nintendo Announces Major Franchise Revival Plans", description: "Nintendo has hinted at reviving several beloved franchises for their next console generation.", imagePrompt: "Nintendo characters silhouetted against golden sunset, epic reveal style" },
   ],
   esports: [
     { topic: "Esports Tournament Prize Pools Reach Record Levels", description: "Esports tournament prize pools have reached unprecedented levels in 2026.", imagePrompt: "Massive esports arena with crowd cheering, stage with trophy, neon lights" },
-    { topic: "Valorant Champions Tour Expands to New Regions", description: "The Valorant Champions Tour is expanding to include new regions.", imagePrompt: "Valorant agents in competitive pose, esports stage background" },
   ],
 }
 
-async function findTrendingTopics(category) {
-  const prompt = `You are a gaming news editor. Find the LATEST trending news topic for the category "${category.id}" (${category.keywords}).
-
-Return a JSON object with:
-{
-  "topic": "Brief topic title",
-  "description": "2-3 sentence description of what's trending right now",
-  "searchQuery": "search query to find articles on this topic",
-  "imagePrompt": "detailed image generation prompt for a featured image (cinematic, game-related)"
-}
-
-Only return valid JSON, no markdown. Focus on news from the last 24-48 hours.`
-
-  try {
-    const result = await openrouterChat([
-      { role: "system", content: "You are a gaming news editor. Always respond with valid JSON only." },
-      { role: "user", content: prompt },
-    ], { temperature: 0.8 })
-    if (result) return JSON.parse(result.replace(/```json|```/g, "").trim())
-    console.log(`  OpenRouter topic find returned empty, using fallback`)
-  } catch (e) {
-    console.log(`  OpenRouter topic find failed: ${e.message}`)
-  }
-
-  const fallbacks = FALLBACK_TOPICS[category.id] || FALLBACK_TOPICS["gta-6"]
-  const topic = fallbacks[Math.floor(Math.random() * fallbacks.length)]
-  console.log(`  Using fallback topic: ${topic.topic}`)
-  return {
-    topic: topic.topic,
-    description: topic.description,
-    searchQuery: topic.topic,
-    imagePrompt: topic.imagePrompt,
-  }
-}
-
-function buildFallbackArticle(title, category) {
+function buildFallbackArticle(title) {
   const paragraphs = [
     `<p>The gaming community is buzzing with excitement following the latest developments surrounding ${title.toLowerCase()}. This breaking news has captured the attention of players worldwide, with discussions already heating up across social media platforms, gaming forums, and community channels dedicated to tracking every detail of this evolving story.</p>`,
     `<p>Industry analysts have been quick to weigh in on the significance of this development, noting that it arrives at a pivotal moment for the gaming industry. The current landscape is characterized by rapid technological advancement, shifting player expectations, and intense competition among major publishers and platform holders, making any major announcement particularly consequential.</p>`,
@@ -212,57 +202,98 @@ function buildFallbackArticle(title, category) {
   }
 }
 
-async function rewriteArticle(title, sourceContent, category, imagePrompt) {
-  const prompt = `You are a professional gaming journalist. Rewrite this article about "${title}" for a GTA 6 Rewards gaming platform.
+async function fetchArticleContent(url) {
+  const content = await tinyfishFetch(url)
+  if (content) return content
+  try {
+    const res = await fetch(url, {
+      headers: { "User-Agent": "Mozilla/5.0 (compatible; GTARewardsBot/1.0)" },
+      signal: AbortSignal.timeout(10000),
+    })
+    const html = await res.text()
+    const match = html.match(/<article[^>]*>([\s\S]*?)<\/article>/i)
+      || html.match(/<main[^>]*>([\s\S]*?)<\/main>/i)
+      || html.match(/<body[^>]*>([\s\S]*?)<\/body>/i)
+    if (match) return match[1].replace(/<script[^>]*>[\s\S]*?<\/script>/gi, "").replace(/<style[^>]*>[\s\S]*?<\/style>/gi, "").replace(/<nav[^>]*>[\s\S]*?<\/nav>/gi, "").slice(0, 5000)
+    return html.replace(/<script[^>]*>[\s\S]*?<\/script>/gi, "").replace(/<style[^>]*>[\s\S]*?<\/style>/gi, "").slice(0, 5000)
+  } catch {
+    return null
+  }
+}
 
-CATEGORY: ${category}
-SOURCE CONTENT: ${sourceContent.slice(0, 4000)}
+async function searchTrendingTopics(category) {
+  console.log(`  Searching TinyFish for: "${category.search}"`)
+  const results = await tinyfishSearch(category.search)
+  if (results && results.length > 0) {
+    const top = results.slice(0, 3)
+    const topic = top[Math.floor(Math.random() * Math.min(top.length, 3))]
+    let sourceContent = null
+    if (topic.url) {
+      console.log(`  Fetching article: ${topic.url}`)
+      sourceContent = await fetchArticleContent(topic.url)
+    }
+    return {
+      topic: topic.title,
+      description: topic.snippet || topic.title,
+      sourceUrl: topic.url,
+      sourceContent,
+      imagePrompt: `${topic.title} gaming news screenshot style, cinematic`,
+    }
+  }
+
+  const fallbacks = FALLBACK_TOPICS[category.id] || FALLBACK_TOPICS["gta-6"]
+  const fallback = fallbacks[Math.floor(Math.random() * fallbacks.length)]
+  console.log(`  Using fallback topic: ${fallback.topic}`)
+  return {
+    topic: fallback.topic,
+    description: fallback.description,
+    sourceUrl: "",
+    sourceContent: null,
+    imagePrompt: fallback.imagePrompt,
+  }
+}
+
+async function rewriteArticle(title, sourceContent, category) {
+  const systemMsg = `You are a professional gaming journalist writing for GTA 6 Rewards. Respond with valid JSON only.`
+
+  const userMsg = `Write a gaming news article about "${title}" for category "${category}".
+
+${sourceContent ? `SOURCE MATERIAL (use this for facts, rewrite in your own words):\n${sourceContent.slice(0, 6000)}` : "Write an original article based on general gaming knowledge."}
 
 Requirements:
-- Write 800-1500 words of unique, engaging content
-- Add a compelling intro paragraph
-- Use gaming-community tone (exciting, informed)
-- Include relevant subheadings (use <h2> tags)
-- Make it SEO-friendly
-- Do NOT mention "RSS", "source", or attribute to original source
-- Write it as original journalism
+- 800-1500 words of unique, engaging HTML content
+- Use <h2> for subheadings, <p> for paragraphs
+- Gaming-community tone: exciting, informed
+- SEO-friendly
+- Do NOT attribute to any source
+- Write as original journalism
 
-Return JSON format:
+Return JSON:
 {
-  "title": "Optimized headline",
+  "title": "Optimized SEO headline",
   "content": "Full HTML content with <p> and <h2> tags",
   "excerpt": "1-2 sentence summary (max 160 chars)",
-  "readingTime": number
+  "readingTime": number (minutes)
 }
 
 Only return valid JSON, no markdown.`
 
   try {
     const result = await openrouterChat([
-      { role: "system", content: "You are a professional gaming journalist. Always respond with valid JSON only." },
-      { role: "user", content: prompt },
+      { role: "system", content: systemMsg },
+      { role: "user", content: userMsg },
     ], { temperature: 0.7, max_tokens: 8192 })
-    if (!result) throw new Error("Empty response from OpenRouter")
-
+    if (!result) throw new Error("Empty response")
     const cleaned = result.replace(/```json|```/g, "").trim()
-    const parsed = JSON.parse(cleaned)
-
-    let imageData = null
-    if (imagePrompt) {
-      console.log(`  Generating image with Fal AI...`)
-      imageData = await generateImage(imagePrompt)
-    }
-
-    parsed.imageData = imageData || null
-    return parsed
+    return JSON.parse(cleaned)
   } catch (e) {
     console.log(`  Rewrite failed: ${e.message}, using fallback`)
-    return buildFallbackArticle(title, category)
+    return buildFallbackArticle(title)
   }
 }
 
 async function scrape() {
-  console.log("Starting AI-powered scraper...")
+  console.log("Starting scraper (TinyFish search + OpenRouter writing)...")
   const db = await getPrisma()
   let totalNew = 0
 
@@ -271,11 +302,8 @@ async function scrape() {
     const existingArticles = loadCategory(category.id)
     console.log(`  Existing articles: ${existingArticles.length}`)
 
-    const topic = await findTrendingTopics(category)
-    if (!topic) {
-      console.log(`  No topic found for ${category.id}, skipping`)
-      continue
-    }
+    const topic = await searchTrendingTopics(category)
+    if (!topic) continue
     console.log(`  Topic: ${topic.topic}`)
 
     const article = {
@@ -298,29 +326,33 @@ async function scrape() {
       metaDescription: topic.description.slice(0, 160),
       keywords: category.keywords,
       createdAt: new Date().toISOString(),
-      source: "AI Generated",
-      sourceUrl: "",
+      source: topic.sourceUrl ? "TinyFish Search" : "AI Generated",
+      sourceUrl: topic.sourceUrl || "",
     }
 
-    if (isDuplicate(article, existingArticles, null)) {
+    if (isDuplicate(article, existingArticles)) {
       console.log(`  Skipping (exists): ${topic.topic}`)
       continue
     }
 
-    console.log(`  Rewriting article with AI...`)
-    const rewritten = await rewriteArticle(topic.topic, topic.description, category.id, topic.imagePrompt)
+    console.log(`  Rewriting article with LLM...`)
+    const rewritten = await rewriteArticle(topic.topic, topic.sourceContent, category.id)
     if (rewritten) {
       article.title = rewritten.title || article.title
       article.content = rewritten.content || article.content
       article.excerpt = rewritten.excerpt || article.excerpt.slice(0, 160)
       article.readingTime = rewritten.readingTime || Math.max(1, Math.ceil(article.content.split(" ").length / 200))
 
-      if (rewritten.imageData) {
-        const imgPath = join(DATA_DIR, "..", "images", "articles", `${article.slug}.png`)
-        if (!existsSync(dirname(imgPath))) mkdirSync(dirname(imgPath), { recursive: true })
-        writeFileSync(imgPath, Buffer.from(rewritten.imageData, "base64"))
-        article.featuredImage = `/images/articles/${article.slug}.png`
-        console.log(`  Image saved: ${article.slug}.png`)
+      if (topic.imagePrompt) {
+        console.log(`  Generating image...`)
+        const imgData = await generateImage(topic.imagePrompt)
+        if (imgData) {
+          const imgPath = join(DATA_DIR, "..", "images", "articles", `${article.slug}.png`)
+          if (!existsSync(dirname(imgPath))) mkdirSync(dirname(imgPath), { recursive: true })
+          writeFileSync(imgPath, Buffer.from(imgData, "base64"))
+          article.featuredImage = `/images/articles/${article.slug}.png`
+          console.log(`  Image saved: ${article.slug}.png`)
+        }
       }
     }
 
