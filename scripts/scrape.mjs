@@ -68,14 +68,18 @@ async function generateImage(prompt) {
   }
 }
 
+const now = new Date()
+const today = now.toISOString().slice(0, 10)
+const dateLabel = `${now.toLocaleString("en-US", { month: "long" })} ${now.getDate()}, ${now.getFullYear()}`
+
 const CATEGORIES = [
-  { id: "gta-6", search: "GTA 6 news leaks 2026", keywords: "GTA 6, Grand Theft Auto VI, Vice City" },
-  { id: "rockstar", search: "Rockstar Games news 2026", keywords: "Rockstar Games, Take-Two, Red Dead Redemption" },
-  { id: "playstation", search: "PlayStation PS5 news 2026", keywords: "PlayStation, PS5, PS5 Pro, Sony gaming" },
-  { id: "xbox", search: "Xbox news 2026", keywords: "Xbox, Xbox Series X, Xbox Game Pass" },
-  { id: "pc-gaming", search: "PC gaming news 2026", keywords: "PC gaming, Steam, NVIDIA, AMD" },
-  { id: "nintendo", search: "Nintendo Switch news 2026", keywords: "Nintendo, Switch, Mario, Zelda" },
-  { id: "esports", search: "esports tournaments news 2026", keywords: "Esports, competitive gaming, tournaments" },
+  { id: "gta-6", search: `GTA 6 news ${today}` , keywords: "GTA 6, Grand Theft Auto VI, Vice City" },
+  { id: "rockstar", search: `Rockstar Games latest news ${today}`, keywords: "Rockstar Games, Take-Two, Red Dead Redemption" },
+  { id: "playstation", search: `PlayStation PS5 news ${today}`, keywords: "PlayStation, PS5, PS5 Pro, Sony gaming" },
+  { id: "xbox", search: `Xbox news ${today}`, keywords: "Xbox, Xbox Series X, Xbox Game Pass" },
+  { id: "pc-gaming", search: `PC gaming news ${today}`, keywords: "PC gaming, Steam, NVIDIA, AMD" },
+  { id: "nintendo", search: `Nintendo news ${today}`, keywords: "Nintendo, Switch, Mario, Zelda" },
+  { id: "esports", search: `esports news ${today}`, keywords: "Esports, competitive gaming, tournaments" },
 ]
 
 let prisma = null
@@ -132,7 +136,7 @@ function isDuplicate(article, existingArticles) {
 }
 
 const FALLBACK_CONTENT = {
-  intro: `The gaming community is buzzing with excitement following the latest developments. This breaking news has captured the attention of players worldwide, with discussions heating up across social media platforms, gaming forums, and community channels.`,
+  intro: `As of ${dateLabel}, the gaming community is buzzing with excitement following the latest developments. This breaking news has captured the attention of players worldwide, with discussions heating up across social media platforms, gaming forums, and community channels.`,
   body1: `Industry analysts have been quick to weigh in on the significance of this development, noting that it arrives at a pivotal moment for the gaming industry. The current landscape is characterized by rapid technological advancement, shifting player expectations, and intense competition among major publishers and platform holders.`,
   body2: `Sources close to the situation have indicated that this development represents a significant milestone that could have far-reaching implications for how players experience their favorite franchises in the coming months and years. The details that have emerged thus far paint a picture of ambitious planning and execution.`,
   body3: `The response from the community has been overwhelmingly positive, with fans expressing enthusiasm about what this means for the future of their favorite gaming experiences. Many have taken to social media to share their reactions, theories, and hopes for what comes next.`,
