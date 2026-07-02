@@ -4,6 +4,21 @@ import { fileURLToPath } from "url"
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const DATA_DIR = join(__dirname, "..", "public", "data")
+
+// Load .env manually
+const envPath = join(__dirname, "..", ".env")
+const envRaw = readFileSync(envPath, "utf-8")
+envRaw.split("\n").forEach(line => {
+  const match = line.match(/^\s*([^#=]+?)\s*=\s*(.*?)\s*$/)
+  if (match) {
+    const key = match[1].trim()
+    let val = match[2].trim()
+    if ((val.startsWith('"') && val.endsWith('"')) || (val.startsWith("'") && val.endsWith("'")))
+      val = val.slice(1, -1)
+    process.env[key] = val
+  }
+})
+
 const TINYFISH_API_KEY = process.env.TINYFISH_API_KEY || ""
 
 async function tinyfishSearch(query) {
