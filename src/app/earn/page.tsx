@@ -1,7 +1,7 @@
 "use client"
 import Link from "next/link"
-import { Gift, Newspaper, Sparkles, Eye, RefreshCw, Users, ChevronRight, Coins, Zap, Trophy, Flame } from "lucide-react"
-import { AdsterraBanner } from "@/components/ads/AdsterraBanner"
+import { Gift, Newspaper, Sparkles, Eye, RefreshCw, Users, ChevronRight, Trophy, Flame } from "lucide-react"
+import { LazyAd } from "@/components/ads/LazyAd"
 
 const earnMethods = [
   {
@@ -66,7 +66,7 @@ export default function EarnPage() {
       <div className="page-container max-w-4xl">
         <div className="flex gap-4 mb-6">
           <div className="hidden lg:block shrink-0">
-            <AdsterraBanner type="skyscraper" />
+            <LazyAd type="skyscraper" minHeight={600} />
           </div>
           <div className="flex-1 min-w-0">
             <div className="mb-8">
@@ -75,7 +75,7 @@ export default function EarnPage() {
               </h1>
               <p className="text-gray-400">Every action gives you a random Scratch Card</p>
             </div>
-            <AdsterraBanner type="responsive" />
+            <LazyAd type="responsive" minHeight={90} />
           </div>
         </div>
 
@@ -106,8 +106,9 @@ export default function EarnPage() {
           })}
         </div>
 
-        <div className="mt-6">
-          <AdsterraBanner type="responsive" />
+        {/* AD: Between earn methods and leaderboard CTA */}
+        <div className="mt-6 flex justify-center">
+          <LazyAd type="responsive" minHeight={90} />
         </div>
 
         <div className="mt-10 glass-card p-8 text-center relative overflow-hidden">
@@ -125,8 +126,8 @@ export default function EarnPage() {
         </div>
 
         <div className="mt-10 flex flex-col items-center gap-4">
-          <AdsterraBanner type="responsive" />
-          <AdsterraBanner type="small-skyscraper" />
+          <LazyAd type="responsive" minHeight={90} />
+          <LazyAd type="small-skyscraper" minHeight={300} />
         </div>
       </div>
     </div>

@@ -5,7 +5,7 @@ import { Newspaper, Clock, Eye, ChevronDown, Search, Coins } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
 import { formatDate } from "@/lib/utils"
 import { useRouter, useSearchParams } from "next/navigation"
-import { AdBanner } from "@/components/ads/AdBanner"
+import { LazyAd } from "@/components/ads/LazyAd"
 
 interface Article {
   id: string
@@ -137,78 +137,13 @@ export default function NewsGrid({
         ))}
       </div>
 
-      {/* 320×50 AD between filters and articles */}
-      <div className="mb-8">
-        <AdBanner adKey="a32d05859c7cdc4b19c45ea2746367ad" height={50} width={320} className="flex justify-center" />
+      {/* AD: Above articles */}
+      <div className="mb-8 flex justify-center">
+        <LazyAd type="responsive" minHeight={90} />
       </div>
 
-      {/* Articles grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-        <AnimatePresence>
-          {articles.map((article, i) => (
-            <motion.div
-              key={article.id}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.3, delay: (i % 20) * 0.04 }}
-            >
-              <Link
-                href={`/news/${article.slug}`}
-                className="glass-card p-0 overflow-hidden group block h-full neon-glow-card"
-                id={`article-${article.id}`}
-              >
-                {/* Image */}
-                <div className="relative h-48 overflow-hidden">
-                  {article.featuredImage ? (
-                    <>
-                      <img
-                        src={article.featuredImage}
-                        alt={article.title}
-                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                        loading="lazy"
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                    </>
-                  ) : (
-                    <div className="h-full bg-gradient-to-br from-neon-blue/10 to-neon-purple/10 flex items-center justify-center">
-                      <Newspaper className="w-12 h-12 text-gray-600" />
-                    </div>
-                  )}
-                  {/* Earn badge */}
-                  <div className="absolute top-3 right-3 flex items-center gap-1 px-2 py-1 rounded-full bg-neon-green/20 border border-neon-green/30 text-[10px] text-neon-green font-bold opacity-0 group-hover:opacity-100 transition-opacity">
-                    <Coins className="w-2.5 h-2.5" />
-                    Earn
-                  </div>
-                </div>
-
-                <div className="p-5">
-                  {article.categoryName && (
-                    <span className="text-[10px] uppercase tracking-widest text-neon-blue font-bold">
-                      {article.categoryName}
-                    </span>
-                  )}
-                  <h3 className="text-white font-semibold mt-1.5 group-hover:text-neon-blue transition-colors duration-200 line-clamp-2 leading-snug text-sm sm:text-base">
-                    {article.title}
-                  </h3>
-                  <p className="text-gray-400 text-sm mt-2 line-clamp-2 leading-relaxed">{article.excerpt}</p>
-                  <div className="flex items-center gap-3 mt-4 pt-3 border-t border-white/5 text-xs text-gray-600">
-                    <span className="flex items-center gap-1">
-                      <Clock className="w-3 h-3" /> {article.readingTime} min
-                    </span>
-                    <span className="flex items-center gap-1">
-                      <Eye className="w-3 h-3" /> {article.viewCount}
-                    </span>
-                    <span className="ml-auto">{formatDate(article.createdAt)}</span>
-                  </div>
-                </div>
-              </Link>
-            </motion.div>
-          ))}
-        </AnimatePresence>
-      </div>
-
-      {/* Empty state */}
-      {articles.length === 0 && (
+      {/* Articles grid with between-cards ads */}
+      {articles.length === 0 ? (
         <div className="text-center py-24">
           <div className="w-20 h-20 rounded-2xl bg-white/5 flex items-center justify-center mx-auto mb-4">
             <Newspaper className="w-10 h-10 text-gray-700" />
@@ -222,6 +157,79 @@ export default function NewsGrid({
               Clear search
             </Link>
           )}
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+          <AnimatePresence>
+            {articles.flatMap((article, i) => {
+              const items: React.ReactNode[] = [
+                <motion.div
+                  key={article.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.3, delay: (i % 20) * 0.04 }}
+                >
+                  <Link
+                    href={`/news/${article.slug}`}
+                    className="glass-card p-0 overflow-hidden group block h-full neon-glow-card"
+                    id={`article-${article.id}`}
+                  >
+                    <div className="relative h-48 overflow-hidden">
+                      {article.featuredImage ? (
+                        <>
+                          <img
+                            src={article.featuredImage}
+                            alt={article.title}
+                            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                            loading="lazy"
+                          />
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                        </>
+                      ) : (
+                        <div className="h-full bg-gradient-to-br from-neon-blue/10 to-neon-purple/10 flex items-center justify-center">
+                          <Newspaper className="w-12 h-12 text-gray-600" />
+                        </div>
+                      )}
+                      <div className="absolute top-3 right-3 flex items-center gap-1 px-2 py-1 rounded-full bg-neon-green/20 border border-neon-green/30 text-[10px] text-neon-green font-bold opacity-0 group-hover:opacity-100 transition-opacity">
+                        <Coins className="w-2.5 h-2.5" />
+                        Earn
+                      </div>
+                    </div>
+                    <div className="p-5">
+                      {article.categoryName && (
+                        <span className="text-[10px] uppercase tracking-widest text-neon-blue font-bold">
+                          {article.categoryName}
+                        </span>
+                      )}
+                      <h3 className="text-white font-semibold mt-1.5 group-hover:text-neon-blue transition-colors duration-200 line-clamp-2 leading-snug text-sm sm:text-base">
+                        {article.title}
+                      </h3>
+                      <p className="text-gray-400 text-sm mt-2 line-clamp-2 leading-relaxed">{article.excerpt}</p>
+                      <div className="flex items-center gap-3 mt-4 pt-3 border-t border-white/5 text-xs text-gray-600">
+                        <span className="flex items-center gap-1">
+                          <Clock className="w-3 h-3" /> {article.readingTime} min
+                        </span>
+                        <span className="flex items-center gap-1">
+                          <Eye className="w-3 h-3" /> {article.viewCount}
+                        </span>
+                        <span className="ml-auto">{formatDate(article.createdAt)}</span>
+                      </div>
+                    </div>
+                  </Link>
+                </motion.div>,
+              ]
+
+              if ((i + 1) % 6 === 0 && i < articles.length - 1) {
+                items.push(
+                  <div key={`ad-between-${i}`} className="col-span-full flex justify-center">
+                    <LazyAd type="responsive" minHeight={90} />
+                  </div>,
+                )
+              }
+
+              return items
+            })}
+          </AnimatePresence>
         </div>
       )}
 
@@ -245,6 +253,13 @@ export default function NewsGrid({
               </>
             )}
           </button>
+        </div>
+      )}
+
+      {/* AD: Below load more */}
+      {!hasMore && (
+        <div className="mt-10 flex justify-center">
+          <LazyAd type="responsive" minHeight={90} />
         </div>
       )}
     </>

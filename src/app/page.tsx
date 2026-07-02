@@ -8,7 +8,7 @@ import {
 } from "lucide-react"
 import OnlinePlayerBadge from "@/components/ui/OnlinePlayerBadge"
 import { useWallet } from "@/components/providers/WalletProvider"
-import { AdBanner } from "@/components/ads/AdBanner"
+import { LazyAd } from "@/components/ads/LazyAd"
 
 function AnimatedCounter({ target, suffix = "" }: { target: number; suffix?: string }) {
   const [count, setCount] = useState(0)
@@ -128,7 +128,6 @@ export default function HomePage() {
     <div className="min-h-screen">
       {/* ---- HERO ---- */}
       <section className="hero-section relative min-h-[90vh] sm:min-h-screen flex flex-col justify-center overflow-hidden">
-        {/* Cityscape background */}
         <div className="absolute inset-0 z-0">
           <Image
             src="/images/hero-cityscape.png"
@@ -137,76 +136,53 @@ export default function HomePage() {
             priority
             className="object-cover object-center opacity-35"
           />
-          {/* Dark overlay gradient */}
           <div className="absolute inset-0 bg-gradient-to-b from-[#070710]/60 via-[#070710]/40 to-[#070710]" />
           <div className="absolute inset-0 bg-gradient-to-r from-[#070710]/80 via-transparent to-[#070710]/80" />
         </div>
 
-        {/* Animated orbs */}
         <div className="absolute top-1/4 left-1/4 w-96 h-96 rounded-full bg-neon-purple/10 blur-[120px] pointer-events-none" />
         <div className="absolute bottom-1/4 right-1/4 w-80 h-80 rounded-full bg-neon-blue/10 blur-[100px] pointer-events-none" style={{ animationDelay: "1.5s" }} />
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full bg-neon-pink/5 blur-[150px] pointer-events-none" />
 
-        <div
-          className="page-container relative z-10 text-center py-32 sm:py-40"
-        >
+        <div className="page-container relative z-10 text-center py-32 sm:py-40">
           <div>
             <div className="mb-8 flex justify-center">
               <OnlinePlayerBadge />
             </div>
-
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass border border-neon-pink/20 text-xs font-semibold text-neon-pink uppercase tracking-widest mb-8">
               <Zap className="w-3 h-3" />
               <span>GTA 6 Rewards Platform — Now Live</span>
             </div>
-
             <h1 className="text-5xl sm:text-7xl lg:text-8xl font-heading font-black mb-6 leading-none tracking-tight">
               <span className="gradient-text">GTA 6</span>
               <br />
               <span className="text-white">Rewards</span>
             </h1>
-
             <p className="text-gray-300 text-lg sm:text-xl max-w-2xl mx-auto mb-10 leading-relaxed">
               The ultimate GTA 6 fan platform. Earn points through news, ads & challenges —
               then redeem them for <span className="text-neon-green font-semibold">real gaming rewards</span>.
             </p>
-
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
               {isConnected && walletId ? (
-                <Link
-                  href="/dashboard"
-                  className="btn-primary text-base sm:text-lg py-4 px-8 flex items-center gap-3 shine-effect"
-                >
+                <Link href="/dashboard" className="btn-primary text-base sm:text-lg py-4 px-8 flex items-center gap-3 shine-effect">
                   <Shield className="w-5 h-5" />
                   Go to Dashboard
                   <ArrowRight className="w-5 h-5" />
                 </Link>
               ) : (
-                <Link
-                  href="/wallet/create"
-                  className="btn-primary text-base sm:text-lg py-4 px-8 flex items-center gap-3 shine-effect"
-                  id="hero-cta-create"
-                >
+                <Link href="/wallet/create" className="btn-primary text-base sm:text-lg py-4 px-8 flex items-center gap-3 shine-effect" id="hero-cta-create">
                   <Shield className="w-5 h-5" />
                   Start Earning Free
                   <ArrowRight className="w-5 h-5" />
                 </Link>
               )}
-              <Link
-                href="/earn"
-                className="btn-secondary text-base sm:text-lg py-4 px-8 flex items-center gap-3"
-                id="hero-cta-earn"
-              >
+              <Link href="/earn" className="btn-secondary text-base sm:text-lg py-4 px-8 flex items-center gap-3" id="hero-cta-earn">
                 <Play className="w-5 h-5" />
                 How It Works
               </Link>
             </div>
           </div>
-
-          {/* Stats row */}
-          <div
-            className="grid grid-cols-3 gap-4 sm:gap-8 max-w-2xl mx-auto mt-16 sm:mt-20"
-          >
+          <div className="grid grid-cols-3 gap-4 sm:gap-8 max-w-2xl mx-auto mt-16 sm:mt-20">
             {[
               { value: stats.users, suffix: "+", label: "Players Joined", icon: Users, color: "text-neon-blue" },
               { value: stats.articles, suffix: "+", label: "GTA 6 Articles", icon: Newspaper, color: "text-neon-purple" },
@@ -222,56 +198,38 @@ export default function HomePage() {
             ))}
           </div>
         </div>
-
-        {/* Scroll indicator */}
-        <div
-          className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 z-10"
-        >
+        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 z-10">
           <span className="text-xs text-gray-600 uppercase tracking-widest">Scroll</span>
-          <div
-            className="w-5 h-8 rounded-full border border-white/20 flex items-start justify-center p-1"
-          >
+          <div className="w-5 h-8 rounded-full border border-white/20 flex items-start justify-center p-1">
             <div className="w-1 h-2 rounded-full bg-neon-pink" />
           </div>
         </div>
       </section>
 
-      {/* ---- 728×90 AD ---- */}
-      <div className="page-container py-4">
-        <AdBanner adKey="7e7419c72404cab7787c27dfdac31321" height={90} width={728} className="flex justify-center" />
+      {/* AD: Below Hero */}
+      <div className="page-container py-4 flex justify-center">
+        <LazyAd type="responsive" minHeight={90} />
       </div>
 
       {/* ---- HOW IT WORKS ---- */}
       <section className="py-20 sm:py-28 relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-b from-transparent via-neon-purple/5 to-transparent pointer-events-none" />
         <div className="page-container">
-          <div
-            className="text-center mb-16"
-          >
+          <div className="text-center mb-16">
             <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-neon-purple/10 border border-neon-purple/20 text-xs text-neon-purple uppercase tracking-widest font-semibold mb-4">
               <Sparkles className="w-3 h-3" />
               Simple Process
             </div>
-            <h2 className="text-3xl sm:text-4xl font-heading font-bold text-white mb-4">
-              Earn & Redeem in 3 Steps
-            </h2>
-            <p className="text-gray-400 max-w-lg mx-auto">
-              No credit card, no sign-up hassle. Just create a wallet and start earning.
-            </p>
+            <h2 className="text-3xl sm:text-4xl font-heading font-bold text-white mb-4">Earn & Redeem in 3 Steps</h2>
+            <p className="text-gray-400 max-w-lg mx-auto">No credit card, no sign-up hassle. Just create a wallet and start earning.</p>
           </div>
-
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 relative">
-            {/* Connector lines */}
             <div className="hidden md:block absolute top-16 left-1/3 right-1/3 h-px bg-gradient-to-r from-neon-pink/40 to-neon-purple/40 z-0" />
             <div className="hidden md:block absolute top-16 left-2/3 right-0 h-px bg-gradient-to-r from-neon-purple/40 to-neon-blue/40 z-0" />
-
             {howItWorks.map((step, i) => {
               const Icon = step.icon
               return (
-                <div
-                  key={step.step}
-                  className="relative z-10 text-center"
-                >
+                <div key={step.step} className="relative z-10 text-center">
                   <div className="relative inline-flex mb-6">
                     <div className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto feature-icon">
                       <Icon className="w-7 h-7 text-neon-pink" />
@@ -289,12 +247,15 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* AD: After How It Works */}
+      <div className="page-container py-4 flex justify-center">
+        <LazyAd type="responsive" minHeight={90} />
+      </div>
+
       {/* ---- LATEST NEWS ---- */}
       <section className="py-16 sm:py-20">
         <div className="page-container">
-          <div
-            className="flex items-center justify-between mb-10"
-          >
+          <div className="flex items-center justify-between mb-10">
             <div>
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-neon-blue/10 border border-neon-blue/20 text-xs text-neon-blue uppercase tracking-widest font-semibold mb-3">
                 <Newspaper className="w-3 h-3" />
@@ -306,61 +267,48 @@ export default function HomePage() {
               View All <ChevronRight className="w-4 h-4" />
             </Link>
           </div>
-
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {featuredArticles.length > 0
               ? featuredArticles.map((article: any, i: number) => (
-                <div
-                  key={article.id}
-                >
-                  <Link href={`/news/${article.slug}`} className="glass-card p-0 overflow-hidden group block neon-glow-card shine-effect" id={`news-card-${i}`}>
-                    {article.featuredImage ? (
-                      <div className="relative h-48 overflow-hidden">
-                        <img
-                          src={article.featuredImage}
-                          alt={article.title}
-                          className="w-full h-full object-cover"
-                        />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-                      </div>
-                    ) : (
-                      <div className="h-48 bg-gradient-to-br from-neon-blue/10 to-neon-purple/10 flex items-center justify-center">
-                        <Newspaper className="w-12 h-12 text-gray-600" />
-                      </div>
-                    )}
-                    <div className="p-5">
-                      {article.category && (
-                        <span className="text-[10px] uppercase tracking-wider text-neon-blue font-bold">
-                          {article.category.name}
-                        </span>
+                  <div key={article.id}>
+                    <Link href={`/news/${article.slug}`} className="glass-card p-0 overflow-hidden group block neon-glow-card shine-effect" id={`news-card-${i}`}>
+                      {article.featuredImage ? (
+                        <div className="relative h-48 overflow-hidden">
+                          <img src={article.featuredImage} alt={article.title} className="w-full h-full object-cover" />
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+                        </div>
+                      ) : (
+                        <div className="h-48 bg-gradient-to-br from-neon-blue/10 to-neon-purple/10 flex items-center justify-center">
+                          <Newspaper className="w-12 h-12 text-gray-600" />
+                        </div>
                       )}
-                      <h3 className="text-white font-semibold mt-1.5 group-hover:text-neon-blue line-clamp-2 leading-snug">
-                        {article.title}
-                      </h3>
-                      <p className="text-gray-400 text-sm mt-2 line-clamp-2 leading-relaxed">{article.excerpt}</p>
-                      <div className="flex items-center justify-between mt-4 text-xs text-gray-600">
-                        <span>{new Date(article.createdAt).toLocaleDateString()}</span>
-                        <span className="flex items-center gap-1 text-neon-green">
-                          <Coins className="w-3 h-3" />
-                          Earn points
-                        </span>
+                      <div className="p-5">
+                        {article.category && (
+                          <span className="text-[10px] uppercase tracking-wider text-neon-blue font-bold">{article.category.name}</span>
+                        )}
+                        <h3 className="text-white font-semibold mt-1.5 group-hover:text-neon-blue line-clamp-2 leading-snug">{article.title}</h3>
+                        <p className="text-gray-400 text-sm mt-2 line-clamp-2 leading-relaxed">{article.excerpt}</p>
+                        <div className="flex items-center justify-between mt-4 text-xs text-gray-600">
+                          <span>{new Date(article.createdAt).toLocaleDateString()}</span>
+                          <span className="flex items-center gap-1 text-neon-green">
+                            <Coins className="w-3 h-3" /> Earn points
+                          </span>
+                        </div>
                       </div>
-                    </div>
-                  </Link>
-                </div>
-              ))
-              : Array.from({ length: 3 }).map((_, i) => (
-                <div key={i} className="glass-card p-0 overflow-hidden">
-                  <div className="h-48 skeleton" />
-                  <div className="p-5 space-y-3">
-                    <div className="h-3 w-20 skeleton" />
-                    <div className="h-5 w-full skeleton" />
-                    <div className="h-4 w-3/4 skeleton" />
+                    </Link>
                   </div>
-                </div>
-              ))}
+                ))
+              : Array.from({ length: 3 }).map((_, i) => (
+                  <div key={i} className="glass-card p-0 overflow-hidden">
+                    <div className="h-48 skeleton" />
+                    <div className="p-5 space-y-3">
+                      <div className="h-3 w-20 skeleton" />
+                      <div className="h-5 w-full skeleton" />
+                      <div className="h-4 w-3/4 skeleton" />
+                    </div>
+                  </div>
+                ))}
           </div>
-
           <div className="text-center mt-8 sm:hidden">
             <Link href="/news" className="btn-secondary text-sm py-3 px-6 inline-flex items-center gap-2">
               View All News <ChevronRight className="w-4 h-4" />
@@ -369,37 +317,28 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ---- 728×90 AD ---- */}
-      <div className="page-container py-4">
-        <AdBanner adKey="7e7419c72404cab7787c27dfdac31321" height={90} width={728} className="flex justify-center" />
+      {/* AD: After Latest News */}
+      <div className="page-container py-4 flex justify-center">
+        <LazyAd type="responsive" minHeight={90} />
       </div>
 
       {/* ---- FEATURES GRID ---- */}
       <section className="py-20 sm:py-28 relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-b from-transparent via-neon-blue/3 to-transparent pointer-events-none" />
         <div className="page-container">
-          <div
-            className="text-center mb-16"
-          >
+          <div className="text-center mb-16">
             <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-neon-green/10 border border-neon-green/20 text-xs text-neon-green uppercase tracking-widest font-semibold mb-4">
               <Star className="w-3 h-3" />
               Everything Included
             </div>
-            <h2 className="text-3xl sm:text-4xl font-heading font-bold text-white mb-4">
-              One Platform. Everything You Need.
-            </h2>
-            <p className="text-gray-400 max-w-lg mx-auto">
-              Built for serious GTA 6 fans. News, rewards, community — all in one place.
-            </p>
+            <h2 className="text-3xl sm:text-4xl font-heading font-bold text-white mb-4">One Platform. Everything You Need.</h2>
+            <p className="text-gray-400 max-w-lg mx-auto">Built for serious GTA 6 fans. News, rewards, community -- all in one place.</p>
           </div>
-
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
             {features.map((f, i) => {
               const Icon = f.icon
               return (
-                <div
-                  key={f.title}
-                >
+                <div key={f.title}>
                   <Link href={f.href} className={`glass-card p-6 group flex flex-col gap-4 block neon-glow-card shine-effect h-full`} id={`feature-${f.title.toLowerCase().replace(" ", "-")}`}>
                     <div className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${f.color} flex items-center justify-center feature-icon flex-shrink-0`}>
                       <Icon className={`w-6 h-6 ${f.iconColor}`} />
@@ -419,54 +358,43 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* AD: After Features Grid */}
+      <div className="page-container py-4 flex justify-center">
+        <LazyAd type="responsive" minHeight={90} />
+      </div>
+
       {/* ---- REWARDS BANNER ---- */}
       <section className="py-16 sm:py-20">
         <div className="page-container">
-          <div
-            className="relative rounded-3xl overflow-hidden"
-          >
-            {/* Background image */}
+          <div className="relative rounded-3xl overflow-hidden">
             <div className="absolute inset-0 z-0">
-              <Image
-                src="/images/rewards-banner.png"
-                alt="Rewards"
-                fill
-                className="object-cover object-center opacity-30"
-              />
+              <Image src="/images/rewards-banner.png" alt="Rewards" fill className="object-cover object-center opacity-30" />
               <div className="absolute inset-0 bg-gradient-to-r from-[#070710]/95 via-[#070710]/70 to-[#070710]/80" />
             </div>
-
-            {/* Glow orbs */}
             <div className="absolute top-0 right-1/4 w-64 h-64 rounded-full bg-neon-yellow/10 blur-[80px] pointer-events-none" />
             <div className="absolute bottom-0 left-1/3 w-48 h-48 rounded-full bg-neon-green/10 blur-[60px] pointer-events-none" />
-
             <div className="relative z-10 p-10 sm:p-16 text-center">
               <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-neon-yellow/30 to-neon-green/20 flex items-center justify-center mx-auto mb-6 border border-neon-yellow/20">
                 <Trophy className="w-8 h-8 text-neon-yellow" />
               </div>
               <h2 className="text-3xl sm:text-5xl font-heading font-bold text-white mb-4">
-                Start Earning{" "}
-                <span className="gradient-text-green">Today</span>
+                Start Earning <span className="gradient-text-green">Today</span>
               </h2>
               <p className="text-gray-300 max-w-xl mx-auto mb-8 text-base sm:text-lg leading-relaxed">
-                Create your free wallet in under a minute. No email, no password.
-                Just your private phrase — and a world of rewards waiting.
+                Create your free wallet in under a minute. No email, no password. Just your private phrase -- and a world of rewards waiting.
               </p>
               <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
                 {isConnected && walletId ? (
                   <Link href="/dashboard" className="btn-primary text-base py-4 px-10 flex items-center gap-3 shine-effect">
-                    <Shield className="w-5 h-5" />
-                    Go to Dashboard <ArrowRight className="w-5 h-5" />
+                    <Shield className="w-5 h-5" /> Go to Dashboard <ArrowRight className="w-5 h-5" />
                   </Link>
                 ) : (
                   <Link href="/wallet/create" className="btn-primary text-base py-4 px-10 flex items-center gap-3 shine-effect" id="cta-create-wallet">
-                    <Shield className="w-5 h-5" />
-                    Create Free Wallet
+                    <Shield className="w-5 h-5" /> Create Free Wallet
                   </Link>
                 )}
                 <Link href="/rewards" className="btn-secondary text-base py-4 px-8 flex items-center gap-3" id="cta-view-rewards">
-                  <Gift className="w-5 h-5" />
-                  Browse Rewards
+                  <Gift className="w-5 h-5" /> Browse Rewards
                 </Link>
               </div>
               <p className="text-gray-600 text-xs mt-6 font-mono">
@@ -476,6 +404,11 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+
+      {/* AD: Above Footer */}
+      <div className="page-container py-4 flex justify-center">
+        <LazyAd type="responsive" minHeight={90} />
+      </div>
     </div>
   )
 }

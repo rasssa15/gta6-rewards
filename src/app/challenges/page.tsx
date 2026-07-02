@@ -2,7 +2,7 @@
 import { useState, useEffect, useCallback, useRef } from "react"
 import { Sparkles, Target, CheckCircle, Gift, Eye, Star, RefreshCw, Loader2, Check } from "lucide-react"
 import Link from "next/link"
-import { AdsterraBanner } from "@/components/ads/AdsterraBanner"
+import { LazyAd } from "@/components/ads/LazyAd"
 import { useWallet } from "@/components/providers/WalletProvider"
 import toast from "react-hot-toast"
 
@@ -106,7 +106,7 @@ export default function ChallengesPage() {
       <div className="page-container max-w-4xl">
         <div className="flex gap-4 mb-6">
           <div className="hidden lg:block shrink-0">
-            <AdsterraBanner type="skyscraper" />
+            <LazyAd type="skyscraper" minHeight={600} />
           </div>
           <div className="flex-1 min-w-0">
             <div className="text-center mb-6">
@@ -121,8 +121,13 @@ export default function ChallengesPage() {
                 </button>
               )}
             </div>
-            <AdsterraBanner type="responsive" />
+            <LazyAd type="responsive" minHeight={90} />
           </div>
+        </div>
+
+        {/* AD: Below header */}
+        <div className="mb-6 flex justify-center">
+          <LazyAd type="responsive" minHeight={90} />
         </div>
 
         {showAd && (
@@ -182,7 +187,7 @@ export default function ChallengesPage() {
           </div>
         ) : (
           <>
-            <AdsterraBanner type="responsive" />
+            <LazyAd type="responsive" minHeight={90} />
             <div className="space-y-3 mt-6">
               {challenges.map((challenge) => (
                 <div
@@ -214,9 +219,9 @@ export default function ChallengesPage() {
                           </span>
                           <span className="text-xs text-neon-purple font-mono">+{challenge.xpReward} XP</span>
                           {isChest(challenge) ? (
-                            <span className="text-xs text-yellow-400 font-mono">🎁 5 cards</span>
+                            <span className="text-xs text-yellow-400 font-mono">5 cards</span>
                           ) : (
-                            <span className="text-xs text-yellow-400 font-mono">🥇 Gold card</span>
+                            <span className="text-xs text-yellow-400 font-mono">Gold card</span>
                           )}
                         </div>
                       </div>
@@ -235,9 +240,9 @@ export default function ChallengesPage() {
                       {claiming === challenge.id ? (
                         <span>Claiming...</span>
                       ) : challenge.completed ? (
-                        "Claimed ✓"
+                        "Claimed"
                       ) : challenge.progress >= challenge.target ? (
-                        "Claim →"
+                        "Claim"
                       ) : (
                         `${challenge.progress}/${challenge.target}`
                       )}
@@ -262,8 +267,8 @@ export default function ChallengesPage() {
         )}
 
         <div className="mt-8 flex flex-col items-center gap-4">
-          <AdsterraBanner type="responsive" />
-          <AdsterraBanner type="small-skyscraper" />
+          <LazyAd type="responsive" minHeight={90} />
+          <LazyAd type="small-skyscraper" minHeight={300} />
         </div>
       </div>
     </div>

@@ -7,6 +7,8 @@ import { Toaster } from "react-hot-toast"
 import { WalletProvider } from "@/components/providers/WalletProvider"
 import { AdScripts } from "@/components/ads/AdScripts"
 import { ConsentBanner } from "@/components/ads/ConsentBanner"
+import { StickyFooterAd } from "@/components/ads/StickyFooterAd"
+import { HeaderAd } from "@/components/ads/HeaderAd"
 import AnimationWrapper from "@/components/AnimationWrapper"
 import { ThemeProvider } from "@/components/ThemeProvider"
 import "./globals.css"
@@ -45,6 +47,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <AnimationWrapper>
           <ParticleBackground />
           <Header />
+          <HeaderAd />
           <main className="relative z-10 min-h-screen pt-16">{children}</main>
           <Footer />
           <ConsentBanner />
@@ -59,6 +62,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               },
             }}
           />
+          <StickyFooterAd />
           <AdScripts />
           </AnimationWrapper>
           </ThemeProvider>

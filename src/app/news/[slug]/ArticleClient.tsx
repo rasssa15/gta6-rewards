@@ -3,6 +3,7 @@ import { useState, useEffect, useRef } from "react"
 import { Share2, Bookmark, MessageSquare } from "lucide-react"
 import { useWallet } from "@/components/providers/WalletProvider"
 import { SmartLinkPopunder } from "@/components/ads/SmartLinkPopunder"
+import { InArticleAd } from "@/components/ads/InArticleAd"
 import toast from "react-hot-toast"
 import { formatDate } from "@/lib/utils"
 
@@ -14,7 +15,6 @@ export default function ArticleClient({ article, comments: initialComments }: { 
   const [bookmarked, setBookmarked] = useState(false)
   const [comments, setComments] = useState<Comment[]>(initialComments)
   const [commentText, setCommentText] = useState("")
-  const adInjected = useRef(false)
 
   const autoPopup = useRef(false)
 
@@ -27,49 +27,6 @@ export default function ArticleClient({ article, comments: initialComments }: { 
       } catch {}
     }, 1500)
     return () => clearTimeout(timer)
-  }, [])
-
-  useEffect(() => {
-    if (adInjected.current) return
-    adInjected.current = true
-
-    const injectAd = (containerId: string, type: "skyscraper" | "small-skyscraper") => {
-      const container = document.getElementById(containerId)
-      if (!container) return
-
-      if (type === "skyscraper") {
-        const inline = document.createElement("script")
-        inline.text = `atOptions={'key':'14c436bda0b1d02724d0618980143ce5','format':'iframe','height':600,'width':160,'params':{}};`
-        container.appendChild(inline)
-        const invoke = document.createElement("script")
-        invoke.src = "https://evidentbummerhike.com/14c436bda0b1d02724d0618980143ce5/invoke.js"
-        container.appendChild(invoke)
-      }
-
-      if (type === "small-skyscraper") {
-        const inline = document.createElement("script")
-        inline.text = `atOptions={'key':'0eda691a40adbc5636d43af20fdda82d','format':'iframe','height':300,'width':160,'params':{}};`
-        container.appendChild(inline)
-        const invoke = document.createElement("script")
-        invoke.src = "https://evidentbummerhike.com/0eda691a40adbc5636d43af20fdda82d/invoke.js"
-        container.appendChild(invoke)
-      }
-    }
-
-    injectAd("ht-skyscraper-placeholder", "skyscraper")
-    injectAd("ht-small-skyscraper-placeholder", "small-skyscraper")
-
-    const incontent = document.getElementById("adsterra-incontent")
-    if (incontent) {
-      const s = document.createElement("script")
-      s.async = true
-      s.setAttribute("data-cfasync", "false")
-      s.src = "https://evidentbummerhike.com/f301214e059ca70b56b447bf6850594e/invoke.js"
-      incontent.appendChild(s)
-      const d = document.createElement("div")
-      d.id = "container-f301214e059ca70b56b447bf6850594e"
-      incontent.appendChild(d)
-    }
   }, [])
 
   const handleBookmark = async () => {
@@ -115,11 +72,9 @@ export default function ArticleClient({ article, comments: initialComments }: { 
         </button>
       </div>
 
+      <InArticleAd />
       <div className="prose prose-invert max-w-none text-gray-300 leading-relaxed" dangerouslySetInnerHTML={{ __html: article.content }} />
-
-      <div className="my-6 flex flex-col items-center gap-4">
-        <div id="adsterra-incontent" className="flex justify-center w-full" />
-      </div>
+      <InArticleAd />
 
       <div className="mt-12 glass-card p-6">
         <h3 className="text-lg font-heading font-bold text-white mb-4 flex items-center gap-2">
