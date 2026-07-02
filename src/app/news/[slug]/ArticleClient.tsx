@@ -16,18 +16,7 @@ export default function ArticleClient({ article, comments: initialComments }: { 
   const [comments, setComments] = useState<Comment[]>(initialComments)
   const [commentText, setCommentText] = useState("")
 
-  const autoPopup = useRef(false)
 
-  useEffect(() => {
-    if (autoPopup.current) return
-    autoPopup.current = true
-    const timer = setTimeout(() => {
-      try {
-        window.open("https://www.effectivecpmnetwork.com/ferya5qq?key=0fdf4c14f0056af80dff7d2b13c4d1ee", "_blank")
-      } catch {}
-    }, 1500)
-    return () => clearTimeout(timer)
-  }, [])
 
   const handleBookmark = async () => {
     if (!walletId || !article) return toast.error("Connect wallet to bookmark")

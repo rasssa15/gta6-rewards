@@ -126,7 +126,6 @@ function RedeemContent() {
 
   const handlePopupAdClick = async () => {
     if (!redemptionId || !walletId) return
-    window.open("https://www.effectivecpmnetwork.com/ferya5qq?key=0fdf4c14f0056af80dff7d2b13c4d1ee", "_blank", "width=400,height=300")
     try {
       const res = await fetch("/api/redeem/ad-click", {
         method: "POST",

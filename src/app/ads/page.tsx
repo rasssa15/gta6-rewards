@@ -1,30 +1,16 @@
 "use client"
 import { useState, useEffect, useRef, useCallback } from "react"
-import { Eye, Play, Star, ExternalLink, AlertCircle, Loader2, Check } from "lucide-react"
+import { Eye, Play, Loader2, Check } from "lucide-react"
 import { useWallet } from "@/components/providers/WalletProvider"
-import { AdsterraBanner } from "@/components/ads/AdsterraBanner"
+import { LazyAd } from "@/components/ads/LazyAd"
 import toast from "react-hot-toast"
 import Link from "next/link"
 
-const VIDEO_AD_URL = "https://expensive-pollution.com/d/moFCzmd.GKNGvGZ/GnUh/peBm_9/u/Z/UFlXkFPHTjcSxeOHDaQ/4/OwD/kFt/NhzQEo4VN/Dwg/5tMowH"
-const DIRECT_LINKS = [
-  "https://www.effectivecpmnetwork.com/ferya5qq?key=0fdf4c14f0056af80dff7d2b13c4d1ee",
-  "https://pleased-report.com/JahekC",
-  "https://www.effectivecpmnetwork.com/ferya5qq?key=0fdf4c14f0056af80dff7d2b13c4d1ee",
-  "https://pleased-report.com/JahekC",
-  "https://www.effectivecpmnetwork.com/ferya5qq?key=0fdf4c14f0056af80dff7d2b13c4d1ee",
-]
-const COOLDOWN_SECONDS = 5
-
 export default function AdsPage() {
   const { walletId, refresh } = useWallet()
-  const [mode, setMode] = useState<"idle" | "video" | "links" | "done">("idle")
-  const [videoError, setVideoError] = useState(false)
-  const [completedLinks, setCompletedLinks] = useState(0)
-  const [cooldown, setCooldown] = useState(0)
+  const [mode, setMode] = useState<"idle" | "video" | "done">("idle")
   const [adsWatched, setAdsWatched] = useState(0)
   const [claiming, setClaiming] = useState(false)
-  const cooldownRef = useRef<number | null>(null)
   const videoRef = useRef<HTMLVideoElement>(null)
 
   useEffect(() => {
@@ -34,11 +20,6 @@ export default function AdsPage() {
       }).catch(() => {})
     }
   }, [walletId])
-
-  const clearCooldown = () => {
-    if (cooldownRef.current) clearInterval(cooldownRef.current)
-    setCooldown(0)
-  }
 
   const claimReward = useCallback(async () => {
     if (!walletId || claiming) return
@@ -59,67 +40,30 @@ export default function AdsPage() {
   }, [walletId, claiming, refresh])
 
   const startAd = () => {
-    setVideoError(false)
-    setCompletedLinks(0)
     setMode("video")
-    clearCooldown()
-
     setTimeout(() => {
       if (videoRef.current) {
-        videoRef.current.src = VIDEO_AD_URL
-        videoRef.current.play().catch(() => {
-          setVideoError(true)
-          setMode("links")
-        })
+        videoRef.current.src = "https://expensive-pollution.com/d/moFCzmd.GKNGvGZ/GnUh/peBm_9/u/Z/UFlXkFPHTjcSxeOHDaQ/4/OwD/kFt/NhzQEo4VN/Dwg/5tMowH"
+        videoRef.current.play().catch(() => claimReward())
       } else {
-        setVideoError(true)
-        setMode("links")
+        claimReward()
       }
     }, 500)
 
     setTimeout(() => {
-      if (!videoError && mode === "video") {
-        setVideoError(true)
-        setMode("links")
-      }
+      if (mode === "video") claimReward()
     }, 8000)
   }
-
-  const openLink = (index: number) => {
-    if (index !== completedLinks || cooldown > 0) return
-    try { window.open(DIRECT_LINKS[index], "_blank") } catch {}
-    setCompletedLinks(prev => prev + 1)
-    setCooldown(COOLDOWN_SECONDS)
-    cooldownRef.current = window.setInterval(() => {
-      setCooldown(prev => {
-        if (prev <= 1) { window.clearInterval(cooldownRef.current!); return 0 }
-        return prev - 1
-      })
-    }, 1000)
-  }
-
-  useEffect(() => {
-    if (completedLinks >= 5 && !claiming) {
-      clearCooldown()
-      claimReward()
-    }
-  }, [completedLinks, claiming, claimReward])
-
-  useEffect(() => {
-    return () => clearCooldown()
-  }, [])
-
-  const videoEnded = () => { claimReward() }
 
   return (
     <div className="min-h-screen pt-24 pb-16">
       <div className="page-container max-w-4xl">
         <div className="flex gap-4 mb-6">
           <div className="hidden lg:block shrink-0">
-            <AdsterraBanner type="skyscraper" />
+            <LazyAd type="skyscraper" minHeight={600} />
           </div>
           <div className="flex-1 min-w-0">
-            <AdsterraBanner type="responsive" />
+            <LazyAd type="responsive" minHeight={90} />
             <div className="text-center mb-8 mt-4">
               <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-neon-green to-emerald-500 flex items-center justify-center mx-auto mb-4">
                 <Eye className="w-8 h-8 text-white" />
@@ -167,58 +111,10 @@ export default function AdsPage() {
 
               {mode === "video" && (
                 <div className="p-8 text-center">
-                  <video ref={videoRef} className="hidden" onEnded={videoEnded} />
+                  <video ref={videoRef} className="hidden" />
                   <Loader2 className="w-12 h-12 text-neon-green animate-spin mx-auto mb-4" />
                   <p className="text-white font-semibold mb-2">Loading video ad...</p>
-                  <p className="text-gray-400 text-xs">If video doesn&apos;t load, you&apos;ll be prompted to open direct links.</p>
-                </div>
-              )}
-
-              {mode === "links" && (
-                <div className="p-6">
-                  <div className="flex items-center gap-2 mb-4">
-                    <AlertCircle className="w-5 h-5 text-amber-400" />
-                    <p className="text-amber-400 font-semibold text-sm">Ad couldn&apos;t load. Open all 5 links to earn your reward!</p>
-                  </div>
-                  <div className="flex items-center gap-2 mb-4">
-                    {Array.from({ length: 5 }, (_, i) => (
-                      <div key={i} className={`w-8 h-8 rounded-lg flex items-center justify-center text-sm font-bold transition-all ${
-                        i < completedLinks ? "bg-neon-green text-black" : i === completedLinks ? "bg-white/10 text-white border border-white/30" : "bg-white/5 text-gray-600"
-                      }`}>
-                        {i < completedLinks ? <Check className="w-4 h-4" /> : i + 1}
-                      </div>
-                    ))}
-                  </div>
-                  <div className="space-y-2">
-                    {DIRECT_LINKS.map((link, i) => {
-                      const done = i < completedLinks
-                      const active = i === completedLinks && cooldown === 0
-                      const waiting = i === completedLinks && cooldown > 0
-                      const locked = i > completedLinks
-                      return (
-                        <button
-                          key={i}
-                          onClick={() => openLink(i)}
-                          disabled={!active}
-                          className={`w-full flex items-center gap-3 p-3 rounded-lg text-left text-sm transition-all ${
-                            done ? "bg-neon-green/10 text-neon-green border border-neon-green/30" :
-                            active ? "bg-white/10 text-white border border-white/20 hover:bg-white/20 cursor-pointer" :
-                            "bg-white/5 text-gray-600 border border-white/5 cursor-not-allowed"
-                          }`}
-                        >
-                          <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${
-                            done ? "bg-neon-green text-black" : active ? "bg-white/20 text-white" : "bg-white/10 text-gray-600"
-                          }`}>
-                            {done ? <Check className="w-3 h-3" /> : locked ? "🔒" : i + 1}
-                          </span>
-                          <span className="flex-1 truncate">{link.replace(/https?:\/\//, "")}</span>
-                          {active && !done && <ExternalLink className="w-4 h-4 shrink-0" />}
-                          {waiting && <span className="text-xs text-amber-400 shrink-0">{cooldown}s</span>}
-                          {done && <span className="text-xs text-neon-green shrink-0">Done</span>}
-                        </button>
-                      )
-                    })}
-                  </div>
+                  <p className="text-gray-400 text-xs">Please wait while the ad loads</p>
                 </div>
               )}
 
@@ -238,8 +134,8 @@ export default function AdsPage() {
         )}
 
         <div className="mt-8 flex flex-col items-center gap-4">
-          <AdsterraBanner type="responsive" />
-          <AdsterraBanner type="small-skyscraper" />
+          <LazyAd type="responsive" minHeight={90} />
+          <LazyAd type="small-skyscraper" minHeight={300} />
         </div>
       </div>
     </div>

@@ -10,7 +10,7 @@ import { WalletGuard } from "@/components/wallet/WalletGuard"
 import { getSession, clearWallet, setLocked } from "@/lib/wallet/storage"
 import { formatDate, formatNumber } from "@/lib/utils"
 import { useTheme } from "@/components/ThemeProvider"
-import { AdBanner } from "@/components/ads/AdBanner"
+import { LazyAd } from "@/components/ads/LazyAd"
 
 export default function DashboardPage() {
   const router = useRouter()
@@ -37,14 +37,7 @@ export default function DashboardPage() {
     }
   }, [])
 
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      try {
-        window.open("https://www.effectivecpmnetwork.com/ferya5qq?key=0fdf4c14f0056af80dff7d2b13c4d1ee", "_blank")
-      } catch {}
-    }, 30000)
-    return () => clearTimeout(timer)
-  }, [])
+
 
   const handleLock = () => {
     setLocked(true)
@@ -142,9 +135,8 @@ export default function DashboardPage() {
             ))}
           </div>
 
-          {/* 728×90 AD */}
-          <div className="mb-6">
-            <AdBanner adKey="728x90-dashboard-mid" height={90} width={728} className="flex justify-center" />
+          <div className="mb-6 flex justify-center">
+            <LazyAd type="responsive" minHeight={90} />
           </div>
 
           <div className="flex gap-2 mb-6 overflow-x-auto">
@@ -301,14 +293,12 @@ export default function DashboardPage() {
             </div>
           )}
 
-          {/* 320×50 mobile banner (hidden on desktop) */}
-          <div className="block sm:hidden mb-6">
-            <AdBanner adKey="320x50-dashboard-mobile" height={50} width={320} className="flex justify-center" />
+          <div className="block sm:hidden mb-6 flex justify-center">
+            <LazyAd type="responsive" minHeight={90} />
           </div>
 
-          {/* 468×60 AD */}
-          <div className="mb-6">
-            <AdBanner adKey="468x60-dashboard-bottom" height={60} width={468} className="flex justify-center" />
+          <div className="mb-6 flex justify-center">
+            <LazyAd type="responsive" minHeight={90} />
           </div>
         </div>
       </div>

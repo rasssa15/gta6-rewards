@@ -82,9 +82,6 @@ export default function ChallengesPage() {
         const totalPts = data.scratchResults?.reduce((s: number, r: any) => s + r.points, 0) || 0
         toast.success(`Claimed! +${data.xpReward} XP, ${count} cards (${totalPts} pts)!`)
         refresh()
-        try {
-          window.open("https://www.effectivecpmnetwork.com/ferya5qq?key=0fdf4c14f0056af80dff7d2b13c4d1ee", "_blank")
-        } catch {}
       }
       setChallenges((prev) =>
         prev.map((c) =>
