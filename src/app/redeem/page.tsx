@@ -46,6 +46,7 @@ function RedeemContent() {
   const [codeViewed, setCodeViewed] = useState(false)
   const [viewingCode, setViewingCode] = useState(false)
   const [revealedCode, setRevealedCode] = useState<string | null>(null)
+  const [popupCooldown, setPopupCooldown] = useState(0)
 
   const pollRef = useRef<NodeJS.Timeout | null>(null)
 
@@ -124,8 +125,14 @@ function RedeemContent() {
     setRedeeming(false)
   }
 
+  const popupCooldownRef = useRef<NodeJS.Timeout | null>(null)
+
   const handlePopupAdClick = async () => {
-    if (!redemptionId || !walletId) return
+    if (!redemptionId || !walletId || popupCooldown > 0) return
+    setPopupCooldown(5)
+    try {
+      window.open("https://www.effectivecpmnetwork.com/ferya5qq?key=0fdf4c14f0056af80dff7d2b13c4d1ee", "_blank")
+    } catch {}
     try {
       const res = await fetch("/api/redeem/ad-click", {
         method: "POST",
@@ -138,6 +145,12 @@ function RedeemContent() {
         toast.success(`Popup ad clicked! (${data.popupAdsClicked}/${data.popupAdsRequired})`)
       }
     } catch {}
+    popupCooldownRef.current = setInterval(() => {
+      setPopupCooldown(prev => {
+        if (prev <= 1) { clearInterval(popupCooldownRef.current!); return 0 }
+        return prev - 1
+      })
+    }, 1000)
   }
 
   const handleViewCode = async () => {
@@ -295,8 +308,8 @@ function RedeemContent() {
                 </div>
 
                 <div className="flex flex-col gap-2">
-                  <button onClick={handlePopupAdClick} className="w-full py-2.5 rounded-xl bg-gradient-to-r from-neon-purple/20 to-neon-blue/20 border border-neon-purple/30 text-white text-sm font-semibold flex items-center justify-center gap-2 hover:from-neon-purple/30 hover:to-neon-blue/30 transition-all">
-                    <ExternalLink className="w-4 h-4" /> Click Popup Ad ({popupClicked}/{popupRequired})
+                  <button onClick={handlePopupAdClick} disabled={popupCooldown > 0} className="w-full py-2.5 rounded-xl bg-gradient-to-r from-neon-purple/20 to-neon-blue/20 border border-neon-purple/30 text-white text-sm font-semibold flex items-center justify-center gap-2 hover:from-neon-purple/30 hover:to-neon-blue/30 transition-all disabled:opacity-50 disabled:cursor-not-allowed">
+                    {popupCooldown > 0 ? <><Clock className="w-4 h-4" /> Wait {popupCooldown}s</> : <><ExternalLink className="w-4 h-4" /> Click Popup Ad ({popupClicked}/{popupRequired})</>}
                   </button>
                   <Link href="/challenges" className="w-full py-2.5 rounded-xl bg-white/5 border border-white/10 text-gray-400 text-sm font-semibold flex items-center justify-center gap-2 hover:text-white transition-all">
                     <Trophy className="w-4 h-4" /> Complete Challenges ({challengesCompleted}/5)
