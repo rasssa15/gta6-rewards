@@ -90,12 +90,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <StickyFooterAd />
           <div className="hidden xl:block fixed left-0 top-24 bottom-0 z-[60] w-[160px] pointer-events-none">
             <div className="pointer-events-auto p-2 h-full flex items-start justify-center">
-              <LazyAd type="skyscraper" minHeight={600} containerSuffix="left" />
+              <LazyAd type="skyscraper" minHeight={600} />
             </div>
           </div>
           <div className="hidden xl:block fixed right-0 top-24 bottom-0 z-[60] w-[160px] pointer-events-none">
             <div className="pointer-events-auto p-2 h-full flex items-start justify-center">
-              <LazyAd type="banner-160x300" minHeight={300} containerSuffix="right" />
+              <LazyAd type="banner-160x300" minHeight={300} />
             </div>
           </div>
           <AdScripts />

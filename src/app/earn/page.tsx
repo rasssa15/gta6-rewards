@@ -77,7 +77,7 @@ export default function EarnPage() {
               </h1>
               <p className="text-gray-400">Every action gives you a random Scratch Card</p>
             </div>
-            <LazyAd type="responsive" minHeight={90} />
+            <LazyAd type="medium-rectangle" minHeight={90} />
           </div>
         </div>
 
@@ -110,7 +110,7 @@ export default function EarnPage() {
 
         {/* AD: Between earn methods and leaderboard CTA */}
         <div className="mt-6 flex justify-center">
-          <LazyAd type="responsive" minHeight={90} />
+          <LazyAd type="medium-rectangle" minHeight={90} />
         </div>
 
         <div className="mt-10 glass-card p-8 text-center relative overflow-hidden">
@@ -128,7 +128,7 @@ export default function EarnPage() {
         </div>
 
         <div className="mt-10 flex flex-col items-center gap-4">
-          <LazyAd type="responsive" minHeight={90} />
+          <LazyAd type="medium-rectangle" minHeight={90} />
           <LazyAd type="skyscraper" minHeight={600} />
         </div>
       </div>

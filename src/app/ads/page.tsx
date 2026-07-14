@@ -79,7 +79,7 @@ export default function AdsPage() {
             <LazyAd type="skyscraper" minHeight={600} />
           </div>
           <div className="flex-1 min-w-0">
-            <LazyAd type="responsive" minHeight={90} className="mb-4" />
+            <LazyAd type="medium-rectangle" minHeight={90} className="mb-4" />
             <div className="text-center mb-8">
               <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-neon-green to-emerald-500 flex items-center justify-center mx-auto mb-4">
                 <Eye className="w-8 h-8 text-white" />

@@ -257,7 +257,7 @@ export default function HomePage() {
       {/* AD: After How It Works */}
       <div className="page-container py-4 flex justify-center">
         <div className="hidden lg:flex justify-center">
-          <LazyAd type="responsive" minHeight={90} />
+          <LazyAd type="medium-rectangle" minHeight={90} />
         </div>
         <div className="flex lg:hidden justify-center">
           <AtOptionsAd adKey="bec02ef6fdbfe5fe80e15c3c4f9f4b58" width={300} height={250} />

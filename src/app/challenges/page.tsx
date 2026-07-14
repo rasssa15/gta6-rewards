@@ -122,7 +122,7 @@ export default function ChallengesPage() {
                 </button>
               )}
             </div>
-            <LazyAd type="responsive" minHeight={90} className="mb-6" />
+            <LazyAd type="medium-rectangle" minHeight={90} className="mb-6" />
 
             {showAd && (
               <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4">
@@ -193,7 +193,7 @@ export default function ChallengesPage() {
               </div>
             ) : (
               <>
-                <LazyAd type="responsive" minHeight={90} />
+                <LazyAd type="medium-rectangle" minHeight={90} />
                 <div className="space-y-3 mt-6">
                   {challenges.map((challenge) => (
                     <div
@@ -273,7 +273,7 @@ export default function ChallengesPage() {
             )}
 
             <div className="mt-8 flex flex-col items-center gap-4">
-              <LazyAd type="responsive" minHeight={90} />
+              <LazyAd type="medium-rectangle" minHeight={90} />
               <LazyAd type="skyscraper" minHeight={600} />
             </div>
           </div>

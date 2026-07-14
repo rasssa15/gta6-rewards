@@ -137,7 +137,7 @@ export default function DashboardPage() {
           </div>
 
           <div className="mb-6 flex justify-center">
-            <LazyAd type="responsive" minHeight={90} />
+            <LazyAd type="medium-rectangle" minHeight={90} />
           </div>
 
           <div className="mb-6 flex justify-center">
@@ -299,11 +299,11 @@ export default function DashboardPage() {
           )}
 
           <div className="block sm:hidden mb-6 flex justify-center">
-            <LazyAd type="responsive" minHeight={90} />
+            <LazyAd type="medium-rectangle" minHeight={90} />
           </div>
 
           <div className="mb-6 flex justify-center">
-            <LazyAd type="responsive" minHeight={90} />
+            <LazyAd type="medium-rectangle" minHeight={90} />
           </div>
         </div>
       </div>
