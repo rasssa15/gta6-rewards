@@ -7,15 +7,7 @@ import ArticleClient from "./ArticleClient"
 import SidebarAds from "./SidebarAds"
 import ArticleImage from "./ArticleImage"
 
-export async function generateStaticParams() {
-  const articles = getAllArticles()
-  return articles.map((article) => ({
-    slug: article.slug,
-  }))
-}
-
-export const dynamicParams = true
-export const revalidate = 86400
+export const dynamic = "force-dynamic"
 
 async function findArticle(slug: string): Promise<ArticleData | null> {
   const fromJson = getArticleBySlug(slug)
@@ -52,6 +44,11 @@ async function findArticle(slug: string): Promise<ArticleData | null> {
     }
   } catch {}
   return null
+}
+
+export async function generateMetadata({ params }: { params: { slug: string } }) {
+  const article = await findArticle(params.slug)
+  return { title: article ? article.title : "Article" }
 }
 
 export default async function ArticlePage({

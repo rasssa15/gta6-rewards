@@ -94,7 +94,7 @@ export function getAllArticles(): ArticleData[] {
     const chunk = cache.get(cat)
     if (chunk) all.push(...chunk)
   }
-  return all.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+  return all
 }
 
 export function getArticleBySlug(slug: string): ArticleData | undefined {
@@ -142,8 +142,7 @@ export function getArticles(options: {
   }
 
   const total = all.length
-  const sorted = all.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
-  const articles = sorted.slice(offset, offset + limit)
+  const articles = all.slice(offset, offset + limit)
   return { articles, total }
 }
 
@@ -186,18 +185,6 @@ export function getUserByWalletId(walletId: string): UserData | undefined {
       if (found) return found
     }
   }
-}
-
-export function getLeaderboard(period: string, limit: number = 50): UserData[] {
-  const chunks = ensureUsersLoaded()
-  const all: UserData[] = []
-  for (let i = 1; i <= 4; i++) {
-    const chunk = chunks.get(i)
-    if (chunk) all.push(...chunk)
-  }
-  const key = period === "daily" ? "dailyPoints" : period === "weekly" ? "weeklyPoints" : period === "monthly" ? "monthlyPoints" : "points"
-  all.sort((a, b) => b[key] - a[key])
-  return all.slice(0, limit)
 }
 
 function ensureCommentsLoaded() {

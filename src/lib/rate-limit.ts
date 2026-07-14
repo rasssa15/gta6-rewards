@@ -1,5 +1,7 @@
 type RateLimitStore = Map<string, { count: number; resetAt: number }>
 
+// NOTE: In-memory store resets on every Vercel cold start. This is acceptable
+// for this app's traffic level, but high-volume abuse could slip through briefly.
 const store: RateLimitStore = new Map()
 const CLEANUP_INTERVAL = 60_000
 
@@ -27,6 +29,13 @@ const DEFAULTS: Record<string, RateLimitConfig> = {
   "PATCH:/api/users": { max: 5, windowMs: 60_000 },
   "GET:/api/points": { max: 30, windowMs: 60_000 },
   "GET:/api/challenges": { max: 20, windowMs: 60_000 },
+  "POST:/api/admin/auth": { max: 5, windowMs: 60_000 },
+  "GET:/api/articles/generate": { max: 3, windowMs: 60_000 },
+  "GET:/api/articles": { max: 10, windowMs: 10_000 },
+  "POST:/api/redeem": { max: 5, windowMs: 60_000 },
+  "POST:/api/redeem/ad-click": { max: 30, windowMs: 60_000 },
+  "POST:/api/referral": { max: 5, windowMs: 60_000 },
+  "GET:/api/leaderboard": { max: 30, windowMs: 60_000 },
 }
 
 export function getRateLimitConfig(method: string, pathname: string): RateLimitConfig {

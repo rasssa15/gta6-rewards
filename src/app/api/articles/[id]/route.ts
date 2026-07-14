@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { getArticleBySlug, getArticleById, ArticleData } from "@/lib/data"
+import { checkAdminAuth } from "@/lib/admin-auth"
+import { checkRateLimit } from "@/lib/rate-limit"
 
 async function getDbArticle(slugOrId: string): Promise<ArticleData | undefined> {
   try {
@@ -42,6 +44,15 @@ export async function GET(
   req: NextRequest,
   { params }: { params: { id: string } }
 ) {
+  const ip = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || req.headers.get("x-real-ip") || "unknown"
+  const { allowed, resetAt } = checkRateLimit(ip, "GET", "/api/articles/id")
+  if (!allowed) {
+    return NextResponse.json(
+      { error: "Too many requests" },
+      { status: 429, headers: { "Retry-After": String(Math.ceil((resetAt - Date.now()) / 1000)), "X-RateLimit-Remaining": "0" } }
+    )
+  }
+
   try {
     let article = getArticleById(params.id)
     if (!article) article = getArticleBySlug(params.id)
@@ -59,6 +70,17 @@ export async function PUT(
   req: NextRequest,
   { params }: { params: { id: string } }
 ) {
+  if (!checkAdminAuth()) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+
+  const ip = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || req.headers.get("x-real-ip") || "unknown"
+  const { allowed, resetAt } = checkRateLimit(ip, "PUT", "/api/articles/id")
+  if (!allowed) {
+    return NextResponse.json(
+      { error: "Too many requests" },
+      { status: 429, headers: { "Retry-After": String(Math.ceil((resetAt - Date.now()) / 1000)), "X-RateLimit-Remaining": "0" } }
+    )
+  }
+
   try {
     const data = await req.json()
     const { prisma } = await import("@/lib/prisma")
@@ -91,6 +113,17 @@ export async function DELETE(
   req: NextRequest,
   { params }: { params: { id: string } }
 ) {
+  if (!checkAdminAuth()) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+
+  const ip = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || req.headers.get("x-real-ip") || "unknown"
+  const { allowed, resetAt } = checkRateLimit(ip, "DELETE", "/api/articles/id")
+  if (!allowed) {
+    return NextResponse.json(
+      { error: "Too many requests" },
+      { status: 429, headers: { "Retry-After": String(Math.ceil((resetAt - Date.now()) / 1000)), "X-RateLimit-Remaining": "0" } }
+    )
+  }
+
   try {
     const { prisma } = await import("@/lib/prisma")
     await prisma.article.delete({ where: { id: params.id } })

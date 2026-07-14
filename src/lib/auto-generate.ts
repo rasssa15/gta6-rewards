@@ -1,11 +1,7 @@
-import { GoogleGenerativeAI } from "@google/generative-ai"
 import slugify from "slugify"
 import { createHash } from "crypto"
 import { generateImageWithOpenAI } from "./openai-image"
 import { buildImagePrompt } from "./worker-image"
-
-const API_KEY = process.env.GEMINI_API_KEY || ""
-const genAI = API_KEY ? new GoogleGenerativeAI(API_KEY) : null
 
 const CATEGORY_MAP: Record<string, { id: string; name: string }> = {
   "gta-6": { id: "gta-6", name: "GTA 6" },
@@ -25,10 +21,6 @@ function pick<T>(arr: T[]): T {
 
 function hashSeed(text: string): string {
   return createHash("md5").update(text).digest("hex").slice(0, 16)
-}
-
-function removeJsonMarkers(text: string): string {
-  return text.replace(/```json\s*/g, "").replace(/```\s*/g, "").trim()
 }
 
 export function getCategoryList() {
@@ -97,16 +89,7 @@ function getRandomHeadline(category: string): string {
 }
 
 export async function getNewsHeadline(category: string): Promise<string> {
-  if (!genAI) return getRandomHeadline(category)
-
-  try {
-    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" })
-    const prompt = `You are a gaming news editor. Give me ONE breaking news headline about ${category} in the context of GTA 6, Rockstar Games, and gaming. The headline must be factual-sounding, under 100 characters, and feel like real gaming journalism. Output ONLY the headline, nothing else. Include the current date context (late June 2026).`
-    const result = await model.generateContent(prompt)
-    return result.response.text().trim().slice(0, 120)
-  } catch {
-    return getRandomHeadline(category)
-  }
+  return getRandomHeadline(category)
 }
 
 export async function writeArticle(headline: string, category: string): Promise<{
@@ -116,52 +99,12 @@ export async function writeArticle(headline: string, category: string): Promise<
   readingTime: number
   tags: string
 }> {
-  const defaultContent = buildFallbackArticle(headline)
-
-  if (!genAI) {
-    return {
-      title: headline,
-      content: defaultContent,
-      excerpt: headline.slice(0, 155),
-      readingTime: 4,
-      tags: category.replace(/-/g, ","),
-    }
-  }
-
-  const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" })
-  const prompt = `You are a professional gaming journalist writing for GTA 6 Rewards. Write a detailed, creative, and interesting article about this headline:
-
-"${headline}"
-
-The article must:
-- Be written in clean HTML paragraph format (use <p> tags)
-- Be at least 600 words of engaging content
-- Include specific details, analysis, and context
-- Reference the current date (late June 2026)
-- Sound like real gaming journalism
-- End with a concluding paragraph
-
-Return JSON (no markdown):
-{
-  "title": "catchy article title under 80 chars",
-  "content": "full article in HTML <p> paragraphs",
-  "excerpt": "one sentence summary under 160 chars",
-  "readingTime": number (estimated minutes),
-  "tags": "comma-separated,relevant,tags"
-}`
-
-  try {
-    const result = await model.generateContent(prompt)
-    const text = removeJsonMarkers(result.response.text())
-    return JSON.parse(text)
-  } catch {
-    return {
-      title: headline,
-      content: defaultContent,
-      excerpt: headline.slice(0, 155),
-      readingTime: 4,
-      tags: category.replace(/-/g, ","),
-    }
+  return {
+    title: headline,
+    content: buildFallbackArticle(headline),
+    excerpt: headline.slice(0, 155),
+    readingTime: 4,
+    tags: category.replace(/-/g, ","),
   }
 }
 

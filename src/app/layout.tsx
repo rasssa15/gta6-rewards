@@ -6,10 +6,14 @@ import { ParticleBackground } from "@/components/ui/ParticleBackground"
 import { Toaster } from "react-hot-toast"
 import { WalletProvider } from "@/components/providers/WalletProvider"
 import { AdScripts } from "@/components/ads/AdScripts"
+import { BottomBannerAd } from "@/components/ads/BottomBannerAd"
+import { LazyAd } from "@/components/ads/LazyAd"
 import { ConsentBanner } from "@/components/ads/ConsentBanner"
 import { StickyFooterAd } from "@/components/ads/StickyFooterAd"
 import { HeaderAd } from "@/components/ads/HeaderAd"
 import { AutoPopupAd } from "@/components/ads/AutoPopupAd"
+import { AutoPopupAd2 } from "@/components/ads/AutoPopupAd2"
+import { SmartLinkPopunder } from "@/components/ads/SmartLinkPopunder"
 import AnimationWrapper from "@/components/AnimationWrapper"
 import { ThemeProvider } from "@/components/ThemeProvider"
 import "./globals.css"
@@ -20,7 +24,7 @@ const orbitron = Orbitron({ subsets: ["latin"], variable: "--font-heading" })
 
 export const metadata: Metadata = {
   title: {
-    default: "GTA 6 Rewards - Gaming News & Rewards Platform",
+    default: "Home | GTA 6 Rewards",
     template: "%s | GTA 6 Rewards",
   },
   description:
@@ -40,7 +44,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en" className="dark">
       <head>
         <meta name="referrer" content="strict-origin-when-cross-origin" />
-        <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4766594802116036" crossOrigin="anonymous"></script>
       </head>
       <body className={`${inter.variable} ${orbitron.variable} font-body antialiased`}>
         <WalletProvider>
@@ -49,7 +52,17 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <ParticleBackground />
           <Header />
           <HeaderAd />
-          <main className="relative z-10 min-h-screen pt-16">{children}</main>
+          <div className="page-container py-2 flex flex-col items-center gap-2 border-b border-white/5 bg-black/30">
+            <div className="hidden lg:flex justify-center items-center gap-2 w-full">
+              <LazyAd type="leaderboard" minHeight={90} />
+              <LazyAd type="responsive" minHeight={90} />
+            </div>
+            <div className="flex lg:hidden justify-center">
+              <LazyAd type="medium-rectangle" minHeight={250} />
+            </div>
+          </div>
+          <main className="relative z-10 min-h-screen pt-16 xl:px-[180px]">{children}</main>
+          <BottomBannerAd />
           <Footer />
           <ConsentBanner />
           <Toaster
@@ -63,8 +76,20 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               },
             }}
           />
+          <SmartLinkPopunder />
           <AutoPopupAd />
+          <AutoPopupAd2 />
           <StickyFooterAd />
+          <div className="hidden xl:block fixed left-0 top-24 bottom-0 z-[60] w-[160px] pointer-events-none">
+            <div className="pointer-events-auto p-2 h-full flex items-start justify-center">
+              <LazyAd type="skyscraper" minHeight={600} />
+            </div>
+          </div>
+          <div className="hidden xl:block fixed right-0 top-24 bottom-0 z-[60] w-[160px] pointer-events-none">
+            <div className="pointer-events-auto p-2 h-full flex items-start justify-center">
+              <LazyAd type="skyscraper" minHeight={600} />
+            </div>
+          </div>
           <AdScripts />
           </AnimationWrapper>
           </ThemeProvider>

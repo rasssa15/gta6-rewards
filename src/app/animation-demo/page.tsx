@@ -1,10 +1,12 @@
 "use client"
+import { useEffect } from "react"
 import {
   RewardAnimationProvider,
   useRewardAnimation,
   RewardsAnimation,
   type RewardItem,
 } from "@/components/rewards"
+import { LazyAd } from "@/components/ads/LazyAd"
 
 const DEMO_SINGLE: RewardItem = {
   id: "demo-1",
@@ -110,10 +112,14 @@ function DemoControls() {
 }
 
 export default function AnimationDemoPage() {
+  useEffect(() => { document.title = "Animation Demo | GTA 6 Rewards" }, [])
   return (
     <RewardAnimationProvider>
       <DemoControls />
       <RewardsAnimation />
+      <div className="mt-10 flex justify-center">
+        <LazyAd type="leaderboard" minHeight={90} />
+      </div>
     </RewardAnimationProvider>
   )
 }

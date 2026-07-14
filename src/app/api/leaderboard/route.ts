@@ -1,21 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
-import { getLeaderboard } from "@/lib/data"
 
-const CONFIG: Record<string, { floor: number; range?: number; ceiling?: number }> = {
-  daily:   { floor: 210,   range: 1000  },
-  weekly:  { floor: 1900,  range: 4000  },
-  monthly: { floor: 4500,  range: 8000  },
-  all:     { floor: 0,     ceiling: 0   },
-}
-
-function seededRandom(seed: string): number {
-  let hash = 0
-  for (let i = 0; i < seed.length; i++) {
-    hash = ((hash << 5) - hash) + seed.charCodeAt(i)
-    hash |= 0
-  }
-  return Math.abs(hash) / 2147483647
-}
+export const dynamic = "force-dynamic"
 
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url)
@@ -23,80 +8,39 @@ export async function GET(req: NextRequest) {
   const limit = Math.min(parseInt(searchParams.get("limit") || "50"), 100)
 
   try {
-    const fakeUsers = getLeaderboard(period, 500)
-    const key = period === "daily" ? "dailyPoints" : period === "weekly" ? "weeklyPoints" : period === "monthly" ? "monthlyPoints" : "points"
+    const { prisma } = await import("@/lib/prisma")
 
-    // Fetch real users from DB
-    let realUsers: any[] = []
-    try {
-      const { prisma } = await import("@/lib/prisma")
-      realUsers = await prisma.user.findMany({
-        where: { points: { gt: 0 } },
-        select: { walletId: true, name: true, points: true, level: true },
-        orderBy: { points: "desc" },
-        take: limit,
-      })
-    } catch {}
+    let where: any = { points: { gt: 0 } }
 
-    // Merge: combine fake + real, sort by points desc, deduplicate by walletId
-    const allUsers = [...fakeUsers.map(u => ({ ...u, _real: false })), ...realUsers.map(u => ({ ...u, _real: true }))]
-    const seen = new Set<string>()
-    const merged = allUsers
-      .sort((a, b) => (b.points || 0) - (a.points || 0))
-      .filter(u => {
-        if (seen.has(u.walletId)) return false
-        seen.add(u.walletId)
-        return true
-      })
-      .slice(0, limit)
-
-    if (period === "all") {
-      // All-time: fake users get varied points based on walletId seed; real users use actual points
-      const realUsers = merged.filter(u => u._real)
-      const fakeUsersMap = new Map(merged.filter(u => !u._real).map(u => [u.walletId, u]))
-      const allFake = getLeaderboard("all", 500)
-      const withPoints = allFake.map(u => {
-        const seed = seededRandom(u.walletId + "all")
-        const fake = fakeUsersMap.has(u.walletId) ? fakeUsersMap.get(u.walletId)! : u
-        return { ...fake, points: Math.round(500 + seed * 25000) }
-      })
-      const combined = [...withPoints, ...realUsers]
-        .sort((a, b) => (b.points || 0) - (a.points || 0))
-        .slice(0, limit)
-        .map((u, i) => ({
-          rank: i + 1,
-          walletId: u.walletId,
-          name: u.name || "Player",
-          points: Math.max(u.points || 0, 0),
-          level: u.level || 1,
-          badges: 0,
-        }))
-      return NextResponse.json(combined)
+    if (period === "daily") {
+      const today = new Date()
+      today.setHours(0, 0, 0, 0)
+      where = { lastLogin: { gte: today }, points: { gt: 0 } }
+    } else if (period === "weekly") {
+      const weekAgo = new Date()
+      weekAgo.setDate(weekAgo.getDate() - 7)
+      where = { lastLogin: { gte: weekAgo }, points: { gt: 0 } }
+    } else if (period === "monthly") {
+      const monthAgo = new Date()
+      monthAgo.setMonth(monthAgo.getMonth() - 1)
+      where = { lastLogin: { gte: monthAgo }, points: { gt: 0 } }
     }
 
-    // Daily / Weekly / Monthly: random decreasing points by rank
-    const today = new Date().toISOString().split("T")[0]
-    const weighted = merged.map(u => ({
+    const users = await prisma.user.findMany({
+      where,
+      select: { walletId: true, name: true, points: true, level: true },
+      orderBy: { points: "desc" },
+      take: limit,
+    })
+
+    const result = users.map((u, i) => ({
+      rank: i + 1,
       walletId: u.walletId,
       name: u.name || "Player",
+      points: u.points,
       level: u.level || 1,
-      seed: seededRandom(u.walletId + period + today),
+      badges: 0,
     }))
-    weighted.sort((a, b) => b.seed - a.seed)
-
-    const n = weighted.length
-    const minSeed = n > 0 ? weighted[n - 1].seed : 0
-    const maxSeed = n > 0 ? weighted[0].seed : 1
-    const seedRange = maxSeed - minSeed || 1
-
-    const result = weighted.map((w, i) => {
-      const norm = (w.seed - minSeed) / seedRange
-      const cfg = CONFIG[period]
-      const points = cfg.range
-        ? Math.round(cfg.floor + norm * cfg.range)
-        : cfg.floor
-      return { rank: i + 1, walletId: w.walletId, name: w.name, points, level: w.level, badges: 0 }
-    })
 
     return NextResponse.json(result)
   } catch (error) {

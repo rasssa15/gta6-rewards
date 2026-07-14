@@ -2,12 +2,14 @@
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { Lock, LogOut } from "lucide-react"
+import { LazyAd } from "@/components/ads/LazyAd"
 import toast from "react-hot-toast"
 import { validatePin, setLocked, hasWallet, loadWallet, setSession } from "@/lib/wallet/storage"
 import { useWallet } from "@/components/providers/WalletProvider"
 import { PinInput } from "@/components/wallet/PinInput"
 
 export default function UnlockPage() {
+  useEffect(() => { document.title = "Unlock Wallet | GTA 6 Rewards" }, [])
   const router = useRouter()
   const { refresh } = useWallet()
   const [pin, setPin] = useState("")
@@ -71,6 +73,12 @@ export default function UnlockPage() {
               Forgot PIN? Use recovery phrase
             </button>
           </div>
+        </div>
+        <div className="mt-10 flex justify-center">
+          <div className="flex flex-col items-center gap-4">
+          <LazyAd type="medium-rectangle" minHeight={250} />
+          <LazyAd type="leaderboard" minHeight={90} />
+        </div>
         </div>
       </div>
     </div>

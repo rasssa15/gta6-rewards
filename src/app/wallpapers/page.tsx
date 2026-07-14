@@ -1,7 +1,8 @@
 "use client"
-import { useState, useMemo } from "react"
-import { Download, Image, Check, Loader2, X } from "lucide-react"
+import { useState, useEffect, useMemo } from "react"
+import { Download, Image, Check, X } from "lucide-react"
 import toast from "react-hot-toast"
+import { LazyAd } from "@/components/ads/LazyAd"
 
 const WALLPAPER_GROUPS = [
   { name: "Jason & Lucia 1", folder: "Jason_and_Lucia_01", count: 6 },
@@ -53,6 +54,7 @@ function downloadImage(src: string, name: string) {
 }
 
 export default function WallpapersPage() {
+  useEffect(() => { document.title = "Wallpapers | GTA 6 Rewards" }, [])
   const [loaded, setLoaded] = useState<Set<string>>(new Set())
   const [selected, setSelected] = useState<{ folder: string; variants: { label: string; src: string }[] } | null>(null)
 
@@ -89,6 +91,14 @@ export default function WallpapersPage() {
           </div>
         </div>
 
+        <div className="my-6 flex justify-center">
+          <LazyAd type="leaderboard" minHeight={90} />
+        </div>
+
+        <div className="my-6 flex justify-center">
+          <LazyAd type="medium-rectangle" minHeight={250} />
+        </div>
+
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
           {allWallpapers.map((wp) => (
             <div
@@ -116,6 +126,10 @@ export default function WallpapersPage() {
               </div>
             </div>
           ))}
+        </div>
+
+        <div className="my-8 flex justify-center">
+          <LazyAd type="leaderboard" minHeight={90} />
         </div>
 
         {selected && (

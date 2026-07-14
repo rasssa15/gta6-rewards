@@ -41,7 +41,7 @@ export async function PATCH(
         status: 429, headers: { "Retry-After": String(Math.ceil((resetAt - Date.now()) / 1000)), "X-RateLimit-Remaining": "0" },
       })
     }
-    const allowedFields = ["name", "region"]
+    const allowedFields = ["name", "region", "theme"]
     const data: Record<string, any> = {}
     for (const key of allowedFields) {
       if (body[key] !== undefined) data[key] = body[key]

@@ -10,6 +10,7 @@ datasource db {
 model User {
   id        String   @id @default(uuid())
   walletId  String   @unique
+  referralCode String?  @unique
   name      String   @default("Player")
   points    Float    @default(0)
   level     Int      @default(1)
@@ -36,6 +37,10 @@ model User {
   region            String   @default("")
   popupAdsClicked   Int      @default(0)
 
+  @@index([referrerId])
+  @@index([points])
+  @@index([level])
+  @@index([createdAt])
   @@map("users")
 }
 
@@ -74,24 +79,30 @@ model Article {
   bookmarks  ArticleBookmark[]
   comments   Comment[]
 
+  @@index([categoryId])
+  @@index([status])
+  @@index([createdAt])
+  @@index([sourceUrl])
   @@map("articles")
 }
 
 model ArticleView {
   id        String   @id @default(uuid())
   articleId String
-  article   Article  @relation(fields: [articleId], references: [id])
+  article   Article  @relation(fields: [articleId], references: [id], onDelete: Cascade)
   userId    String?
   user      User?    @relation(fields: [userId], references: [id])
   createdAt DateTime @default(now())
 
+  @@index([articleId])
+  @@index([userId])
   @@map("article_views")
 }
 
 model ArticleBookmark {
   id        String   @id @default(uuid())
   articleId String
-  article   Article  @relation(fields: [articleId], references: [id])
+  article   Article  @relation(fields: [articleId], references: [id], onDelete: Cascade)
   userId    String
   user      User     @relation(fields: [userId], references: [id])
   createdAt DateTime @default(now())
@@ -104,13 +115,15 @@ model Comment {
   id        String   @id @default(uuid())
   content   String
   articleId String
-  article   Article  @relation(fields: [articleId], references: [id])
+  article   Article  @relation(fields: [articleId], references: [id], onDelete: Cascade)
   userId    String
   user      User     @relation(fields: [userId], references: [id])
   likes     Int      @default(0)
   parentId  String?
   createdAt DateTime @default(now())
 
+  @@index([articleId])
+  @@index([userId])
   @@map("comments")
 }
 
@@ -123,6 +136,8 @@ model PointTransaction {
   reference String   @default("")
   createdAt DateTime @default(now())
 
+  @@index([userId])
+  @@index([createdAt])
   @@map("point_transactions")
 }
 
@@ -145,16 +160,16 @@ model Reward {
 model Redemption {
   id               String   @id @default(uuid())
   userId           String
-  user             User     @relation(fields: [userId], references: [id])
+  user             User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   rewardId         String
-  reward           Reward   @relation(fields: [rewardId], references: [id])
+  reward           Reward   @relation(fields: [rewardId], references: [id], onDelete: Cascade)
   status           String   @default("pending_code")
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
   codeAvailableAt  DateTime?
   popupAdsClicked  Int      @default(0)
   popupAdsRequired Int      @default(20)
-  code             String?
+  code             String?  @unique
   codeViewed       Boolean  @default(false)
   codeViewCount    Int      @default(0)
   userCountry      String   @default("")
@@ -162,6 +177,9 @@ model Redemption {
   codePrefix       String   @default("AE")
   platform         String   @default("steam")
 
+  @@index([userId])
+  @@index([rewardId])
+  @@index([status])
   @@map("redemptions")
 }
 
@@ -220,6 +238,8 @@ model ChallengeCompletion {
   date        String   @default("")
 
   @@unique([userId, challengeId, date])
+  @@index([userId])
+  @@index([challengeId])
   @@map("challenge_completions")
 }
 
@@ -230,6 +250,7 @@ model ScratchResult {
   points    Float    @default(0)
   createdAt DateTime @default(now())
 
+  @@index([userId])
   @@map("scratch_results")
 }
 

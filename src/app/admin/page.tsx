@@ -18,6 +18,7 @@ const navItems = [
 ]
 
 export default function AdminPage() {
+  useEffect(() => { document.title = "Admin Dashboard | GTA 6 Rewards" }, [])
   const [analytics, setAnalytics] = useState<any>(null)
   const [loading, setLoading] = useState(true)
 

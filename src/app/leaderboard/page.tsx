@@ -28,6 +28,7 @@ function getLevelColor(level: number): string {
 }
 
 export default function LeaderboardPage() {
+  useEffect(() => { document.title = "Leaderboard | GTA 6 Rewards" }, [])
   const [period, setPeriod] = useState("all")
   const [players, setPlayers] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
@@ -90,7 +91,7 @@ export default function LeaderboardPage() {
 
         {/* 468×60 AD */}
         <div className="mb-8">
-          <AdBanner adKey="468x60-leaderboard-mid" height={60} width={468} className="flex justify-center" />
+          <AdBanner adKey="f301214e059ca70b56b447bf6850594e" height={90} width={728} className="flex justify-center" />
         </div>
 
         {/* 728×90 AD */}
@@ -236,7 +237,7 @@ export default function LeaderboardPage() {
         )}
         {/* 160×300 AD */}
         <div className="mt-8 flex justify-center">
-          <AdBanner adKey="160x300-leaderboard-bottom" height={300} width={160} className="flex justify-center" />
+          <AdBanner adKey="14c436bda0b1d02724d0618980143ce5" height={600} width={160} className="flex justify-center" />
         </div>
       </div>
     </div>

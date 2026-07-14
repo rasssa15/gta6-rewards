@@ -21,14 +21,12 @@ export function StickyFooterAd() {
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
-          const d = document.createElement("div")
-          d.id = "container-f301214e059ca70b56b447bf6850594e"
-          el.appendChild(d)
-          const s = document.createElement("script")
-          s.async = true
-          s.setAttribute("data-cfasync", "false")
-          s.src = "https://evidentbummerhike.com/f301214e059ca70b56b447bf6850594e/invoke.js"
-          el.appendChild(s)
+          const inline = document.createElement("script")
+          inline.text = "atOptions={'key':'bec02ef6fdbfe5fe80e15c3c4f9f4b58','format':'iframe','height':250,'width':300,'params':{}};"
+          el.appendChild(inline)
+          const invoke = document.createElement("script")
+          invoke.src = "https://evidentbummerhike.com/bec02ef6fdbfe5fe80e15c3c4f9f4b58/invoke.js"
+          el.appendChild(invoke)
           setLoaded(true)
           observer.disconnect()
         }

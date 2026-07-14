@@ -54,7 +54,7 @@ export async function POST(req: NextRequest) {
     if (challenge.type === "watch_ads") {
       try {
         const existing = await prisma.challengeCompletion.findUnique({
-          where: { userId_challengeId_date: { userId: uid, challengeId, date: "once" } },
+          where: { userId_challengeId_date: { userId: uid, challengeId, date: today } },
         })
         alreadyCompleted = existing?.completed || false
       } catch {}
@@ -78,9 +78,9 @@ export async function POST(req: NextRequest) {
       try {
         // Mark as completed
         await prisma.challengeCompletion.upsert({
-          where: { userId_challengeId_date: { userId: uid, challengeId, date: challenge.type === "watch_ads" ? "once" : today } },
+          where: { userId_challengeId_date: { userId: uid, challengeId, date: today } },
           update: { completed: true, completedAt: new Date(), progress },
-          create: { userId: uid, challengeId, date: challenge.type === "watch_ads" ? "once" : today, progress, completed: true, completedAt: new Date() },
+          create: { userId: uid, challengeId, date: today, progress, completed: true, completedAt: new Date() },
         })
 
         // Award XP

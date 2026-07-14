@@ -2,6 +2,7 @@
 import { useState, useEffect, useRef, Suspense } from "react"
 import { useSearchParams, useRouter } from "next/navigation"
 import { Gift, ArrowLeft, Check, AlertCircle, Loader2, Copy, Star, ArrowRight, Image as ImageIcon, Clock, Eye, Shield, Globe, ExternalLink, Trophy, Calendar } from "lucide-react"
+import { LazyAd } from "@/components/ads/LazyAd"
 import Link from "next/link"
 import { motion } from "framer-motion"
 import { useWallet } from "@/components/providers/WalletProvider"
@@ -424,6 +425,10 @@ function RedeemContent() {
           </div>
         </div>
       </div>
+      <div className="mt-10 flex flex-col items-center gap-4">
+        <LazyAd type="medium-rectangle" minHeight={250} />
+        <LazyAd type="leaderboard" minHeight={90} />
+      </div>
     </div>
   )
 }
@@ -439,6 +444,7 @@ function formatTimer(ms: number): string {
 }
 
 export default function RedeemPage() {
+  useEffect(() => { document.title = "Redeem Rewards | GTA 6 Rewards" }, [])
   return (
     <Suspense fallback={<div className="min-h-screen pt-24 flex items-center justify-center"><div className="animate-pulse text-gray-400">Loading...</div></div>}>
       <RedeemContent />

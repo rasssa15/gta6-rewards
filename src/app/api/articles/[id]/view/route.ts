@@ -18,20 +18,23 @@ export async function POST(
       })
     }
 
-    // Ensure article exists in DB for FK constraint
-    await prisma.article.upsert({
-      where: { id: articleId },
-      update: {},
-      create: { id: articleId, title: "Article", slug: articleId },
-    })
+    const existingArticle = await prisma.article.findUnique({ where: { id: articleId }, select: { id: true } })
+    if (!existingArticle) {
+      return NextResponse.json({ error: "Article not found" }, { status: 404 })
+    }
 
-    await prisma.articleView.create({
-      data: { articleId, userId: userId || null },
-    })
-    await prisma.article.update({
-      where: { id: articleId },
-      data: { viewCount: { increment: 1 } },
-    })
+    if (userId) {
+      const recentView = await prisma.articleView.findFirst({
+        where: { articleId, userId, createdAt: { gte: new Date(Date.now() - 3600000) } },
+      })
+      if (!recentView) {
+        await prisma.articleView.create({ data: { articleId, userId } })
+        await prisma.article.update({ where: { id: articleId }, data: { viewCount: { increment: 1 } } })
+      }
+    } else {
+      await prisma.articleView.create({ data: { articleId, userId: null } })
+      await prisma.article.update({ where: { id: articleId }, data: { viewCount: { increment: 1 } } })
+    }
 
     let scratchResult = null
     if (userId) {

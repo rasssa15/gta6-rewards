@@ -1,10 +1,11 @@
 "use client"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { ShieldAlert, Eye, EyeOff } from "lucide-react"
 import toast from "react-hot-toast"
 
 export default function AdminLoginPage() {
+  useEffect(() => { document.title = "Admin Login | GTA 6 Rewards" }, [])
   const [password, setPassword] = useState("")
   const [show, setShow] = useState(false)
   const [loading, setLoading] = useState(false)
@@ -21,7 +22,6 @@ export default function AdminLoginPage() {
         body: JSON.stringify({ password }),
       })
       if (res.ok) {
-        sessionStorage.setItem("admin_auth", "true")
         toast.success("Welcome, admin!")
         router.push("/admin")
       } else {

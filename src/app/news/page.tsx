@@ -1,3 +1,4 @@
+import { Metadata } from "next"
 import { getAllArticles, getArticleChunk } from "@/lib/data"
 import NewsGrid from "./NewsGrid"
 
@@ -10,6 +11,8 @@ const ALL_CATEGORIES = [
   { id: "nintendo", name: "Nintendo", slug: "nintendo" },
   { id: "esports", name: "Esports", slug: "esports" },
 ]
+
+export const metadata: Metadata = { title: "GTA 6 News" }
 
 export default function NewsPage({
   searchParams,

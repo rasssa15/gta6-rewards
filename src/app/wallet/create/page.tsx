@@ -1,7 +1,8 @@
 "use client"
-import { useState, useCallback } from "react"
+import { useState, useEffect, useCallback } from "react"
 import { useRouter } from "next/navigation"
 import { Shield, ArrowLeft, ArrowRight, Eye, EyeOff, Copy, Check } from "lucide-react"
+import { LazyAd } from "@/components/ads/LazyAd"
 import toast from "react-hot-toast"
 import { generatePhrase, hashPhrase } from "@/lib/wallet/phrase"
 import { saveWallet } from "@/lib/wallet/storage"
@@ -11,6 +12,7 @@ import { PinInput } from "@/components/wallet/PinInput"
 type Step = "intro" | "phrase" | "name" | "pin" | "done"
 
 export default function CreateWalletPage() {
+  useEffect(() => { document.title = "Create Wallet | GTA 6 Rewards" }, [])
   const router = useRouter()
   const { refresh } = useWallet()
   const [step, setStep] = useState<Step>("intro")
@@ -210,6 +212,12 @@ export default function CreateWalletPage() {
             </div>
           </div>
         )}
+      </div>
+      <div className="mt-10 flex justify-center">
+        <div className="flex flex-col items-center gap-4">
+          <LazyAd type="medium-rectangle" minHeight={250} />
+          <LazyAd type="leaderboard" minHeight={90} />
+        </div>
       </div>
     </div>
   )

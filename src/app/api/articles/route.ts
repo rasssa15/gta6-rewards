@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
 import { getArticles, getAllArticles, getArticleChunk, ArticleData } from "@/lib/data"
+import { checkRateLimit } from "@/lib/rate-limit"
 
 async function getDbArticles(options: {
   category?: string
@@ -21,7 +22,7 @@ async function getDbArticles(options: {
       prisma.article.findMany({
         where,
         include: { category: true },
-        orderBy: { createdAt: "desc" },
+        orderBy: { title: "asc" },
         take: limit,
         skip: offset,
       }),
@@ -57,6 +58,15 @@ async function getDbArticles(options: {
 }
 
 export async function GET(req: NextRequest) {
+  const ip = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || req.headers.get("x-real-ip") || "unknown"
+  const { allowed, resetAt } = checkRateLimit(ip, "GET", "/api/articles")
+  if (!allowed) {
+    return NextResponse.json(
+      { error: "Too many requests" },
+      { status: 429, headers: { "Retry-After": String(Math.ceil((resetAt - Date.now()) / 1000)), "X-RateLimit-Remaining": "0" } }
+    )
+  }
+
   const { searchParams } = new URL(req.url)
   const category = searchParams.get("category")
   const limit = Math.min(parseInt(searchParams.get("limit") || "20"), 50)
@@ -85,5 +95,5 @@ function mergeAndDedup(json: ArticleData[], db: ArticleData[]): ArticleData[] {
       result.push(a)
     }
   }
-  return result.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+  return result
 }

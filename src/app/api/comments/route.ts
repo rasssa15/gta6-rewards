@@ -55,15 +55,13 @@ export async function POST(req: NextRequest) {
     const user = await prisma.user.upsert({
       where: { walletId },
       update: { lastLogin: new Date() },
-      create: { walletId, name: "Player", lastLogin: new Date() },
+      create: { walletId, name: "Player", referralCode: walletId.slice(2, 8).toUpperCase(), lastLogin: new Date() },
     })
 
-    // Ensure article exists in DB for FK constraint
-    await prisma.article.upsert({
-      where: { id: articleId },
-      update: {},
-      create: { id: articleId, title: "Article", slug: articleId },
-    })
+    const existingArticle = await prisma.article.findUnique({ where: { id: articleId }, select: { id: true } })
+    if (!existingArticle) {
+      return NextResponse.json({ error: "Article not found" }, { status: 404 })
+    }
 
     const comment = await prisma.comment.create({
       data: { content, articleId, userId: user.id, parentId: parentId || null },

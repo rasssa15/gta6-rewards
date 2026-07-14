@@ -13,6 +13,7 @@ import { useTheme } from "@/components/ThemeProvider"
 import { LazyAd } from "@/components/ads/LazyAd"
 
 export default function DashboardPage() {
+  useEffect(() => { document.title = "Dashboard | GTA 6 Rewards" }, [])
   const router = useRouter()
   const [wallet, setWallet] = useState<any>(null)
   const [userData, setUserData] = useState<any>(null)
@@ -137,6 +138,10 @@ export default function DashboardPage() {
 
           <div className="mb-6 flex justify-center">
             <LazyAd type="responsive" minHeight={90} />
+          </div>
+
+          <div className="mb-6 flex justify-center">
+            <LazyAd type="medium-rectangle" minHeight={250} />
           </div>
 
           <div className="flex gap-2 mb-6 overflow-x-auto">

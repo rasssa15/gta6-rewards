@@ -2,9 +2,19 @@
 import { useState, useEffect, Suspense } from "react"
 import { useSearchParams, useRouter } from "next/navigation"
 import { Gift, Users, Copy, Check, ArrowRight } from "lucide-react"
+import { LazyAd } from "@/components/ads/LazyAd"
 import { motion } from "framer-motion"
 import { useWallet } from "@/components/providers/WalletProvider"
 import toast from "react-hot-toast"
+
+function ReferralBottomAd() {
+  return (
+    <div className="page-container mt-10 flex flex-col items-center gap-4">
+      <LazyAd type="leaderboard" minHeight={90} />
+      <LazyAd type="medium-rectangle" minHeight={250} />
+    </div>
+  )
+}
 
 function ReferralContent() {
   const searchParams = useSearchParams()
@@ -76,9 +86,11 @@ function ReferralContent() {
 }
 
 export default function ReferralPage() {
+  useEffect(() => { document.title = "Referral Program | GTA 6 Rewards" }, [])
   return (
     <Suspense fallback={<div className="min-h-screen pt-24 flex items-center justify-center"><div className="animate-pulse text-gray-400">Loading...</div></div>}>
       <ReferralContent />
+      <ReferralBottomAd />
     </Suspense>
   )
 }

@@ -1,0 +1,13 @@
+import { PrismaClient } from "@prisma/client"
+const p = new PrismaClient()
+const articles = await p.article.findMany({ select: { slug: true, viewCount: true }, orderBy: { createdAt: "desc" }, take: 20 })
+console.log("20 most recent articles:")
+articles.forEach((a, i) => console.log(`  ${i+1}. ${a.slug.slice(0, 55)} | ${a.viewCount} views`))
+const totalViewRecords = await p.articleView.count()
+const totalComments = await p.comment.count()
+const totalArticles = await p.article.count()
+console.log(`\nTotal articles: ${totalArticles}`)
+console.log(`Total view records: ${totalViewRecords}`)
+console.log(`Total comments: ${totalComments}`)
+console.log(`Avg views/article: ${Math.round(totalViewRecords / totalArticles)}`)
+await p.$disconnect()

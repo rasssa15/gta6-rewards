@@ -1,4 +1,5 @@
 "use client"
+import { useEffect } from "react"
 import Link from "next/link"
 import { Gift, Newspaper, Sparkles, Eye, RefreshCw, Users, ChevronRight, Trophy, Flame } from "lucide-react"
 import { LazyAd } from "@/components/ads/LazyAd"
@@ -61,6 +62,7 @@ const earnMethods = [
 ]
 
 export default function EarnPage() {
+  useEffect(() => { document.title = "Earn Points | GTA 6 Rewards" }, [])
   return (
     <div className="min-h-screen pt-24 pb-16">
       <div className="page-container max-w-4xl">
@@ -127,7 +129,7 @@ export default function EarnPage() {
 
         <div className="mt-10 flex flex-col items-center gap-4">
           <LazyAd type="responsive" minHeight={90} />
-          <LazyAd type="small-skyscraper" minHeight={300} />
+          <LazyAd type="skyscraper" minHeight={600} />
         </div>
       </div>
     </div>

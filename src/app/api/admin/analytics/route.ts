@@ -1,13 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
-import { cookies } from "next/headers"
-
-function checkAdminAuth(): boolean {
-  const cookieStore = cookies()
-  const adminAuth = cookieStore.get("admin_auth_cookie")?.value
-  const adminPassword = process.env.ADMIN_PASSWORD
-  return adminAuth === adminPassword
-}
+import { checkAdminAuth } from "@/lib/admin-auth"
 
 export async function GET() {
   if (!checkAdminAuth()) {
@@ -26,7 +19,7 @@ export async function GET() {
       ])
 
     return NextResponse.json({
-      totalUsers: totalUsers + 80000,
+      totalUsers,
       totalArticles,
       totalPoints: totalPoints._sum.amount || 0,
       totalScratches,

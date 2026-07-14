@@ -9,6 +9,7 @@ import {
 import OnlinePlayerBadge from "@/components/ui/OnlinePlayerBadge"
 import { useWallet } from "@/components/providers/WalletProvider"
 import { LazyAd } from "@/components/ads/LazyAd"
+import { AtOptionsAd } from "@/components/ads/AtOptionsAd"
 
 function AnimatedCounter({ target, suffix = "" }: { target: number; suffix?: string }) {
   const [count, setCount] = useState(0)
@@ -107,6 +108,7 @@ const howItWorks = [
 ]
 
 export default function HomePage() {
+  useEffect(() => { document.title = "Home | GTA 6 Rewards" }, [])
   const { isConnected, walletId, isLoading } = useWallet()
   const [stats, setStats] = useState({ users: 80000, articles: 50, points: 12500000 })
   const [featuredArticles, setFeaturedArticles] = useState<any[]>([])
@@ -208,7 +210,12 @@ export default function HomePage() {
 
       {/* AD: Below Hero */}
       <div className="page-container py-4 flex justify-center">
-        <LazyAd type="responsive" minHeight={90} />
+        <div className="hidden lg:flex justify-center">
+          <LazyAd type="leaderboard" minHeight={90} />
+        </div>
+        <div className="flex lg:hidden justify-center">
+          <AtOptionsAd adKey="bec02ef6fdbfe5fe80e15c3c4f9f4b58" width={300} height={250} />
+        </div>
       </div>
 
       {/* ---- HOW IT WORKS ---- */}
@@ -249,7 +256,12 @@ export default function HomePage() {
 
       {/* AD: After How It Works */}
       <div className="page-container py-4 flex justify-center">
-        <LazyAd type="responsive" minHeight={90} />
+        <div className="hidden lg:flex justify-center">
+          <LazyAd type="responsive" minHeight={90} />
+        </div>
+        <div className="flex lg:hidden justify-center">
+          <AtOptionsAd adKey="bec02ef6fdbfe5fe80e15c3c4f9f4b58" width={300} height={250} />
+        </div>
       </div>
 
       {/* ---- LATEST NEWS ---- */}
@@ -319,7 +331,7 @@ export default function HomePage() {
 
       {/* AD: After Latest News */}
       <div className="page-container py-4 flex justify-center">
-        <LazyAd type="responsive" minHeight={90} />
+        <LazyAd type="medium-rectangle" minHeight={250} />
       </div>
 
       {/* ---- FEATURES GRID ---- */}
@@ -360,7 +372,7 @@ export default function HomePage() {
 
       {/* AD: After Features Grid */}
       <div className="page-container py-4 flex justify-center">
-        <LazyAd type="responsive" minHeight={90} />
+        <LazyAd type="medium-rectangle" minHeight={250} />
       </div>
 
       {/* ---- REWARDS BANNER ---- */}
@@ -407,7 +419,12 @@ export default function HomePage() {
 
       {/* AD: Above Footer */}
       <div className="page-container py-4 flex justify-center">
-        <LazyAd type="responsive" minHeight={90} />
+        <div className="hidden lg:flex justify-center">
+          <LazyAd type="leaderboard" minHeight={90} />
+        </div>
+        <div className="flex lg:hidden justify-center">
+          <LazyAd type="medium-rectangle" minHeight={250} />
+        </div>
       </div>
     </div>
   )

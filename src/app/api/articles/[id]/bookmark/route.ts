@@ -19,12 +19,10 @@ export async function POST(
       })
     }
 
-    // Ensure article exists in DB for FK constraint
-    await prisma.article.upsert({
-      where: { id: params.id },
-      update: {},
-      create: { id: params.id, title: "Article", slug: params.id },
-    })
+    const existingArticle = await prisma.article.findUnique({ where: { id: params.id }, select: { id: true } })
+    if (!existingArticle) {
+      return NextResponse.json({ error: "Article not found" }, { status: 404 })
+    }
 
     const existing = await prisma.articleBookmark.findUnique({
       where: { userId_articleId: { userId, articleId: params.id } },

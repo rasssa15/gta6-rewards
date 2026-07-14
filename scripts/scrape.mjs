@@ -55,30 +55,42 @@ async function tinyfishFetch(url) {
 }
 
 async function generateImage(prompt) {
-  const FAL_KEY = process.env.FAL_KEY
-  if (!FAL_KEY) return null
+  const CF_TOKEN = process.env.CF_API_TOKEN
+  const CF_ACCOUNT = process.env.CF_ACCOUNT_ID
+  if (!CF_TOKEN || !CF_ACCOUNT) {
+    console.log(`  Missing CF credentials`)
+    return null
+  }
   try {
-    const res = await fetch("https://fal.run/fal-ai/flux/schnell", {
-      method: "POST",
-      headers: {
-        "Authorization": `Key ${FAL_KEY}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        prompt,
-        image_size: "landscape_4_3",
-        num_images: 1,
-      }),
-    })
-    if (!res.ok) return null
-    const data = await res.json()
-    if (data.images?.[0]?.url) {
-      const imgRes = await fetch(data.images[0].url)
-      const buf = Buffer.from(await imgRes.arrayBuffer())
+    const res = await fetch(
+      `https://api.cloudflare.com/client/v4/accounts/${CF_ACCOUNT}/ai/run/@cf/black-forest-labs/flux-1-schnell`,
+      {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${CF_TOKEN}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ prompt }),
+      }
+    )
+    if (!res.ok) {
+      const errText = await res.text()
+      console.log(`  CF API error ${res.status}: ${errText.slice(0, 200)}`)
+      return null
+    }
+    const contentType = res.headers.get("content-type") || ""
+    if (contentType.includes("image/")) {
+      const buf = Buffer.from(await res.arrayBuffer())
       return buf.toString("base64")
     }
+    const data = await res.json()
+    if (data.success && data.result) {
+      if (data.result.image) return data.result.image
+      if (data.result.data?.[0]) return data.result.data[0]
+    }
     return null
-  } catch {
+  } catch (e) {
+    console.log(`  CF image gen error: ${e.message}`)
     return null
   }
 }

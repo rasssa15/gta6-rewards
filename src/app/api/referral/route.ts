@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { getUserByWalletId } from "@/lib/data"
 import { prisma } from "@/lib/prisma"
+import { randomBytes } from "crypto"
 
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url)
@@ -23,9 +24,13 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: "User not found" }, { status: 404 })
     }
 
-    // Generate referral code from walletId
-    const code = user.walletId.slice(2, 8).toUpperCase() + (user.name || "PLAYER").slice(0, 4).toUpperCase()
-    const link = `${process.env.NEXT_PUBLIC_SITE_URL || "https://gta6-rewards.vercel.app"}/referral?ref=${code}`
+    let referralCode = user.referralCode
+    if (!referralCode) {
+      referralCode = randomBytes(4).toString("hex").toUpperCase()
+      await prisma.user.update({ where: { id: user.id }, data: { referralCode } })
+    }
+
+    const link = `${process.env.NEXT_PUBLIC_SITE_URL || "https://gta6-rewards.vercel.app"}/referral?ref=${referralCode}`
 
     const referralCount = await prisma.user.count({ where: { referrerId: user.id } })
     const bonusEarned = await prisma.pointTransaction.aggregate({
@@ -34,7 +39,7 @@ export async function GET(req: NextRequest) {
     })
 
     return NextResponse.json({
-      code,
+      code: referralCode,
       link,
       referralCount,
       bonusEarned: bonusEarned._sum.amount || 0,

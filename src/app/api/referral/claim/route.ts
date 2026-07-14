@@ -33,15 +33,13 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "You already used a referral code!" }, { status: 400 })
     }
 
-    // Find referrer by matching code pattern
-    const allUsers = await prisma.user.findMany({ where: { NOT: { id: user.id } } })
-    const referrer = allUsers.find(u => {
-      const c = u.walletId.slice(2, 8).toUpperCase() + (u.name || "PLAYER").slice(0, 4).toUpperCase()
-      return c === code.toUpperCase()
-    })
+    const referrer = await prisma.user.findUnique({ where: { referralCode: code.toUpperCase() } })
 
     if (!referrer) {
       return NextResponse.json({ error: "Invalid referral code" }, { status: 400 })
+    }
+    if (referrer.id === user.id) {
+      return NextResponse.json({ error: "You cannot refer yourself" }, { status: 400 })
     }
 
     await prisma.user.update({

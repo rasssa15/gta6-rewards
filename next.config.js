@@ -18,13 +18,13 @@ const nextConfig = {
             key: "Content-Security-Policy",
             value: [
               "default-src 'self'",
-              "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://pagead2.googlesyndication.com https://*.effectivecpmnetwork.com https://massivesalad.com https://evidentbummerhike.com https://pl30094851.effectivecpmnetwork.com https://pl30094859.effectivecpmnetwork.com https://www.highperformanceformat.com",
+              "script-src 'self' 'unsafe-inline' 'unsafe-eval' https: http:",
               "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
-              "img-src 'self' data: blob: https: http:",
+              "img-src 'self' data: blob: https:",
               "font-src 'self' https://fonts.gstatic.com",
-              "frame-src 'self' https://www.effectivecpmnetwork.com https://expensive-pollution.com https://pleased-report.com https://evidentbummerhike.com https://www.highperformanceformat.com https://massivesalad.com",
-              "connect-src 'self' https://*.vercel.app",
-              "media-src 'self' https://expensive-pollution.com",
+              "frame-src 'self' https: http:",
+               "connect-src 'self' https://*.vercel.app https://*.protrafficinspector.com https://spendsdetachment.com https://*.spendsdetachment.com https://realizationnewestfangs.com https://*.realizationnewestfangs.com https://zoologyfibre.com https://*.zoologyfibre.com https://evidentbummerhike.com https://*.evidentbummerhike.com https://effectivecpmnetwork.com https://*.effectivecpmnetwork.com",
+              "media-src 'self'",
             ].join("; "),
           },
           {
@@ -33,7 +33,7 @@ const nextConfig = {
           },
           {
             key: "X-Frame-Options",
-            value: "DENY",
+            value: "SAMEORIGIN",
           },
           {
             key: "Referrer-Policy",

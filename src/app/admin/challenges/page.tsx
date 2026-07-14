@@ -5,6 +5,7 @@ import { motion } from "framer-motion"
 import toast from "react-hot-toast"
 
 export default function AdminChallengesPage() {
+  useEffect(() => { document.title = "Manage Challenges | GTA 6 Rewards" }, [])
   const [challenges, setChallenges] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [form, setForm] = useState({ title: "", description: "", type: "read_articles", target: 5, pointReward: 10, xpReward: 30, key: "" })

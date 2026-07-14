@@ -48,16 +48,17 @@ export async function GET(req: NextRequest) {
       }
     }
 
-    // Find completions for watch_ads (date: "once")
-    const onceCompletions = resolvedId
+    const today = new Date().toISOString().split("T")[0]
+
+    const todaysCompletions = resolvedId
       ? await prisma.challengeCompletion.findMany({
-          where: { userId: resolvedId, date: "once" },
+          where: { userId: resolvedId, date: today },
         })
       : []
 
     const challengesWithProgress = challenges.map((ch) => {
       const target = ch.target || 1
-      const completion = onceCompletions.find((c) => c.challengeId === ch.id)
+      const completion = todaysCompletions.find((c) => c.challengeId === ch.id)
 
       if (ch.type === "watch_ads") {
         return {

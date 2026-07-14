@@ -2,6 +2,11 @@ import { readFileSync } from "fs"
 import { join, dirname } from "path"
 import { fileURLToPath } from "url"
 
+if (process.env.NODE_ENV === "production") {
+  console.error("⛔ DEV ONLY — bot-simulator.mjs must not run in production")
+  process.exit(1)
+}
+
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const DATA_DIR = join(__dirname, "..", "public", "data")
 const API_BASE = process.env.API_URL || "https://gta6-rewards.vercel.app"

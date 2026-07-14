@@ -1,4 +1,8 @@
+import { Metadata } from "next"
 import { Lock } from "lucide-react"
+import { LazyAd } from "@/components/ads/LazyAd"
+
+export const metadata: Metadata = { title: "Privacy Policy" }
 
 export default function PrivacyPage() {
   return (
@@ -10,6 +14,10 @@ export default function PrivacyPage() {
           </div>
           <h1 className="text-3xl font-heading font-bold text-white mb-2">Privacy Policy</h1>
           <p className="text-gray-400">Last updated: June 2026</p>
+        </div>
+
+        <div className="flex justify-center mb-6">
+          <LazyAd type="leaderboard" minHeight={90} />
         </div>
 
         <div className="glass-card p-8 space-y-6 text-gray-300 text-sm leading-relaxed">
@@ -33,6 +41,10 @@ export default function PrivacyPage() {
             </ul>
             <p className="mt-2">We do not sell, rent, or share your personal data with third parties except as required by law.</p>
           </section>
+
+          <div className="my-6 flex justify-center">
+            <LazyAd type="medium-rectangle" minHeight={250} />
+          </div>
 
           <section>
             <h2 className="text-xl font-heading font-bold text-white mb-3">3. Wallet &amp; Session Data</h2>
@@ -69,6 +81,9 @@ export default function PrivacyPage() {
             <h2 className="text-xl font-heading font-bold text-white mb-3">8. Changes to This Policy</h2>
             <p>We may update this privacy policy. Changes will be posted on this page with an updated date.</p>
           </section>
+        </div>
+        <div className="mt-10 flex justify-center">
+          <LazyAd type="leaderboard" minHeight={90} />
         </div>
       </div>
     </div>

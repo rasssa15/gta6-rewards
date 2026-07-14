@@ -30,7 +30,7 @@ export function AdBanner({ adKey, height, width, format = "iframe", className }:
     container.appendChild(inlineScript)
 
     const invokeScript = document.createElement("script")
-    invokeScript.src = `https://www.highperformanceformat.com/${adKey}/invoke.js`
+    invokeScript.src = `https://evidentbummerhike.com/${adKey}/invoke.js`
     invokeScript.async = true
     container.appendChild(invokeScript)
 

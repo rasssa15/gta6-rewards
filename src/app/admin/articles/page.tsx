@@ -8,6 +8,7 @@ import toast from "react-hot-toast"
 import slugify from "slugify"
 
 export default function AdminArticlesPage() {
+  useEffect(() => { document.title = "Manage Articles | GTA 6 Rewards" }, [])
   const router = useRouter()
   const [articles, setArticles] = useState<any[]>([])
   const [loading, setLoading] = useState(true)

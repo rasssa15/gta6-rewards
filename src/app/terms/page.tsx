@@ -1,4 +1,8 @@
+import { Metadata } from "next"
 import { Shield } from "lucide-react"
+import { LazyAd } from "@/components/ads/LazyAd"
+
+export const metadata: Metadata = { title: "Terms of Service" }
 
 export default function TermsPage() {
   return (
@@ -10,6 +14,10 @@ export default function TermsPage() {
           </div>
           <h1 className="text-3xl font-heading font-bold text-white mb-2">Terms of Service</h1>
           <p className="text-gray-400">Last updated: June 2026</p>
+        </div>
+
+        <div className="flex justify-center mb-6">
+          <LazyAd type="leaderboard" minHeight={90} />
         </div>
 
         <div className="glass-card p-8 space-y-6 text-gray-300 text-sm leading-relaxed">
@@ -37,6 +45,10 @@ export default function TermsPage() {
             </ul>
           </section>
 
+          <div className="my-6 flex justify-center">
+            <LazyAd type="medium-rectangle" minHeight={250} />
+          </div>
+
           <section>
             <h2 className="text-xl font-heading font-bold text-white mb-3">4. No Guarantees</h2>
             <p>This platform is provided "as is" without any warranties. The operators make no guarantees about uptime, data accuracy, or the availability of features. We reserve the right to modify or discontinue the platform at any time without notice.</p>
@@ -56,6 +68,9 @@ export default function TermsPage() {
             <h2 className="text-xl font-heading font-bold text-white mb-3">7. Contact</h2>
             <p>For questions about these terms, please reach out via the platforms GitHub repository.</p>
           </section>
+        </div>
+        <div className="mt-10 flex justify-center">
+          <LazyAd type="leaderboard" minHeight={90} />
         </div>
       </div>
     </div>

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { getUsers } from "@/lib/data"
 import { checkRateLimit } from "@/lib/rate-limit"
+import { randomBytes } from "crypto"
 
 export async function POST(req: NextRequest) {
   try {
@@ -19,7 +20,7 @@ export async function POST(req: NextRequest) {
     const user = await prisma.user.upsert({
       where: { walletId },
       update: { lastLogin: new Date() },
-      create: { walletId, name: name || "Player", lastLogin: new Date() },
+      create: { walletId, name: name || "Player", referralCode: randomBytes(4).toString("hex").toUpperCase(), lastLogin: new Date() },
     })
     return NextResponse.json(user)
   } catch (error) {

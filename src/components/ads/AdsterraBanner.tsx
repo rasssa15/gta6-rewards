@@ -2,7 +2,7 @@
 import { useEffect, useRef } from "react"
 
 interface AdsterraBannerProps {
-  type: "responsive" | "skyscraper" | "small-skyscraper"
+  type: "responsive" | "skyscraper"
   className?: string
 }
 
@@ -27,35 +27,10 @@ export function AdsterraBanner({ type, className }: AdsterraBannerProps) {
 
     if (type === "skyscraper") {
       const inline = document.createElement("script")
-      inline.text = `
-        atOptions = {
-          'key' : '14c436bda0b1d02724d0618980143ce5',
-          'format' : 'iframe',
-          'height' : 600,
-          'width' : 160,
-          'params' : {}
-        };
-      `
+      inline.text = "atOptions={'key':'14c436bda0b1d02724d0618980143ce5','format':'iframe','height':600,'width':160,'params':{}};"
       container.appendChild(inline)
       const invoke = document.createElement("script")
       invoke.src = "https://evidentbummerhike.com/14c436bda0b1d02724d0618980143ce5/invoke.js"
-      container.appendChild(invoke)
-    }
-
-    if (type === "small-skyscraper") {
-      const inline = document.createElement("script")
-      inline.text = `
-        atOptions = {
-          'key' : '0eda691a40adbc5636d43af20fdda82d',
-          'format' : 'iframe',
-          'height' : 300,
-          'width' : 160,
-          'params' : {}
-        };
-      `
-      container.appendChild(inline)
-      const invoke = document.createElement("script")
-      invoke.src = "https://evidentbummerhike.com/0eda691a40adbc5636d43af20fdda82d/invoke.js"
       container.appendChild(invoke)
     }
 

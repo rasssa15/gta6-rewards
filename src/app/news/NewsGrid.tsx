@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from "framer-motion"
 import { formatDate } from "@/lib/utils"
 import { useRouter, useSearchParams } from "next/navigation"
 import { LazyAd } from "@/components/ads/LazyAd"
+import { AtOptionsAd } from "@/components/ads/AtOptionsAd"
 
 interface Article {
   id: string
@@ -139,7 +140,12 @@ export default function NewsGrid({
 
       {/* AD: Above articles */}
       <div className="mb-8 flex justify-center">
-        <LazyAd type="responsive" minHeight={90} />
+        <div className="hidden lg:flex justify-center">
+          <LazyAd type="leaderboard" minHeight={90} />
+        </div>
+        <div className="flex lg:hidden justify-center">
+          <AtOptionsAd adKey="bec02ef6fdbfe5fe80e15c3c4f9f4b58" width={300} height={250} />
+        </div>
       </div>
 
       {/* Articles grid with between-cards ads */}
@@ -222,7 +228,12 @@ export default function NewsGrid({
               if ((i + 1) % 6 === 0 && i < articles.length - 1) {
                 items.push(
                   <div key={`ad-between-${i}`} className="col-span-full flex justify-center">
-                    <LazyAd type="responsive" minHeight={90} />
+                    <div className="hidden lg:flex justify-center">
+                      <LazyAd type="medium-rectangle" minHeight={250} />
+                    </div>
+                    <div className="flex lg:hidden justify-center">
+                      <AtOptionsAd adKey="bec02ef6fdbfe5fe80e15c3c4f9f4b58" width={300} height={250} />
+                    </div>
                   </div>,
                 )
               }
@@ -259,7 +270,12 @@ export default function NewsGrid({
       {/* AD: Below load more */}
       {!hasMore && (
         <div className="mt-10 flex justify-center">
-          <LazyAd type="responsive" minHeight={90} />
+          <div className="hidden lg:flex justify-center">
+            <LazyAd type="leaderboard" minHeight={90} />
+          </div>
+          <div className="flex lg:hidden justify-center">
+            <LazyAd type="medium-rectangle" minHeight={250} />
+          </div>
         </div>
       )}
     </>

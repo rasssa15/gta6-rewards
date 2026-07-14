@@ -5,6 +5,7 @@ import { motion } from "framer-motion"
 import { formatNumber } from "@/lib/utils"
 
 export default function AdminUsersPage() {
+  useEffect(() => { document.title = "User Management | GTA 6 Rewards" }, [])
   const [users, setUsers] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
 

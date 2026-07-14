@@ -21,6 +21,7 @@ const PLATFORMS = [
 const FEATURED_CATEGORIES = ["gta6", "steam", "playstation"]
 
 export default function RewardsPage() {
+  useEffect(() => { document.title = "Rewards | GTA 6 Rewards" }, [])
   const [rewards, setRewards] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [activePlatform, setActivePlatform] = useState("all")
@@ -78,7 +79,7 @@ export default function RewardsPage() {
       </section>
 
       <div className="page-container mb-10">
-        <AdBanner adKey="rewards-leaderboard" height={90} width={728} className="flex justify-center mb-10" />
+        <AdBanner adKey="7e7419c72404cab7787c27dfdac31321" height={90} width={728} className="flex justify-center mb-10" />
       </div>
       <div className="page-container">
         {activePlatform === "all" && featured.length > 0 && (
@@ -155,7 +156,7 @@ export default function RewardsPage() {
         </div>
 
         <div className="flex justify-center mb-8">
-          <AdBanner adKey="rewards-sidebar" height={300} width={160} className="flex justify-center" />
+          <AdBanner adKey="14c436bda0b1d02724d0618980143ce5" height={600} width={160} className="flex justify-center" />
         </div>
 
         {loading ? (
@@ -239,7 +240,7 @@ export default function RewardsPage() {
         )}
 
         <div className="flex justify-center mb-8">
-          <AdBanner adKey="rewards-bottom" height={60} width={468} className="flex justify-center" />
+          <AdBanner adKey="f301214e059ca70b56b447bf6850594e" height={90} width={728} className="flex justify-center" />
         </div>
         <RedeemGuide />
       </div>

@@ -1,5 +1,5 @@
 "use client"
-import React, { useState } from "react"
+import React, { useState, useEffect } from "react"
 import { HelpCircle, ChevronDown, Search } from "lucide-react"
 import { AdBanner } from "@/components/ads/AdBanner"
 
@@ -62,7 +62,7 @@ const faqs = [
   },
   {
     q: "What articles are on the site?",
-    a: "We feature GTA 6 news, rumors, leaks, and analysis. Articles are auto-generated using AI and updated every 2 hours. Each article you read gives you a scratch card. You can also bookmark your favorite articles.",
+      a: "We feature GTA 6 news, rumors, leaks, and analysis. Each article you read gives you a scratch card. You can also bookmark your favorite articles.",
   },
   {
     q: "Why do I see a video ad before articles?",
@@ -83,6 +83,7 @@ const faqs = [
 ]
 
 export default function FAQPage() {
+  useEffect(() => { document.title = "FAQ | GTA 6 Rewards" }, [])
   const [search, setSearch] = useState("")
   const [openId, setOpenId] = useState<number | null>(null)
 
@@ -103,7 +104,7 @@ export default function FAQPage() {
           <p className="text-gray-400">Frequently asked questions</p>
         </div>
 
-        <AdBanner adKey="728x90-faq-top" height={90} width={728} className="mb-8" />
+        <AdBanner adKey="7e7419c72404cab7787c27dfdac31321" height={90} width={728} className="mb-8" />
 
         <div className="relative mb-8">
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
@@ -114,6 +115,10 @@ export default function FAQPage() {
             placeholder="Search questions..."
             className="input-field pl-10"
           />
+        </div>
+
+        <div className="flex justify-center mb-8">
+          <AdBanner adKey="bec02ef6fdbfe5fe80e15c3c4f9f4b58" height={250} width={300} className="my-2" />
         </div>
 
         <div className="space-y-2">
@@ -137,7 +142,7 @@ export default function FAQPage() {
                   </div>
                 )}
               </div>
-              {i === 5 && <AdBanner adKey="300x250-faq-mid" height={250} width={300} className="my-4 mx-auto" />}
+              {i === 5 && <AdBanner adKey="bec02ef6fdbfe5fe80e15c3c4f9f4b58" height={250} width={300} className="my-4 mx-auto" />}
             </React.Fragment>
           ))}
         </div>
@@ -149,7 +154,7 @@ export default function FAQPage() {
         )}
 
         <div className="mt-8">
-          <AdBanner adKey="468x60-faq-bottom" height={60} width={468} />
+          <AdBanner adKey="f301214e059ca70b56b447bf6850594e" height={90} width={728} />
         </div>
       </div>
     </div>

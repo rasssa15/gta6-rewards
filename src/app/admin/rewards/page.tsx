@@ -5,6 +5,7 @@ import { motion } from "framer-motion"
 import toast from "react-hot-toast"
 
 export default function AdminRewardsPage() {
+  useEffect(() => { document.title = "Manage Rewards | GTA 6 Rewards" }, [])
   const [rewards, setRewards] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [form, setForm] = useState({ name: "", description: "", pointsCost: 100, stock: 10, category: "gift-card", image: "" })

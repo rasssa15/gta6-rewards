@@ -15,9 +15,9 @@ export function formatDate(date: Date | string) {
 
 export function formatNumber(num: number | undefined | null) {
   if (num == null) return "0"
-  if (num >= 1000000) return (num / 1000000).toFixed(1) + "M"
-  if (num >= 1000) return (num / 1000).toFixed(1) + "K"
-  return num.toString()
+  if (num >= 1000000) return (num / 1000000).toFixed(2) + "M"
+  if (num >= 1000) return (num / 1000).toFixed(2) + "K"
+  return Number.isInteger(num) ? num.toString() : num.toFixed(2)
 }
 
 export function slugify(text: string) {

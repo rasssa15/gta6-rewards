@@ -1,12 +1,13 @@
 "use client"
 import { useState, useEffect, useCallback, useRef } from "react"
-import { Sparkles, Target, CheckCircle, Gift, Eye, Star, RefreshCw, Loader2, Check } from "lucide-react"
+import { Sparkles, Target, CheckCircle, Gift, Eye, Star, RefreshCw, Loader2, Check, ExternalLink } from "lucide-react"
 import Link from "next/link"
 import { LazyAd } from "@/components/ads/LazyAd"
 import { useWallet } from "@/components/providers/WalletProvider"
 import toast from "react-hot-toast"
 
 export default function ChallengesPage() {
+  useEffect(() => { document.title = "Challenges | GTA 6 Rewards" }, [])
   const { walletId, refresh } = useWallet()
   const [challenges, setChallenges] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
@@ -48,6 +49,9 @@ export default function ChallengesPage() {
   const triggerAd = () => {
     setShowAd(true)
     setAdTimer(8)
+    setTimeout(() => {
+      window.open("https://www.effectivecpmnetwork.com/ferya5qq?key=0fdf4c14f0056af80dff7d2b13c4d1ee", "_blank")
+    }, 1000)
   }
 
   const handleAdComplete = () => {
@@ -101,7 +105,7 @@ export default function ChallengesPage() {
   return (
     <div className="min-h-screen pt-24 pb-16">
       <div className="page-container max-w-4xl">
-        <div className="flex gap-4 mb-6">
+        <div className="flex gap-4 mb-6 items-start">
           <div className="hidden lg:block shrink-0">
             <LazyAd type="skyscraper" minHeight={600} />
           </div>
@@ -118,154 +122,161 @@ export default function ChallengesPage() {
                 </button>
               )}
             </div>
-            <LazyAd type="responsive" minHeight={90} />
-          </div>
-        </div>
+            <LazyAd type="responsive" minHeight={90} className="mb-6" />
 
-        {/* AD: Below header */}
-        <div className="mb-6 flex justify-center">
-          <LazyAd type="responsive" minHeight={90} />
-        </div>
+            {showAd && (
+              <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4">
+                <div className="glass-card p-6 max-w-sm w-full text-center">
+                  <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-neon-green/20 to-emerald-500/20 flex items-center justify-center mx-auto mb-4">
+                    <Eye className="w-8 h-8 text-neon-green" />
+                  </div>
+                  <h3 className="text-white font-semibold mb-2">Watch ad to claim reward</h3>
+                  <p className="text-gray-400 text-xs mb-4">Interact with the ad below, then click Continue</p>
 
-        {showAd && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4">
-            <div className="glass-card p-6 max-w-sm w-full text-center">
-              <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-neon-green/20 to-emerald-500/20 flex items-center justify-center mx-auto mb-4">
-                <Loader2 className="w-8 h-8 text-neon-green animate-spin" />
+                  <div className="mb-4 flex justify-center">
+                    <LazyAd type="medium-rectangle" minHeight={250} />
+                  </div>
+
+                  <button
+                    onClick={() => window.open("https://www.effectivecpmnetwork.com/ferya5qq?key=0fdf4c14f0056af80dff7d2b13c4d1ee", "_blank")}
+                    className="text-xs text-neon-blue hover:text-white mb-4 inline-flex items-center gap-1"
+                  >
+                    <ExternalLink className="w-3 h-3" /> Open ad in new tab
+                  </button>
+
+                  <div className="text-3xl font-heading font-bold text-neon-green mb-2">{adTimer}s</div>
+                  {adTimer === 0 ? (
+                    <button onClick={handleAdComplete} className="btn-primary w-full !py-3 font-bold flex items-center justify-center gap-2">
+                      <Check className="w-5 h-5" /> Continue
+                    </button>
+                  ) : (
+                    <p className="text-xs text-gray-500">Wait for the timer...</p>
+                  )}
+                  <button onClick={() => setShowAd(false)} className="text-xs text-gray-500 hover:text-white mt-3 block mx-auto">Skip</button>
+                </div>
               </div>
-              <h3 className="text-white font-semibold mb-2">Ad is loading...</h3>
-              <p className="text-gray-400 text-sm mb-4">Please wait while the ad loads</p>
-              <div className="text-3xl font-heading font-bold text-neon-green mb-2">{adTimer}s</div>
-              {adTimer === 0 ? (
-                <button onClick={handleAdComplete} className="btn-primary w-full !py-3 font-bold flex items-center justify-center gap-2">
-                  <Check className="w-5 h-5" /> Continue
-                </button>
-              ) : (
-                <p className="text-xs text-gray-500">Wait for the timer...</p>
-              )}
-              <button onClick={() => setShowAd(false)} className="text-xs text-gray-500 hover:text-white mt-3 block mx-auto">Skip</button>
-            </div>
-          </div>
-        )}
+            )}
 
-        {!walletId && (
-          <div className="glass-card p-8 text-center mb-8">
-            <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-neon-purple/20 to-neon-blue/20 flex items-center justify-center mx-auto mb-4">
-              <Target className="w-8 h-8 text-neon-purple" />
-            </div>
-            <h3 className="text-white font-semibold mb-2">Wallet Required</h3>
-            <p className="text-gray-400 text-sm mb-6">Create or unlock your wallet to track challenges and claim rewards.</p>
-            <div className="flex flex-col sm:flex-row gap-3 justify-center">
-              <Link href="/wallet/create" className="btn-primary !py-2.5 !px-6 text-sm font-semibold">
-                Create Wallet
-              </Link>
-              <Link href="/wallet/login" className="btn-secondary !py-2.5 !px-6 text-sm font-semibold">
-                Unlock Wallet
-              </Link>
-            </div>
-          </div>
-        )}
-
-        {loading ? (
-          <div className="space-y-4">
-            {Array.from({ length: 5 }).map((_, i) => (
-              <div key={i} className="glass-card p-6 space-y-3">
-                <div className="h-5 w-48 skeleton" />
-                <div className="h-4 w-64 skeleton" />
-                <div className="h-2 w-full skeleton" />
+            {!walletId && (
+              <div className="glass-card p-8 text-center mb-8">
+                <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-neon-purple/20 to-neon-blue/20 flex items-center justify-center mx-auto mb-4">
+                  <Target className="w-8 h-8 text-neon-purple" />
+                </div>
+                <h3 className="text-white font-semibold mb-2">Wallet Required</h3>
+                <p className="text-gray-400 text-sm mb-6">Create or unlock your wallet to track challenges and claim rewards.</p>
+                <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                  <Link href="/wallet/create" className="btn-primary !py-2.5 !px-6 text-sm font-semibold">
+                    Create Wallet
+                  </Link>
+                  <Link href="/wallet/login" className="btn-secondary !py-2.5 !px-6 text-sm font-semibold">
+                    Unlock Wallet
+                  </Link>
+                </div>
               </div>
-            ))}
-          </div>
-        ) : challenges.length === 0 ? (
-          <div className="text-center py-20">
-            <Target className="w-16 h-16 text-gray-600 mx-auto mb-4" />
-            <h3 className="text-xl text-gray-400 font-semibold">No challenges available</h3>
-            <p className="text-gray-600 text-sm mt-2">Check back later.</p>
-          </div>
-        ) : (
-          <>
-            <LazyAd type="responsive" minHeight={90} />
-            <div className="space-y-3 mt-6">
-              {challenges.map((challenge) => (
-                <div
-                  key={challenge.id}
-                  className={`glass-card p-5 ${challenge.completed ? "border-neon-green/30 opacity-70" : ""}`}
-                >
-                  <div className="flex items-start justify-between gap-4">
-                    <div className="flex items-start gap-3 flex-1 min-w-0">
-                      <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${
-                        isChest(challenge)
-                          ? "bg-gradient-to-br from-yellow-500/20 to-amber-400/20"
-                          : "bg-gradient-to-br from-yellow-500/20 to-orange-500/20"
-                      }`}>
-                        {isChest(challenge) ? (
-                          <Gift className="w-5 h-5 text-yellow-400" />
-                        ) : (
-                          <Star className="w-5 h-5 text-yellow-400" />
-                        )}
-                      </div>
-                      <div className="min-w-0">
-                        <h3 className="text-white font-semibold text-sm flex items-center gap-2 flex-wrap">
-                          {challenge.title}
-                          {challenge.completed && <CheckCircle className="w-3.5 h-3.5 text-neon-green shrink-0" />}
-                        </h3>
-                        <p className="text-gray-400 text-xs mt-0.5">{challenge.description}</p>
-                        <div className="flex items-center gap-3 mt-2">
-                          <span className="text-xs text-gray-500 flex items-center gap-1">
-                            <Eye className="w-3 h-3" /> {challenge.target} ads
-                          </span>
-                          <span className="text-xs text-neon-purple font-mono">+{challenge.xpReward} XP</span>
-                          {isChest(challenge) ? (
-                            <span className="text-xs text-yellow-400 font-mono">5 cards</span>
+            )}
+
+            {loading ? (
+              <div className="space-y-4">
+                {Array.from({ length: 5 }).map((_, i) => (
+                  <div key={i} className="glass-card p-6 space-y-3">
+                    <div className="h-5 w-48 skeleton" />
+                    <div className="h-4 w-64 skeleton" />
+                    <div className="h-2 w-full skeleton" />
+                  </div>
+                ))}
+              </div>
+            ) : challenges.length === 0 ? (
+              <div className="text-center py-20">
+                <Target className="w-16 h-16 text-gray-600 mx-auto mb-4" />
+                <h3 className="text-xl text-gray-400 font-semibold">No challenges available</h3>
+                <p className="text-gray-600 text-sm mt-2">Check back later.</p>
+              </div>
+            ) : (
+              <>
+                <LazyAd type="responsive" minHeight={90} />
+                <div className="space-y-3 mt-6">
+                  {challenges.map((challenge) => (
+                    <div
+                      key={challenge.id}
+                      className={`glass-card p-5 ${challenge.completed ? "border-neon-green/30 opacity-70" : ""}`}
+                    >
+                      <div className="flex items-start justify-between gap-4">
+                        <div className="flex items-start gap-3 flex-1 min-w-0">
+                          <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${
+                            isChest(challenge)
+                              ? "bg-gradient-to-br from-yellow-500/20 to-amber-400/20"
+                              : "bg-gradient-to-br from-yellow-500/20 to-orange-500/20"
+                          }`}>
+                            {isChest(challenge) ? (
+                              <Gift className="w-5 h-5 text-yellow-400" />
+                            ) : (
+                              <Star className="w-5 h-5 text-yellow-400" />
+                            )}
+                          </div>
+                          <div className="min-w-0">
+                            <h3 className="text-white font-semibold text-sm flex items-center gap-2 flex-wrap">
+                              {challenge.title}
+                              {challenge.completed && <CheckCircle className="w-3.5 h-3.5 text-neon-green shrink-0" />}
+                            </h3>
+                            <p className="text-gray-400 text-xs mt-0.5">{challenge.description}</p>
+                            <div className="flex items-center gap-3 mt-2">
+                              <span className="text-xs text-gray-500 flex items-center gap-1">
+                                <Eye className="w-3 h-3" /> {challenge.target} ads
+                              </span>
+                              <span className="text-xs text-neon-purple font-mono">+{challenge.xpReward} XP</span>
+                              {isChest(challenge) ? (
+                                <span className="text-xs text-yellow-400 font-mono">5 cards</span>
+                              ) : (
+                                <span className="text-xs text-yellow-400 font-mono">Gold card</span>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                        <button
+                          onClick={() => handleClaim(challenge.id)}
+                          disabled={challenge.completed || !walletId || claiming === challenge.id || challenge.progress < challenge.target}
+                          className={`px-4 py-2 rounded-xl text-xs font-semibold shrink-0 ${
+                            challenge.completed
+                              ? "bg-neon-green/10 text-neon-green cursor-default"
+                              : challenge.progress >= challenge.target
+                                ? "bg-gradient-to-r from-neon-green to-emerald-500 text-white hover:shadow-lg hover:shadow-neon-green/20"
+                                : "glass text-gray-500 cursor-not-allowed"
+                          }`}
+                        >
+                          {claiming === challenge.id ? (
+                            <span>Claiming...</span>
+                          ) : challenge.completed ? (
+                            "Claimed"
+                          ) : challenge.progress >= challenge.target ? (
+                            "Claim"
                           ) : (
-                            <span className="text-xs text-yellow-400 font-mono">Gold card</span>
+                            `${challenge.progress}/${challenge.target}`
                           )}
+                        </button>
+                      </div>
+                      <div className="mt-3">
+                        <div className="flex items-center justify-between text-xs text-gray-600 mb-1">
+                          <span>Ads watched</span>
+                          <span>{(challenge.progress ?? 0)}/{challenge.target || "?"}</span>
+                        </div>
+                        <div className="progress-bar">
+                          <div
+                            className="progress-fill"
+                            style={{ width: `${Math.min((challenge.progress / challenge.target) * 100, 100)}%` }}
+                          />
                         </div>
                       </div>
                     </div>
-                    <button
-                      onClick={() => handleClaim(challenge.id)}
-                      disabled={challenge.completed || !walletId || claiming === challenge.id || challenge.progress < challenge.target}
-                      className={`px-4 py-2 rounded-xl text-xs font-semibold shrink-0 ${
-                        challenge.completed
-                          ? "bg-neon-green/10 text-neon-green cursor-default"
-                          : challenge.progress >= challenge.target
-                            ? "bg-gradient-to-r from-neon-green to-emerald-500 text-white hover:shadow-lg hover:shadow-neon-green/20"
-                            : "glass text-gray-500 cursor-not-allowed"
-                      }`}
-                    >
-                      {claiming === challenge.id ? (
-                        <span>Claiming...</span>
-                      ) : challenge.completed ? (
-                        "Claimed"
-                      ) : challenge.progress >= challenge.target ? (
-                        "Claim"
-                      ) : (
-                        `${challenge.progress}/${challenge.target}`
-                      )}
-                    </button>
-                  </div>
-                  <div className="mt-3">
-                    <div className="flex items-center justify-between text-xs text-gray-600 mb-1">
-                      <span>Ads watched</span>
-                      <span>{(challenge.progress ?? 0)}/{challenge.target || "?"}</span>
-                    </div>
-                    <div className="progress-bar">
-                      <div
-                        className="progress-fill"
-                        style={{ width: `${Math.min((challenge.progress / challenge.target) * 100, 100)}%` }}
-                      />
-                    </div>
-                  </div>
+                  ))}
                 </div>
-              ))}
-            </div>
-          </>
-        )}
+              </>
+            )}
 
-        <div className="mt-8 flex flex-col items-center gap-4">
-          <LazyAd type="responsive" minHeight={90} />
-          <LazyAd type="small-skyscraper" minHeight={300} />
+            <div className="mt-8 flex flex-col items-center gap-4">
+              <LazyAd type="responsive" minHeight={90} />
+              <LazyAd type="skyscraper" minHeight={600} />
+            </div>
+          </div>
         </div>
       </div>
     </div>
