@@ -58,10 +58,18 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               <LazyAd type="responsive" minHeight={90} />
             </div>
             <div className="flex lg:hidden justify-center">
-              <LazyAd type="medium-rectangle" minHeight={250} />
+              <LazyAd type="banner-320x50" minHeight={50} />
             </div>
           </div>
+          <div className="w-full flex justify-center py-2">
+            <div className="hidden lg:block"><LazyAd type="medium-rectangle" minHeight={250} className="flex justify-center" /></div>
+            <div className="lg:hidden"><LazyAd type="banner-320x50" minHeight={50} className="flex justify-center" /></div>
+          </div>
           <main className="relative z-10 min-h-screen pt-16 xl:px-[180px]">{children}</main>
+          <div className="w-full flex justify-center py-2">
+            <div className="hidden lg:block"><LazyAd type="medium-rectangle" minHeight={250} className="flex justify-center" /></div>
+            <div className="lg:hidden"><LazyAd type="banner-320x50" minHeight={50} className="flex justify-center" /></div>
+          </div>
           <BottomBannerAd />
           <Footer />
           <ConsentBanner />
@@ -82,12 +90,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <StickyFooterAd />
           <div className="hidden xl:block fixed left-0 top-24 bottom-0 z-[60] w-[160px] pointer-events-none">
             <div className="pointer-events-auto p-2 h-full flex items-start justify-center">
-              <LazyAd type="skyscraper" minHeight={600} />
+              <LazyAd type="skyscraper" minHeight={600} containerSuffix="left" />
             </div>
           </div>
           <div className="hidden xl:block fixed right-0 top-24 bottom-0 z-[60] w-[160px] pointer-events-none">
             <div className="pointer-events-auto p-2 h-full flex items-start justify-center">
-              <LazyAd type="skyscraper" minHeight={600} />
+              <LazyAd type="banner-160x300" minHeight={300} containerSuffix="right" />
             </div>
           </div>
           <AdScripts />

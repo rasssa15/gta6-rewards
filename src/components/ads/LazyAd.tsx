@@ -5,14 +5,15 @@ interface LazyAdProps {
   type: "responsive" | "skyscraper" | "medium-rectangle" | "leaderboard" | "banner-320x50" | "banner-160x300" | "banner-468x60"
   minHeight?: number
   className?: string
+  containerSuffix?: string
 }
 
 interface AdConfig {
   key: string
   containerId: string
   script: string
-  height?: number
-  width?: number
+  height: number
+  width: number
 }
 
 const AD_CONFIG: Record<string, AdConfig> = {
@@ -20,52 +21,58 @@ const AD_CONFIG: Record<string, AdConfig> = {
     key: "f301214e059ca70b56b447bf6850594e",
     containerId: "container-f301214e059ca70b56b447bf6850594e",
     script: "https://evidentbummerhike.com/f301214e059ca70b56b447bf6850594e/invoke.js",
+    height: 280,
+    width: 300,
   },
   skyscraper: {
     key: "14c436bda0b1d02724d0618980143ce5",
+    containerId: "container-14c436bda0b1d02724d0618980143ce5",
+    script: "https://evidentbummerhike.com/14c436bda0b1d02724d0618980143ce5/invoke.js",
     height: 600,
     width: 160,
-    script: "https://evidentbummerhike.com/14c436bda0b1d02724d0618980143ce5/invoke.js",
-    containerId: "container-14c436bda0b1d02724d0618980143ce5",
   },
   "medium-rectangle": {
     key: "bec02ef6fdbfe5fe80e15c3c4f9f4b58",
+    containerId: "container-bec02ef6fdbfe5fe80e15c3c4f9f4b58",
+    script: "https://evidentbummerhike.com/bec02ef6fdbfe5fe80e15c3c4f9f4b58/invoke.js",
     height: 250,
     width: 300,
-    script: "https://evidentbummerhike.com/bec02ef6fdbfe5fe80e15c3c4f9f4b58/invoke.js",
-    containerId: "container-bec02ef6fdbfe5fe80e15c3c4f9f4b58",
   },
   leaderboard: {
     key: "7e7419c72404cab7787c27dfdac31321",
+    containerId: "container-7e7419c72404cab7787c27dfdac31321",
+    script: "https://evidentbummerhike.com/7e7419c72404cab7787c27dfdac31321/invoke.js",
     height: 90,
     width: 728,
-    script: "https://evidentbummerhike.com/7e7419c72404cab7787c27dfdac31321/invoke.js",
-    containerId: "container-7e7419c72404cab7787c27dfdac31321",
   },
   "banner-320x50": {
     key: "a32d05859c7cdc4b19c45ea2746367ad",
+    containerId: "container-a32d05859c7cdc4b19c45ea2746367ad",
+    script: "https://evidentbummerhike.com/a32d05859c7cdc4b19c45ea2746367ad/invoke.js",
     height: 50,
     width: 320,
-    script: "https://evidentbummerhike.com/a32d05859c7cdc4b19c45ea2746367ad/invoke.js",
-    containerId: "container-a32d05859c7cdc4b19c45ea2746367ad",
   },
   "banner-160x300": {
     key: "0eda691a40adbc5636d43af20fdda82d",
+    containerId: "container-0eda691a40adbc5636d43af20fdda82d",
+    script: "https://evidentbummerhike.com/0eda691a40adbc5636d43af20fdda82d/invoke.js",
     height: 300,
     width: 160,
-    script: "https://evidentbummerhike.com/0eda691a40adbc5636d43af20fdda82d/invoke.js",
-    containerId: "container-0eda691a40adbc5636d43af20fdda82d",
   },
   "banner-468x60": {
     key: "ab7ca47a4d4e9c1d01cb3978051a9800",
+    containerId: "container-ab7ca47a4d4e9c1d01cb3978051a9800",
+    script: "https://evidentbummerhike.com/ab7ca47a4d4e9c1d01cb3978051a9800/invoke.js",
     height: 60,
     width: 468,
-    script: "https://evidentbummerhike.com/ab7ca47a4d4e9c1d01cb3978051a9800/invoke.js",
-    containerId: "container-ab7ca47a4d4e9c1d01cb3978051a9800",
   },
 }
 
-export function LazyAd({ type, minHeight, className }: LazyAdProps) {
+// Adsterra's multi-placement safe method: a uniquely-id'd container +
+// the invoke.js script. Each ad renders into its own container, so many
+// ads can coexist on one page (the old atOptions + document.write method
+// collided and broke when several banners were present).
+export function LazyAd({ type, minHeight, className, containerSuffix }: LazyAdProps) {
   const containerRef = useRef<HTMLDivElement>(null)
   const [visible, setVisible] = useState(false)
   const [loaded, setLoaded] = useState(false)
@@ -94,36 +101,31 @@ export function LazyAd({ type, minHeight, className }: LazyAdProps) {
     const config = AD_CONFIG[type]
     if (!config) return
 
-    if (type === "medium-rectangle" || type === "leaderboard" || type === "skyscraper" || type === "banner-320x50" || type === "banner-160x300" || type === "banner-468x60") {
-      const inline = document.createElement("script")
-      inline.text = `atOptions={'key':'${config.key}','format':'iframe','height':${config.height},'width':${config.width},'params':{}};`
-      container.appendChild(inline)
-      const invoke = document.createElement("script")
-      invoke.src = config.script
-      container.appendChild(invoke)
-    } else {
-      const div = document.createElement("div")
-      div.id = config.containerId
-      container.appendChild(div)
-      const script = document.createElement("script")
-      script.async = true
-      script.setAttribute("data-cfasync", "false")
-      script.src = config.script
-      container.appendChild(script)
-    }
+    const id = containerSuffix ? `${config.containerId}-${containerSuffix}` : config.containerId
+    const div = document.createElement("div")
+    div.id = id
+    container.appendChild(div)
+
+    const script = document.createElement("script")
+    script.async = true
+    script.setAttribute("data-cfasync", "false")
+    script.src = config.script
+    container.appendChild(script)
 
     setLoaded(true)
-    return () => { container.innerHTML = "" }
-  }, [visible, loaded, type])
+    return () => {
+      container.innerHTML = ""
+    }
+  }, [visible, loaded, type, containerSuffix])
 
-  const h = minHeight || (type === "skyscraper" ? 600 : type === "medium-rectangle" ? 250 : type === "leaderboard" ? 90 : type === "banner-320x50" ? 50 : type === "banner-160x300" ? 300 : type === "banner-468x60" ? 60 : 90)
-  const minW = type === "skyscraper" ? 160 : type === "medium-rectangle" ? 300 : type === "leaderboard" ? 728 : type === "banner-320x50" ? 320 : type === "banner-160x300" ? 160 : type === "banner-468x60" ? 468 : undefined
+  const config = AD_CONFIG[type]
+  const h = minHeight || config.height
 
   return (
     <div
       ref={containerRef}
       className={className}
-      style={{ minHeight: h, minWidth: minW }}
+      style={{ minHeight: h }}
     />
   )
 }
