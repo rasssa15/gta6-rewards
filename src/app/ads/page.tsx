@@ -1,6 +1,6 @@
 "use client"
 import { useState, useEffect, useRef, useCallback } from "react"
-import { Eye, Play, Loader2, Check } from "lucide-react"
+import { Eye, Play, Loader2, Check, Clock } from "lucide-react"
 import { useWallet } from "@/components/providers/WalletProvider"
 import { LazyAd } from "@/components/ads/LazyAd"
 import { AtOptionsAd } from "@/components/ads/AtOptionsAd"
@@ -18,7 +18,31 @@ export default function AdsPage() {
   }
   const [adsWatched, setAdsWatched] = useState(0)
   const [claiming, setClaiming] = useState(false)
+  const [cooldown, setCooldown] = useState(0)
+  const cooldownRef = useRef<NodeJS.Timeout | null>(null)
   const videoRef = useRef<HTMLVideoElement>(null)
+
+  const COOLDOWN_SECS = 6
+
+  const startCooldown = (secs: number) => {
+    setCooldown(secs)
+    if (cooldownRef.current) clearInterval(cooldownRef.current)
+    cooldownRef.current = setInterval(() => {
+      setCooldown((prev) => {
+        if (prev <= 1) {
+          clearInterval(cooldownRef.current!)
+          return 0
+        }
+        return prev - 1
+      })
+    }, 1000)
+  }
+
+  useEffect(() => {
+    return () => {
+      if (cooldownRef.current) clearInterval(cooldownRef.current)
+    }
+  }, [])
 
   useEffect(() => {
     if (walletId) {
@@ -44,6 +68,7 @@ export default function AdsPage() {
     } catch { toast.error("Network error") }
     setClaiming(false)
     setModeSafe("done")
+    startCooldown(COOLDOWN_SECS)
   }, [walletId, claiming, refresh])
 
   const DIRECT_LINK = "https://www.effectivecpmnetwork.com/ferya5qq?key=0fdf4c14f0056af80dff7d2b13c4d1ee"
@@ -145,9 +170,17 @@ export default function AdsPage() {
                         <Check className="w-10 h-10 text-neon-green" />
                       </div>
                       <p className="text-white text-xl font-bold mb-1">Ad complete!</p>
-                      <button onClick={() => setModeSafe("idle")} className="btn-primary w-full mt-6 py-4 text-base font-bold flex items-center justify-center gap-2">
-                        <Play className="w-5 h-5" /> Watch Another Ad
-                      </button>
+                       <button
+                         onClick={() => setModeSafe("idle")}
+                         disabled={cooldown > 0}
+                         className="btn-primary w-full mt-6 py-4 text-base font-bold flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                       >
+                         {cooldown > 0 ? (
+                           <><Clock className="w-5 h-5" /> Wait {cooldown}s</>
+                         ) : (
+                           <><Play className="w-5 h-5" /> Watch Another Ad</>
+                         )}
+                       </button>
                     </div>
                   )}
                 </div>
