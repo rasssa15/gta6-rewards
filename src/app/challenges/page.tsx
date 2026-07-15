@@ -15,6 +15,7 @@ export default function ChallengesPage() {
   const [showAd, setShowAd] = useState(false)
   const [adTimer, setAdTimer] = useState(8)
   const hasWatchedAdRef = useRef(false)
+  const pendingChallengeRef = useRef<string | null>(null)
 
   const fetchChallenges = useCallback(() => {
     const params = new URLSearchParams()
@@ -57,14 +58,20 @@ export default function ChallengesPage() {
   const handleAdComplete = () => {
     setShowAd(false)
     hasWatchedAdRef.current = true
+    const pending = pendingChallengeRef.current
+    if (pending) {
+      pendingChallengeRef.current = null
+      handleClaim(pending)
+    }
   }
 
   const handleClaim = async (challengeId: string) => {
     if (!walletId) return toast.error("Connect wallet first")
 
     if (!hasWatchedAdRef.current) {
+      pendingChallengeRef.current = challengeId
       triggerAd()
-      toast("Watch an ad to continue!")
+      toast("Watch 1 ad to claim this reward!")
       return
     }
 
@@ -98,6 +105,7 @@ export default function ChallengesPage() {
       toast.error("Failed to claim")
     }
     setClaiming(null)
+    hasWatchedAdRef.current = false
   }
 
   const isChest = (ch: any) => ["ad_20", "ad_40", "ad_75", "ad_100"].includes(ch.key)
