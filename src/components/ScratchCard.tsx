@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect, useRef, useState } from "react"
+import Image from "next/image"
 
 type Tier = "bronze" | "silver" | "gold"
 
@@ -43,10 +44,17 @@ export function ScratchCard({
     ctxRef.current = ctx
     ctx.fillStyle = "#3a3a4a"
     ctx.fillRect(0, 0, canvas.width, canvas.height)
-    ctx.fillStyle = "rgba(255,255,255,0.8)"
-    ctx.font = "bold 15px system-ui, sans-serif"
-    ctx.textAlign = "center"
-    ctx.fillText("SCRATCH HERE", canvas.width / 2, canvas.height / 2)
+    const logo = document.createElement("img")
+    logo.onload = () => {
+      const w = 96
+      const h = (logo.height / logo.width) * w
+      ctx.drawImage(logo, (canvas.width - w) / 2, canvas.height / 2 - h / 2 - 8, w, h)
+      ctx.fillStyle = "rgba(255,255,255,0.55)"
+      ctx.font = "bold 12px system-ui, sans-serif"
+      ctx.textAlign = "center"
+      ctx.fillText("SCRATCH HERE", canvas.width / 2, canvas.height - 14)
+    }
+    logo.src = "/logo.png"
   }, [])
 
   const checkClearThreshold = () => {
