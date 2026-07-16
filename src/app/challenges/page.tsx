@@ -94,7 +94,7 @@ export default function ChallengesPage() {
       if (data.completed) {
         const count = data.scratchResults?.length || 1
         const totalPts = data.scratchResults?.reduce((s: number, r: any) => s + r.points, 0) || 0
-        toast.success(`Claimed! +${data.xpReward} Points, ${count} cards (${totalPts} pts)!`)
+        toast.success(`Claimed! +${data.xpReward} XP, ${count} cards (${totalPts} pts)!`)
         refresh()
       }
       setChallenges((prev) =>
@@ -259,7 +259,7 @@ export default function ChallengesPage() {
                               <span className="text-xs text-gray-500 flex items-center gap-1">
                                 <Eye className="w-3 h-3" /> {challenge.target} ads
                               </span>
-                              <span className="text-xs text-neon-purple font-mono">+{challenge.xpReward} Points</span>
+                              <span className="text-xs text-neon-purple font-mono">+{challenge.xpReward} XP</span>
                               {isChest(challenge) ? (
                                 <span className="text-xs text-yellow-400 font-mono">5 cards</span>
                               ) : (
