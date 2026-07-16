@@ -20,7 +20,7 @@ function pickTier(): CardTier {
   return "bronze"
 }
 
-const DAILY_POINTS_LIMIT = 150
+const DAILY_POINTS_LIMIT = 350
 
 export async function awardScratchCard(userId: string, reason: string, forceTier?: CardTier): Promise<ScratchResult> {
   const { prisma } = await import("@/lib/prisma")

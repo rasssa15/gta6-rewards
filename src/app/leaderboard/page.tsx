@@ -112,7 +112,10 @@ export default function LeaderboardPage() {
               <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-gray-300/20 to-gray-400/10 border border-gray-300/30 flex items-center justify-center mb-2 text-lg font-black text-white">
                 {(players[1]?.name || "U").charAt(0).toUpperCase()}
               </div>
-              <div className="text-[10px] text-gray-400 font-semibold truncate max-w-full px-1">{players[1]?.name || "Player"}</div>
+              <div className="text-[10px] text-gray-400 font-semibold truncate max-w-full px-1 flex items-center justify-center gap-1">
+                {players[1]?.name || "Player"}
+                {players[1]?.isRealUser && <span className="text-[8px] bg-neon-green/15 text-neon-green px-1 rounded-full">👤</span>}
+              </div>
               <div className="text-xs text-gray-300 font-mono font-bold mt-1">{players[1]?.points?.toLocaleString()} pts</div>
               <div className="text-2xl mt-2">🥈</div>
             </div>
@@ -123,7 +126,10 @@ export default function LeaderboardPage() {
               <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-yellow-500/30 to-amber-400/10 border-2 border-yellow-400/40 flex items-center justify-center mb-2 text-xl font-black text-white shadow-lg shadow-yellow-500/20">
                 {(players[0]?.name || "U").charAt(0).toUpperCase()}
               </div>
-              <div className="text-[10px] text-yellow-300 font-bold truncate max-w-full px-1">{players[0]?.name || "Player"}</div>
+              <div className="text-[10px] text-yellow-300 font-bold truncate max-w-full px-1 flex items-center justify-center gap-1">
+                {players[0]?.name || "Player"}
+                {players[0]?.isRealUser && <span className="text-[8px] bg-neon-green/15 text-neon-green px-1 rounded-full">👤</span>}
+              </div>
               <div className="text-xs text-yellow-400 font-mono font-bold mt-1">{players[0]?.points?.toLocaleString()} pts</div>
               <div className="text-2xl mt-2">🥇</div>
             </div>
@@ -133,7 +139,10 @@ export default function LeaderboardPage() {
               <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-amber-700/20 to-amber-500/10 border border-amber-600/30 flex items-center justify-center mb-2 text-lg font-black text-white">
                 {(players[2]?.name || "U").charAt(0).toUpperCase()}
               </div>
-              <div className="text-[10px] text-gray-400 font-semibold truncate max-w-full px-1">{players[2]?.name || "Player"}</div>
+              <div className="text-[10px] text-gray-400 font-semibold truncate max-w-full px-1 flex items-center justify-center gap-1">
+                {players[2]?.name || "Player"}
+                {players[2]?.isRealUser && <span className="text-[8px] bg-neon-green/15 text-neon-green px-1 rounded-full">👤</span>}
+              </div>
               <div className="text-xs text-amber-600 font-mono font-bold mt-1">{players[2]?.points?.toLocaleString()} pts</div>
               <div className="text-2xl mt-2">🥉</div>
             </div>
@@ -202,8 +211,13 @@ export default function LeaderboardPage() {
 
                     {/* Info */}
                     <div className="flex-1 min-w-0">
-                      <div className={`font-semibold truncate ${isTop3 ? rankStyle?.text : "text-white"}`}>
+                      <div className={`font-semibold truncate flex items-center gap-1.5 ${isTop3 ? rankStyle?.text : "text-white"}`}>
                         {player.name || "Anonymous"}
+                        {player.isRealUser && (
+                          <span className="inline-flex items-center gap-0.5 text-[10px] bg-neon-green/15 text-neon-green px-1.5 py-0.5 rounded-full font-semibold shrink-0">
+                            <span className="text-[9px]">👤</span> Real
+                          </span>
+                        )}
                       </div>
                       <div className="flex items-center gap-2 text-xs text-gray-500 mt-0.5">
                         <span className="flex items-center gap-1">

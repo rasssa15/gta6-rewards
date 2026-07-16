@@ -2,7 +2,8 @@
 import { useState, useEffect } from "react"
 import Link from "next/link"
 import { useRouter, usePathname } from "next/navigation"
-import { Gamepad2, Menu, X, User, Shield, Trophy, Sparkles, Gift, HelpCircle, Newspaper, Wallet, LogOut, ChevronDown, Coins, Eye } from "lucide-react"
+import Image from "next/image"
+import { Menu, X, User, Shield, Trophy, Sparkles, Gift, HelpCircle, Newspaper, Wallet, LogOut, ChevronDown, Coins, Eye } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useWallet } from "@/components/providers/WalletProvider"
 import { clearWallet, setLocked } from "@/lib/wallet/storage"
@@ -60,9 +61,7 @@ export function Header() {
       <div className="page-container">
         <div className="flex items-center justify-between h-16 sm:h-20">
           <Link href="/" className="flex items-center gap-2 group shrink-0">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-neon-pink to-neon-purple flex items-center justify-center group-hover:shadow-lg group-hover:shadow-neon-pink/25">
-              <Gamepad2 className="w-5 h-5 text-white" />
-            </div>
+            <Image src="/logo.png" alt="GTA6 Rewards Logo" width={40} height={40} className="rounded-xl group-hover:shadow-lg group-hover:shadow-neon-pink/25" />
             <span className="text-xl font-heading font-bold gradient-text hidden sm:block">
               GTA6 Rewards
             </span>

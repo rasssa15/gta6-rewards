@@ -3,6 +3,7 @@ import { useState, useEffect, useCallback, useRef } from "react"
 import { Sparkles, Target, CheckCircle, Gift, Eye, Star, RefreshCw, Loader2, Check, ExternalLink } from "lucide-react"
 import Link from "next/link"
 import { LazyAd } from "@/components/ads/LazyAd"
+import { ScratchCard } from "@/components/ScratchCard"
 import { useWallet } from "@/components/providers/WalletProvider"
 import toast from "react-hot-toast"
 
@@ -13,6 +14,7 @@ export default function ChallengesPage() {
   const [loading, setLoading] = useState(true)
   const [claiming, setClaiming] = useState<string | null>(null)
   const [showAd, setShowAd] = useState(false)
+  const [showScratch, setShowScratch] = useState(false)
   const [adTimer, setAdTimer] = useState(8)
   const hasWatchedAdRef = useRef(false)
   const pendingChallengeRef = useRef<string | null>(null)
@@ -58,11 +60,12 @@ export default function ChallengesPage() {
   const handleAdComplete = () => {
     setShowAd(false)
     hasWatchedAdRef.current = true
-    const pending = pendingChallengeRef.current
-    if (pending) {
-      pendingChallengeRef.current = null
-      handleClaim(pending)
-    }
+    setShowScratch(true)
+  }
+
+  const claimPending = () => {
+    setShowScratch(false)
+    if (pendingChallengeRef.current) handleClaim(pendingChallengeRef.current)
   }
 
   const handleClaim = async (challengeId: string) => {
@@ -161,9 +164,34 @@ export default function ChallengesPage() {
                     <p className="text-xs text-gray-500">Wait for the timer...</p>
                   )}
                   <button onClick={() => setShowAd(false)} className="text-xs text-gray-500 hover:text-white mt-3 block mx-auto">Skip</button>
-                </div>
-              </div>
-            )}
+                 </div>
+               </div>
+             )}
+
+             {showScratch && pendingChallengeRef.current && (() => {
+               const ch = challenges.find(c => c.id === pendingChallengeRef.current)
+               if (!ch) return null
+               const chest = isChest(ch)
+               return (
+                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4">
+                   <div className="glass-card p-6 max-w-sm w-full text-center">
+                     <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-neon-green/20 to-emerald-500/20 flex items-center justify-center mx-auto mb-4">
+                       <Gift className="w-8 h-8 text-neon-green" />
+                     </div>
+                     <h3 className="text-white font-semibold mb-2">Reward unlocked!</h3>
+                     <p className="text-gray-400 text-xs mb-4">Scratch the card to reveal your prize</p>
+                     <ScratchCard points={ch.xpReward} tier="gold" emoji={chest ? "🎁" : "🏆"} label={chest ? "5 cards" : "Gold card"} />
+                     <button
+                       onClick={claimPending}
+                       className="btn-primary w-full mt-6 !py-3 font-bold flex items-center justify-center gap-2"
+                     >
+                       <Check className="w-5 h-5" /> Claim Reward
+                     </button>
+                   </div>
+                 </div>
+               )
+             })()}
+
 
             {!walletId && (
               <div className="glass-card p-8 text-center mb-8">

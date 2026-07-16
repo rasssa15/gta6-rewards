@@ -1,11 +1,12 @@
 "use client"
 import { useState, useEffect, useRef, useCallback } from "react"
-import { Eye, Play, Loader2, Check, Clock } from "lucide-react"
+import { Eye, Play, Loader2, Clock } from "lucide-react"
 import { useWallet } from "@/components/providers/WalletProvider"
 import { LazyAd } from "@/components/ads/LazyAd"
 import { AtOptionsAd } from "@/components/ads/AtOptionsAd"
 import toast from "react-hot-toast"
 import Link from "next/link"
+import { ScratchCard } from "@/components/ScratchCard"
 
 export default function AdsPage() {
   useEffect(() => { document.title = "Watch Ads | GTA 6 Rewards" }, [])
@@ -21,6 +22,11 @@ export default function AdsPage() {
   const [cooldown, setCooldown] = useState(0)
   const cooldownRef = useRef<NodeJS.Timeout | null>(null)
   const videoRef = useRef<HTMLVideoElement>(null)
+
+  const [lastPoints, setLastPoints] = useState(0)
+  const [lastTier, setLastTier] = useState<"bronze" | "silver" | "gold">("bronze")
+  const deriveTier = (p: number): "bronze" | "silver" | "gold" =>
+    p >= 1 ? "gold" : p >= 0.5 ? "silver" : "bronze"
 
   const COOLDOWN_SECS = 6
 
@@ -64,6 +70,9 @@ export default function AdsPage() {
       const data = await res.json()
       if (data.error) { toast.error(data.error); return }
       setAdsWatched(data.adsWatched)
+      const earned = data.points || 0
+      setLastPoints(earned)
+      setLastTier(deriveTier(earned))
       refresh()
     } catch { toast.error("Network error") }
     setClaiming(false)
@@ -165,22 +174,20 @@ export default function AdsPage() {
                   )}
 
                   {mode === "done" && (
-                    <div className="p-10 text-center">
-                      <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-neon-green/20 to-emerald-500/20 flex items-center justify-center mx-auto mb-4">
-                        <Check className="w-10 h-10 text-neon-green" />
-                      </div>
-                      <p className="text-white text-xl font-bold mb-1">Ad complete!</p>
-                       <button
-                         onClick={() => setModeSafe("idle")}
-                         disabled={cooldown > 0}
-                         className="btn-primary w-full mt-6 py-4 text-base font-bold flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
-                       >
-                         {cooldown > 0 ? (
-                           <><Clock className="w-5 h-5" /> Wait {cooldown}s</>
-                         ) : (
-                           <><Play className="w-5 h-5" /> Watch Another Ad</>
-                         )}
-                       </button>
+                    <div className="p-8 text-center">
+                      <p className="text-white text-lg font-bold mb-4">Ad complete! Scratch to claim</p>
+                      <ScratchCard points={lastPoints} tier={lastTier} />
+                      <button
+                        onClick={() => setModeSafe("idle")}
+                        disabled={cooldown > 0}
+                        className="btn-primary w-full mt-6 py-4 text-base font-bold flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        {cooldown > 0 ? (
+                          <><Clock className="w-5 h-5" /> Wait {cooldown}s</>
+                        ) : (
+                          <><Play className="w-5 h-5" /> Watch Another Ad</>
+                        )}
+                      </button>
                     </div>
                   )}
                 </div>

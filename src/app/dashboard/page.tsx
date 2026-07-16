@@ -227,6 +227,7 @@ export default function DashboardPage() {
           )}
 
           {activeTab === "scratch" && (
+            <>
             <div className="glass-card p-8 text-center max-w-md mx-auto">
               <h3 className="text-xl font-heading font-bold text-white mb-2 flex items-center justify-center gap-2">
                 <Zap className="w-5 h-5 text-neon-yellow" /> Scratch Card
@@ -265,6 +266,10 @@ export default function DashboardPage() {
                 {userData?.scratchCardsPlayed || 0} cards played
               </p>
             </div>
+            <div className="mt-6 flex justify-center">
+              <LazyAd type="medium-rectangle" minHeight={250} />
+            </div>
+            </>
           )}
 
           {activeTab === "referral" && (

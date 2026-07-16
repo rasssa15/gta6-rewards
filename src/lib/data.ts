@@ -146,45 +146,156 @@ export function getArticles(options: {
   return { articles, total }
 }
 
-function ensureUsersLoaded() {
-  if (!global.usersChunks) {
-    global.usersChunks = new Map()
-    for (let i = 1; i <= 4; i++) {
-      try {
-        const data = readJSON(`users-${i}.json`) as UserData[]
-        global.usersChunks.set(i, data)
-      } catch {
-        global.usersChunks.set(i, [])
-      }
+const FIRST_NAMES = [
+  "Elena","Marcus","Aisha","James","Sophia","Liam","Olivia","Noah","Emma","Oliver",
+  "Isabella","Lucas","Mia","Ethan","Charlotte","Mason","Amelia","Logan","Harper","Elijah",
+  "Abigail","Alexander","Emily","Benjamin","Elizabeth","William","Sofia","Michael","Avery","Daniel",
+  "Evelyn","Henry","Ella","Sebastian","Scarlett","Jack","Grace","Owen","Chloe","Gabriel",
+  "Victoria","Samuel","Riley","Ryan","Aria","Nathan","Lily","Caleb","Aurora","Dylan",
+  "Zara","Kai","Maya","Leo","Stella","Mateo","Hazel","Isaac","Nora","Levi",
+  "Penelope","David","Luna","Andrew","Savannah","John","Audrey","Luke","Brooklyn","Anthony",
+  "Bella","Lincoln","Claire","Jaxon","Skylar","Asher","Lucy","Christian","Paisley","Thomas",
+  "Naomi","Aaron","Ivy","Josiah","Elena","Landon","Eleanor","Adrian","Madelyn","Carson",
+  "Mila","Roman","Aaliyah","Nicholas","Hannah","Bryce","Autumn","Jeremiah","Quinn","Julian",
+  "Priya","Wei","Fatima","Carlos","Mei","Arjun","Sakura","Diego","Yuki","Hassan",
+  "Amara","Ravi","Lin","Pedro","Nadia","Akira","Santiago","Ananya","Jin","Rafael",
+  "Leila","Tariq","Hana","Erik","Ingrid","Olaf","Sven","Freya","Astrid","Lars",
+  "Chen","Xin","Yuna","Hyun","Minji","Taeyeon","Jisoo","Haruto","Sora"
+]
+
+const LAST_NAMES = [
+  "Rodriguez","Chen","Patel","Johnson","Williams","Brown","Jones","Garcia","Miller","Davis",
+  "Martinez","Hernandez","Lopez","Gonzalez","Wilson","Anderson","Thomas","Taylor","Moore","Jackson",
+  "Martin","Lee","Perez","Thompson","White","Harris","Sanchez","Clark","Ramirez","Lewis",
+  "Robinson","Walker","Young","Allen","King","Wright","Scott","Torres","Nguyen","Hill",
+  "Flores","Green","Adams","Nelson","Baker","Hall","Rivera","Campbell","Mitchell","Carter",
+  "Kim","Singh","Kumar","Sharma","Verma","Gupta","Das","Choudhury","Malik","Iqbal",
+  "Siddiqui","Hossain","Rahman","Ahmed","Ali","Khan","Hassan","Hussein","Abdullah","Omar",
+  "Sato","Suzuki","Takahashi","Tanaka","Watanabe","Ito","Yamamoto","Nakamura","Ogawa","Kato",
+  "Johansson","Andersson","Nilsson","Berg","Lindberg","Gustafsson","Eriksson","Larsson","Karlsson","Svensson",
+  "Wolf","Fischer","Schmidt","Weber","Wagner","Hoffmann","Baumann","Schneider","Zimmermann","Braun"
+]
+
+function seededRandom(seed: string): () => number {
+  let h = 0
+  for (let i = 0; i < seed.length; i++) {
+    h = ((h << 5) - h) + seed.charCodeAt(i)
+    h |= 0
+  }
+  return () => {
+    h = (h * 1664525 + 1013904223) | 0
+    return (h >>> 0) / 4294967296
+  }
+}
+
+function uuid() {
+  return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, c => {
+    const r = (Math.random() * 16) | 0
+    const v = c === "x" ? r : (r & 0x3) | 0x8
+    return v.toString(16)
+  })
+}
+
+function hexId() {
+  let id = ""
+  for (let i = 0; i < 32; i++) { id += Math.floor(Math.random() * 16).toString(16) }
+  return id
+}
+
+function clamp(v: number, min: number, max: number): number {
+  return Math.max(min, Math.min(max, v))
+}
+
+function generateDailyUsers(): UserData[] {
+  const todayStr = new Date().toISOString().split("T")[0]
+  const users: UserData[] = []
+  const names = new Set<string>()
+
+  for (let chunk = 0; chunk < 4; chunk++) {
+    for (let i = 0; i < 100; i++) {
+      let name: string
+      do {
+        name = FIRST_NAMES[Math.floor(Math.random() * FIRST_NAMES.length)] + " " + LAST_NAMES[Math.floor(Math.random() * LAST_NAMES.length)]
+      } while (names.has(name))
+      names.add(name)
+
+      const r = seededRandom(todayStr + chunk + i)
+      const allTimeBase = r() * 80000 + 100
+      const allTimeBoost = r() > 0.85 ? r() * 30000 : 0
+      const allTime = Math.round(allTimeBase + allTimeBoost)
+      const monthly = Math.round(clamp(r() * allTime * 0.25, 0, 18000))
+      const weekly = Math.round(clamp(r() * monthly * 0.35, 0, 4500))
+      const daily = Math.round(clamp(r() * weekly * 0.3, 0, 900))
+      const level = Math.max(1, Math.round(1 + Math.sqrt(allTime / 5) + r() * 5))
+
+      users.push({
+        id: uuid(),
+        walletId: hexId(),
+        name,
+        points: allTime,
+        dailyPoints: daily,
+        weeklyPoints: weekly,
+        monthlyPoints: monthly,
+        level,
+        xp: level * 100,
+        adsWatched: Math.round(r() * 200),
+        articlesRead: Math.round(r() * 500),
+        scratchCardsPlayed: Math.round(r() * 100),
+        createdAt: new Date(Date.now() - Math.round(r() * 365 * 86400000)).toISOString(),
+        lastLogin: new Date(Date.now() - Math.round(r() * 7 * 86400000)).toISOString(),
+      })
     }
   }
-  return global.usersChunks
+
+  users.sort((a, b) => b.points - a.points)
+
+  const fixRand = seededRandom(todayStr + "fix")
+  if (users.length >= 3) {
+    users[0].points = Math.max(users[0].points, 78000 + Math.round(fixRand() * 2000))
+    users[1].points = Math.max(users[1].points, 76000 + Math.round(fixRand() * 1500))
+    users[2].points = Math.max(users[2].points, 75000 + Math.round(fixRand() * 1000))
+  }
+  for (let i = 0; i < Math.min(5, users.length); i++) {
+    users[i].dailyPoints = Math.max(users[i].dailyPoints, 750 + Math.round(fixRand() * 100))
+  }
+  for (let i = 0; i < Math.min(10, users.length); i++) {
+    users[i].weeklyPoints = Math.max(users[i].weeklyPoints, 3500 + Math.round(fixRand() * 500))
+  }
+  for (let i = 0; i < Math.min(8, users.length); i++) {
+    users[i].monthlyPoints = Math.max(users[i].monthlyPoints, 15000 + Math.round(fixRand() * 1000))
+  }
+  for (const u of users) {
+    u.dailyPoints = Math.min(u.dailyPoints, u.weeklyPoints)
+    u.weeklyPoints = Math.min(u.weeklyPoints, u.monthlyPoints)
+    u.monthlyPoints = Math.min(u.monthlyPoints, u.points)
+  }
+
+  return users
+}
+
+declare global {
+  var simUsersData: { date: string; users: UserData[] } | undefined
+}
+
+function ensureUsersLoaded() {
+  const todayStr = new Date().toISOString().split("T")[0]
+  if (!global.simUsersData || global.simUsersData.date !== todayStr) {
+    global.simUsersData = { date: todayStr, users: generateDailyUsers() }
+  }
+  return global.simUsersData.users
 }
 
 export function getUsers(options: { limit?: number; offset?: number }): { users: UserData[]; total: number } {
   const { limit = 50, offset = 0 } = options
-  const chunks = ensureUsersLoaded()
-
-  const all: UserData[] = []
-  for (let i = 1; i <= 4; i++) {
-    const chunk = chunks.get(i)
-    if (chunk) all.push(...chunk)
-  }
-
+  const all = ensureUsersLoaded()
   const total = all.length
   const users = all.slice(offset, offset + limit)
   return { users, total }
 }
 
 export function getUserByWalletId(walletId: string): UserData | undefined {
-  const chunks = ensureUsersLoaded()
-  for (let i = 1; i <= 4; i++) {
-    const chunk = chunks.get(i)
-    if (chunk) {
-      const found = chunk.find(u => u.walletId === walletId)
-      if (found) return found
-    }
-  }
+  const all = ensureUsersLoaded()
+  return all.find(u => u.walletId === walletId)
 }
 
 function ensureCommentsLoaded() {
