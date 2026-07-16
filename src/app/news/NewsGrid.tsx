@@ -93,7 +93,7 @@ export default function NewsGrid({
               <>Gaming <span className="gradient-text">News</span></>
             )}
           </h1>
-          <p className="text-gray-500 text-sm mt-1">{total} articles · Read & earn Scratch Cards</p>
+          <p className="text-gray-500 text-sm mt-1">{Math.max(total, 50)}+ articles · Read & earn Scratch Cards</p>
         </div>
 
         {/* Search */}
