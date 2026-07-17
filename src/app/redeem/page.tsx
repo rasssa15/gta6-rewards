@@ -8,6 +8,7 @@ import { motion } from "framer-motion"
 import { useWallet } from "@/components/providers/WalletProvider"
 import { useTheme } from "@/components/ThemeProvider"
 import toast from "react-hot-toast"
+import { cleanRewardName } from "@/lib/reward-utils"
 
 const PLATFORMS = [
   { id: "steam", label: "Steam", icon: "🎮", hours: 24, desc: "24 hours" },
@@ -203,7 +204,7 @@ function RedeemContent() {
             <Check className="w-10 h-10 text-neon-green" />
           </div>
           <h2 className="text-2xl font-heading font-bold text-white mb-2">Redemption Successful!</h2>
-          <p className="text-gray-400 mb-4">{reward.name}</p>
+          <p className="text-gray-400 mb-4">{cleanRewardName(reward.name)}</p>
 
           {isThemePack ? (
             <div className="mt-4 p-5 rounded-xl bg-gradient-to-br from-neon-pink/10 to-neon-blue/5 border border-neon-pink/30">
@@ -354,7 +355,7 @@ function RedeemContent() {
             </div>
           </div>
           <div className="p-6">
-            <h1 className="text-2xl font-heading font-bold text-white mb-2">{reward.name}</h1>
+            <h1 className="text-2xl font-heading font-bold text-white mb-2">{cleanRewardName(reward.name)}</h1>
             <p className="text-gray-400 mb-6">{reward.description}</p>
 
             {!walletId ? (

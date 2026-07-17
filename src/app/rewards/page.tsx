@@ -5,6 +5,7 @@ import { formatNumber } from "@/lib/utils"
 import Link from "next/link"
 import { RedeemGuide } from "@/components/redeem/RedeemGuide"
 import { AdBanner } from "@/components/ads/AdBanner"
+import { cleanRewardName } from "@/lib/reward-utils"
 
 const PLATFORMS = [
   { key: "all", label: "All Rewards", icon: Gift },
@@ -117,7 +118,7 @@ export default function RewardsPage() {
                       </div>
                     </div>
                     <div className="p-4">
-                      <h3 className="text-white font-semibold">{reward.name}</h3>
+                      <h3 className="text-white font-semibold">{cleanRewardName(reward.name)}</h3>
                       <p className="text-gray-400 text-sm mt-1 line-clamp-2">{reward.description}</p>
                       <div className="flex items-center justify-between mt-3 pt-3 border-t border-white/5">
                         <span className="flex items-center gap-1 text-neon-yellow font-mono font-bold text-sm">
@@ -209,7 +210,7 @@ export default function RewardsPage() {
                     </div>
                   </div>
                   <div className="p-4 flex-1 flex flex-col">
-                    <h3 className="text-white font-semibold mb-1">{reward.name}</h3>
+                    <h3 className="text-white font-semibold mb-1">{cleanRewardName(reward.name)}</h3>
                     <p className="text-gray-400 text-sm flex-1">{reward.description}</p>
                     <div className="flex items-center justify-between mt-4 pt-3 border-t border-white/5">
                       <span className="flex items-center gap-1 text-neon-yellow font-mono font-bold">
